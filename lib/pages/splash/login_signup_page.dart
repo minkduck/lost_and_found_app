@@ -32,7 +32,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
           Gap(AppLayout.getHeight(160)),
           AppButton(
             boxColor: AppColors.primaryColor,
-            textButton: "Log in",
+            textButton: "Sign in",
             onTap: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (context) => LoginPage()));

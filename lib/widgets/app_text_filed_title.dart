@@ -28,7 +28,7 @@ class AppTextFieldTitle extends StatelessWidget {
           child: Text(
               titleText,
               style: TextStyle(
-                  fontSize: AppLayout.getHeight(20),
+                  fontSize: AppLayout.getHeight(18),
                   color: AppColors.titleColor,
                   fontWeight: FontWeight.bold)),
         ),

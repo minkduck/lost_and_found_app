@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_find_app/pages/auth/login_page.dart';
 import 'package:lost_and_find_app/pages/home/home_screen.dart';
+import 'package:lost_and_find_app/pages/home/items_detail.dart';
 import 'package:lost_and_find_app/pages/splash/login_signup_page.dart';
 
 void main() {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: LoginSignupPage(),
+      home: ItemsDetails(),
     );
   }
 }

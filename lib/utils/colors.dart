@@ -4,6 +4,7 @@ class AppColors {
   static final Color primaryColor = const Color(0xFF4CCEAC);
   static final Color secondPrimaryColor = const Color(0xFF535AC8);
   static final Color titleColor = const Color(0xFF212E5B);
+  static final Color titleLSColor = const Color(0xFFAAAAAA);
 
   static final Color mainColor = const Color(0xFFFFAB40);
   static final Color iconColor1 = const Color(0xFFffd28d);
