@@ -32,7 +32,7 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Text(
                 "Sign Up.",
                 style: TextStyle(
-                    fontSize: AppLayout.getHeight(50),
+                    fontSize: 50,
                     color: AppColors.titleColor,
                     fontWeight: FontWeight.bold),
               ),

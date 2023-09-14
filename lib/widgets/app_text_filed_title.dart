@@ -27,10 +27,7 @@ class AppTextFieldTitle extends StatelessWidget {
           padding: EdgeInsets.only(left: 20),
           child: Text(
               titleText,
-              style: TextStyle(
-                  fontSize: AppLayout.getHeight(18),
-                  color: AppColors.titleColor,
-                  fontWeight: FontWeight.bold)),
+              style: Theme.of(context).textTheme.titleMedium,)
         ),
         Gap(AppLayout.getHeight(15)),
         Container(
@@ -38,7 +35,7 @@ class AppTextFieldTitle extends StatelessWidget {
           margin: EdgeInsets.only(
               left: AppLayout.getHeight(20), right: AppLayout.getHeight(20)),
           decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color(0xFFF4F4F4),
               borderRadius: BorderRadius.circular(AppLayout.getHeight(20)),
               boxShadow: [
                 BoxShadow(

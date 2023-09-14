@@ -1,29 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lost_and_find_app/pages/items/Items_grid_main.dart';
-import 'package:lost_and_find_app/pages/items/items_grid.dart';
-import 'package:lost_and_find_app/utils/app_layout.dart';
-import 'package:lost_and_find_app/widgets/big_text.dart';
 
-import '../../test/cagory.dart';
-import '../../utils/colors.dart';
+import '../pages/items/Items_grid_main.dart';
+import '../utils/app_layout.dart';
+import '../utils/colors.dart';
+import '../widgets/big_text.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class AnotherHomeScreen extends StatefulWidget {
+  const AnotherHomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<AnotherHomeScreen> createState() => _AnotherHomeScreenState();
 }
 
-
-class _HomeScreenState extends State<HomeScreen> {
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
+class _AnotherHomeScreenState extends State<AnotherHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              Gap(AppLayout.getHeight(20)),
+              // Gap(AppLayout.getHeight(20)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -55,9 +45,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Container(
                 alignment: Alignment.centerLeft,
-                child: Text('Items', style: Theme.of(context).textTheme.displayMedium,),
+                child: BigText(
+                  text: "Items",
+                  size: 30,
+                  fontW: FontWeight.w600,
+                ),
               ),
-              Gap(AppLayout.getHeight(25)),
+              // Gap(AppLayout.getHeight(25)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -87,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              Gap(AppLayout.getHeight(25)),
+              // Gap(AppLayout.getHeight(25)),
               ItemsGridMain()
 
             ],

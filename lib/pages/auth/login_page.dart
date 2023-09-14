@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lost_and_find_app/pages/auth/sign_up_page.dart';
+import 'package:lost_and_find_app/pages/home/home_page.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
@@ -31,10 +32,7 @@ class _LoginPageState extends State<LoginPage> {
               alignment: Alignment.center,
               child: Text(
                 "Log In.",
-                style: TextStyle(
-                    fontSize: AppLayout.getHeight(50),
-                    color: AppColors.titleColor,
-                    fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.displayLarge,
               ),
             ),
             Gap(AppLayout.getHeight(40)),
@@ -43,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.only(left: 20),
               child: Text("NAME",
                   style: TextStyle(
-                      fontSize: AppLayout.getHeight(20),
+                      fontSize: 20,
                       color: AppColors.titleColor,
                       fontWeight: FontWeight.bold)),
             ),
@@ -58,10 +56,10 @@ class _LoginPageState extends State<LoginPage> {
                 textController: passwordController,
                 hintText: "",
                 titleText: "PASSWORD"),
-            Gap(AppLayout.getHeight(20)),
+            Gap(AppLayout.getHeight(40)),
             Container(
               alignment: Alignment.centerRight,
-              padding: EdgeInsets.only(right: AppLayout.getHeight(15)),
+              padding: EdgeInsets.only(right: 15),
               child: Text(
                 "Forgot password?",
                 style: TextStyle(
@@ -69,12 +67,15 @@ class _LoginPageState extends State<LoginPage> {
                     color: AppColors.secondPrimaryColor),
               ),
             ),
-            Gap(AppLayout.getHeight(80)),
+            Gap(AppLayout.getHeight(40)),
             AppButton(
                 boxColor: AppColors.primaryColor,
                 textButton: "Log In",
-                onTap: () {}),
-            Gap(AppLayout.getHeight(20)),
+                onTap: () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => HomePage()));
+                }),
+            Gap(AppLayout.getHeight(40)),
             Container(
               padding: EdgeInsets.only(right: AppLayout.getHeight(15)),
               child: Text(

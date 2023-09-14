@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lost_and_find_app/utils/app_styles.dart';
 
 import '../utils/app_layout.dart';
 
@@ -25,7 +26,7 @@ class BigText extends StatelessWidget {
       style: TextStyle(
         color: color,
         fontSize: size == 0?AppLayout.getHeight(20):size,
-        fontFamily: 'Roboto',
+        fontFamily: FontFamily.proxima,
         fontWeight: fontW == FontWeight.w400? FontWeight.w400:fontW
       ),
     );

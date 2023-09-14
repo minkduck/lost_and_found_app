@@ -7,13 +7,15 @@ class StatusWidget extends StatelessWidget {
   final String text;
   double height;
   double width;
+  double fontSize;
 
   StatusWidget(
       {super.key,
       required this.text,
       required this.color,
       this.height = 0,
-      this.width = 0});
+      this.width = 0,
+      this.fontSize = 20});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class StatusWidget extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(color: Colors.white, fontSize: fontSize == 20? 20 : fontSize),
         ),
       ),
     );
