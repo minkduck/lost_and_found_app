@@ -17,4 +17,6 @@ class AppStyles {
       fontFamily: FontFamily.proxima, fontSize: 20, color: Colors.white);
   static TextStyle h6 = TextStyle(
       fontFamily: FontFamily.proxima, fontSize: 15, color: Colors.white);
+  static TextStyle h7 = TextStyle(
+      fontFamily: FontFamily.proxima, fontSize: 12, color: Colors.white);
 }

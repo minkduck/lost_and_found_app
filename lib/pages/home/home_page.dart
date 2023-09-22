@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lost_and_find_app/pages/account/profile_page.dart';
 import 'package:lost_and_find_app/pages/home/home_screen.dart';
 import 'package:lost_and_find_app/pages/message/message_page.dart';
+import 'package:lost_and_find_app/pages/post/post_screen.dart';
 
 import '../../test/another_home_screen.dart';
 import '../../utils/colors.dart';
@@ -17,6 +18,7 @@ class _HomePageState extends State<HomePage> {
   int _selectIndex = 0;
   List pages =[
     HomeScreen(),
+    PostScreen(),
     MessagePage(),
     AccountPage(),
   ];
@@ -50,6 +52,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined,),
               label: "Home"
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.local_post_office,),
+              label: "Post"
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.message_outlined,),

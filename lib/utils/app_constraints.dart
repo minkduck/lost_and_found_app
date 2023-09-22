@@ -7,16 +7,17 @@ class AppConstrants{
     return prefs.getString('access_token') ?? '';
   }
 
-  static const String APP_NAME = "SWD392";
+  static const String APP_NAME = "Lost&Find";
   static const int APP_VERSION = 1;
 
-  static const String BASE_URL = "https://capstone-matching.herokuapp.com";
+  static const String BASE_URL = "https://localhost:44310";
   static String TOKEN = '';
 
   static void init() async {
     TOKEN = await getToken();
   }
 
+  static const String LOGINEP_URL ="/auth/login";
   static const String PROJECT_URL = "/api/v1/projects";
   static const String POST_URL = "/api/v1/posts";
   static const String STUDENT_URL = "/api/v1/students";

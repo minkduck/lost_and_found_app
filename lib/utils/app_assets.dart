@@ -10,6 +10,6 @@ class AppAssets {
   static final String googleLogo = imagePath + 'google_logo.png';
   static final String airpods = imagePath + 'airpods.png';
   static final String avatarDefault = imagePath + 'avatar_default.png';
-
+  static final String upPictureScreen = imagePath + 'up_picture_screen.png';
 
 }

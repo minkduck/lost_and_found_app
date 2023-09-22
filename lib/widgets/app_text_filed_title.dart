@@ -31,7 +31,7 @@ class AppTextFieldTitle extends StatelessWidget {
         ),
         Gap(AppLayout.getHeight(15)),
         Container(
-          height: AppLayout.getHeight(50),
+          height: AppLayout.getHeight(55),
           margin: EdgeInsets.only(
               left: AppLayout.getHeight(20), right: AppLayout.getHeight(20)),
           decoration: BoxDecoration(
@@ -46,9 +46,13 @@ class AppTextFieldTitle extends StatelessWidget {
               ]),
           child: TextFormField(
             onSaved: (value) => textController = value,
+            style: Theme.of(context).textTheme.headlineSmall,
             controller: textController,
             decoration: InputDecoration(
+              isDense: true,
+                // contentPadding: EdgeInsets.zero,
                 hintText: hintText,
+                hintStyle: Theme.of(context).textTheme.labelSmall,
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppLayout.getHeight(20)),
                     borderSide: BorderSide(

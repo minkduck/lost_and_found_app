@@ -9,6 +9,13 @@ import 'package:lost_and_find_app/widgets/app_text_field.dart';
 import 'package:lost_and_find_app/widgets/app_text_filed_title.dart';
 
 import '../../widgets/app_button.dart';
+import '../../widgets/app_button_upload_image.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,6 +27,39 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
+
+
+  Future<void> loginEmailPassword() async {
+    const String apiUrl = 'https://lostandfound.io.vn/auth/login';
+
+    final Map<String, dynamic> data = {
+      'email': emailController.text,
+      'password': passwordController.text,
+    };
+    final response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(data));
+    print(response.toString());
+    if (response.statusCode == 200) {
+      print("login success");
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => HomePage()));
+    } else {
+      // Failed login
+      print(response.statusCode);
+
+      Fluttertoast.showToast(
+          msg: "Login failed. Please check your credentials.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,12 +108,11 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             Gap(AppLayout.getHeight(40)),
-            AppButton(
+            AppButtonUpLoadImage(
                 boxColor: AppColors.primaryColor,
                 textButton: "Log In",
                 onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => HomePage()));
+                  loginEmailPassword();
                 }),
             Gap(AppLayout.getHeight(40)),
             Container(
