@@ -51,23 +51,23 @@ class _ItemsDetailsState extends State<ItemsDetails> {
               ),
               Padding(
                 padding: EdgeInsets.only(
-                    left: 30, top: 10),
+                    left: AppLayout.getWidth(30), top: AppLayout.getHeight(10)),
                 child: Text('Items', style: Theme.of(context).textTheme.displayMedium,),
               ),
               Gap(AppLayout.getHeight(20)),
               Container(
                 margin: EdgeInsets.only(left: 20),
-                height: 350,
-                width: 350,
+                height: AppLayout.getHeight(350),
+                width: AppLayout.getWidth(350),
                 child: Image.asset(AppAssets.airpods, fit: BoxFit.fill),
               ),
               Gap(AppLayout.getHeight(20)),
               Container(
-                  padding: EdgeInsets.only(left: 20),
+                  padding: EdgeInsets.only(left: AppLayout.getWidth(20)),
                   child: StatusWidget(text: "Found", color: Colors.grey)),
               Padding(
                 padding: EdgeInsets.only(
-                    left: 16, top: 16),
+                    left: AppLayout.getWidth(16), top: AppLayout.getHeight(16)),
                 child: Text(
                   "Airpods lost at the libraries.",
                   style: Theme.of(context).textTheme.labelMedium,
@@ -76,8 +76,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
               // time
               Container(
                   padding: EdgeInsets.only(
-                      left: 16,
-                      top: 8),
+                      left: AppLayout.getWidth(16),
+                      top: AppLayout.getHeight(8)),
                   child: IconAndTextWidget(
                       icon: Icons.timer_sharp,
                       text: "2 days ago",
@@ -85,8 +85,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
               //location
               Container(
                   padding: EdgeInsets.only(
-                      left: 16,
-                      top: 8),
+                      left: AppLayout.getWidth(16),
+                      top: AppLayout.getHeight(8)),
                   child: IconAndTextWidget(
                       icon: Icons.location_on,
                       text: "Libraries",
@@ -95,8 +95,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
               Gap(AppLayout.getHeight(10)),
               Container(
                   padding: EdgeInsets.only(
-                      left: 18,
-                      top: 8),
+                      left: AppLayout.getWidth(18),
+                      top: AppLayout.getHeight(8)),
                   child: SmallText(
                     text: "Airpods lost at the libraries.",
                     size: 15,
@@ -107,8 +107,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 children: [
                   Container(
                     padding: EdgeInsets.only(
-                        left: 16,
-                        top: 8),
+                        left: AppLayout.getWidth(16),
+                        top: AppLayout.getHeight(8)),
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[500],
                       radius: 50,

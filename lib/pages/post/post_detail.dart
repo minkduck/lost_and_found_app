@@ -28,7 +28,7 @@ class _PostDetailState extends State<PostDetail> {
                   color: Theme.of(context).cardColor,
                 ),
                 // color: Colors.red,
-                margin: const EdgeInsets.only(bottom: 20.0),
+                margin: EdgeInsets.only(bottom: AppLayout.getHeight(20)),
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   children: [
@@ -64,7 +64,7 @@ class _PostDetailState extends State<PostDetail> {
                     Gap(AppLayout.getHeight(15)),
                     Container(
                       alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.only(left: 20),
+                      margin: EdgeInsets.only(left: AppLayout.getWidth(20)),
                       height: AppLayout.getHeight(151),
                       width: AppLayout.getWidth(180),
                       child: Image.asset(AppAssets.airpods, fit: BoxFit.fill),
@@ -103,7 +103,7 @@ class _PostDetailState extends State<PostDetail> {
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.only(top: 10, left: 10),
+                      padding: EdgeInsets.only(top: AppLayout.getHeight(10), left: AppLayout.getWidth(10)),
                       alignment: Alignment.centerLeft,
                       child: Text(
                         "Comment",
@@ -115,7 +115,7 @@ class _PostDetailState extends State<PostDetail> {
                       itemCount: 5,
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
-                          margin: EdgeInsets.only(bottom: 20,left: 15),
+                          margin: EdgeInsets.only(bottom: AppLayout.getHeight(20),left: AppLayout.getWidth(15)),
                           child: Row(
                             children: [
                               CircleAvatar(

@@ -5,7 +5,7 @@ import 'package:lost_and_find_app/pages/items/items_grid.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/widgets/big_text.dart';
 
-import '../../test/cagory.dart';
+import '../../test/other/cagory.dart';
 import '../../utils/colors.dart';
 
 class HomeScreen extends StatefulWidget {
