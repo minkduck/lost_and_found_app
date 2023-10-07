@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_find_app/pages/items/items_grid.dart';
+import 'package:lost_and_find_app/utils/app_layout.dart';
 
-import '../../test/cagory.dart';
+import '../../test/other/cagory.dart';
 
 class ItemsGridMain extends StatefulWidget {
   const ItemsGridMain({super.key});
@@ -18,10 +19,10 @@ class _ItemsGridMainState extends State<ItemsGridMain> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 200,
+          maxCrossAxisExtent: AppLayout.getWidth(200),
           childAspectRatio: 0.55,
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20
+          crossAxisSpacing: AppLayout.getWidth(20),
+          mainAxisSpacing: AppLayout.getHeight(20)
       ),
       children: DUMMY_DATA.map((item) => ItemsGird(item.id, item.title)).toList(),
     );

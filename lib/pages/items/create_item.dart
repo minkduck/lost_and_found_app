@@ -62,7 +62,7 @@ class _CreateItemState extends State<CreateItem> {
               ),
               Padding(
                 padding: EdgeInsets.only(
-                    left: 30, top: 10),
+                    left: AppLayout.getWidth(30), top: AppLayout.getHeight(10)),
                 child: Text('Create ad', style: Theme.of(context).textTheme.displayMedium,),
               ),
               Gap(AppLayout.getHeight(20)),

@@ -58,7 +58,7 @@ class _PostScreenState extends State<PostScreen> {
                       borderRadius: BorderRadius.circular(20),
                       color: Theme.of(context).cardColor,
                     ),
-                    margin: const EdgeInsets.only(bottom: 20.0),
+                    margin: EdgeInsets.only(bottom: AppLayout.getHeight(20)),
                     padding: const EdgeInsets.all(12.0),
                     child: Column(
                       children: [
@@ -86,7 +86,7 @@ class _PostScreenState extends State<PostScreen> {
                         Gap(AppLayout.getHeight(15)),
                         Container(
                           alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.only(left: 20),
+                          margin: EdgeInsets.only(left: AppLayout.getWidth(20)),
                           height: AppLayout.getHeight(151),
                           width: AppLayout.getWidth(180),
                           child: Image.asset(AppAssets.airpods, fit: BoxFit.fill),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lost_and_find_app/pages/account/profile_page.dart';
 import 'package:lost_and_find_app/pages/home/home_screen.dart';
 import 'package:lost_and_find_app/pages/message/message_page.dart';
 import 'package:lost_and_find_app/pages/post/post_screen.dart';
 
-import '../../test/another_home_screen.dart';
 import '../../utils/colors.dart';
 
 class HomePage extends StatefulWidget {
@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
               label: "Home"
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.local_post_office,),
+              icon: Icon(FontAwesomeIcons.receipt, size: 20,),
               label: "Post"
           ),
           BottomNavigationBarItem(

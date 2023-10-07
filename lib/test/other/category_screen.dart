@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_find_app/pages/items/Items_grid_main.dart';
-import 'package:lost_and_find_app/test/cagory.dart';
-import 'package:lost_and_find_app/test/items_category.dart';
+import 'package:lost_and_find_app/test/other/cagory.dart';
+import 'package:lost_and_find_app/test/other/items_category.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});

@@ -36,11 +36,11 @@ class ItemsGird extends StatelessWidget {
                 right: AppLayout.getWidth(8)),
             child: Column(
               children: [
+                Gap(AppLayout.getHeight(5)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text("Airpods lost at ..."),
-                    Icon(Icons.heart_broken_outlined)
                   ],
                 ),
                 Gap(AppLayout.getHeight(5)),
@@ -81,8 +81,8 @@ class ItemsGird extends StatelessWidget {
                 boxColor: AppColors.secondPrimaryColor,
                 textButton: "Details",
                 fontSize: 18,
-                height: 30,
-                width: 180,
+                height: AppLayout.getHeight(30),
+                width: AppLayout.getWidth(180),
                 topLeft: 1,
                 topRight: 1,
                 onTap: () {

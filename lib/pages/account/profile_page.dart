@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/big_text.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
+import 'package:provider/provider.dart';
 
+import '../../data/api/auth/google_sign_in.dart';
 import '../../utils/app_assets.dart';
 
 class AccountPage extends StatefulWidget {
@@ -17,6 +20,8 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser!;
+
     return Scaffold(
       body: Column(
         children: [
@@ -24,14 +29,14 @@ class _AccountPageState extends State<AccountPage> {
           CircleAvatar(
             radius: 80,
             backgroundImage:
-            AssetImage(AppAssets.avatarDefault!),
+            NetworkImage(user.photoURL!),
           ),
           Gap(AppLayout.getHeight(30)),
-          Text("John", style: Theme.of(context).textTheme.headlineMedium,),
+          Text(user.displayName!, style: Theme.of(context).textTheme.headlineMedium,),
           Gap(AppLayout.getHeight(30)),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30),
-            padding: EdgeInsets.only(top: 20, bottom: 20),
+            padding: EdgeInsets.only(top: AppLayout.getHeight(20), bottom: AppLayout.getHeight(20)),
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -47,23 +52,23 @@ class _AccountPageState extends State<AccountPage> {
               // crossAxisAlignment: CrossAxisAlignment.center,
                children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0, left: 40),
-                  child: IconAndTextWidget(icon: Icons.account_box, text: "@Minkduck", iconColor: AppColors.secondPrimaryColor),
+                  padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                  child: IconAndTextWidget(icon: Icons.account_box, text: user.displayName!, iconColor: AppColors.secondPrimaryColor),
 
                 ),
                  Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
                  Gap(AppLayout.getHeight(10)),
 
                  Padding(
-                   padding: const EdgeInsets.only(bottom: 8.0, left: 40),
-                   child: IconAndTextWidget(icon: Icons.email, text: "David@gmail.com", iconColor: AppColors.secondPrimaryColor),
+                   padding:  EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                   child: IconAndTextWidget(icon: Icons.email, text: user.email!, iconColor: AppColors.secondPrimaryColor),
                  ),
                  Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
                  Gap(AppLayout.getHeight(10)),
 
                  Padding(
-                   padding: const EdgeInsets.only(bottom: 8.0, left: 40),
-                   child: IconAndTextWidget(icon: Icons.phone, text: "+234 608 738 463", iconColor: AppColors.secondPrimaryColor),
+                   padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                   child: IconAndTextWidget(icon: Icons.phone, text: "-", iconColor: AppColors.secondPrimaryColor),
                  ),
                  
                ],
@@ -72,7 +77,8 @@ class _AccountPageState extends State<AccountPage> {
           Gap(AppLayout.getHeight(150)),
           InkWell(
             onTap: () {
-
+              final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
+              provider.logout();
             },
             child: Ink(
               width: AppLayout.getWidth(325),
