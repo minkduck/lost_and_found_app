@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   BigText(
-                    text: "All",
+                    text: "Alls",
                     size: 17,
                     color: AppColors.primaryColor,
                     fontW: FontWeight.w500,
