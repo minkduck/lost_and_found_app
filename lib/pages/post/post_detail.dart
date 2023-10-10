@@ -3,6 +3,8 @@ import 'package:gap/gap.dart';
 
 import '../../utils/app_assets.dart';
 import '../../utils/app_layout.dart';
+import '../../utils/colors.dart';
+import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
 
 class PostDetail extends StatefulWidget {
@@ -22,6 +24,28 @@ class _PostDetailState extends State<PostDetail> {
           child: Column(
             children: [
               Gap(AppLayout.getHeight(50)),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.grey,
+                      size: 30,
+                    ),
+                  ),
+                  BigText(
+                    text: "Post",
+                    size: 20,
+                    color: AppColors.secondPrimaryColor,
+                    fontW: FontWeight.w500,
+                  ),
+                ],
+              ),
+              Gap(AppLayout.getHeight(30)),
+
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),

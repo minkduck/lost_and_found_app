@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lost_and_find_app/pages/items/take_picture.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 
 import '../../utils/app_layout.dart';
@@ -63,7 +64,7 @@ class _CreateItemState extends State<CreateItem> {
               Padding(
                 padding: EdgeInsets.only(
                     left: AppLayout.getWidth(30), top: AppLayout.getHeight(10)),
-                child: Text('Create ad', style: Theme.of(context).textTheme.displayMedium,),
+                child: Text('Create Items', style: Theme.of(context).textTheme.displayMedium,),
               ),
               Gap(AppLayout.getHeight(20)),
 
@@ -113,7 +114,8 @@ class _CreateItemState extends State<CreateItem> {
               
               Center(
                 child: AppButton(boxColor: AppColors.primaryColor, textButton: "Continue", onTap: (){
-
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => TakePictureScreen()));
                 }),
               ),
 
