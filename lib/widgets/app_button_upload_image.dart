@@ -35,7 +35,7 @@ class AppButtonUpLoadImage extends StatelessWidget {
       child: Material(
         color: Colors.transparent, // Set the Material's color to transparent
         child: Ink(
-          width: width == 0 ? 325.0 : width,
+          width: width == 0 ? 150.0 : width,
           height: height == 0 ? 50.0 : height,
           decoration: BoxDecoration(
             color: boxColor,
