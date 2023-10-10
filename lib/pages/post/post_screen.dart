@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lost_and_find_app/pages/post/post_detail.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
@@ -49,18 +50,26 @@ class _PostScreenState extends State<PostScreen> {
                 child: Text('Post', style: Theme.of(context).textTheme.displayMedium,),
               ),
               ListView.builder(
-                shrinkWrap: true, // Important: Set shrinkWrap to true
+                shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: 5,
                 itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Theme.of(context).cardColor,
-                    ),
-                    margin: EdgeInsets.only(bottom: AppLayout.getHeight(20)),
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
+                  return GestureDetector(
+                      onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PostDetail(), // Navigate to PostDetail
+                      ),
+                    );
+                  },
+                  child: Container(
+                  decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).cardColor,
+                  ),
+                  margin: EdgeInsets.only(bottom: AppLayout.getHeight(20)),
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
                       children: [
                         Row(
                           children: [
@@ -109,7 +118,7 @@ class _PostScreenState extends State<PostScreen> {
                         )
                       ],
                     ),
-                  );
+                  ));
                 },
               ),
             ],

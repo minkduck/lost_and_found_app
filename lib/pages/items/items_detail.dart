@@ -5,6 +5,7 @@ import 'package:lost_and_find_app/widgets/app_button.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
 import 'package:lost_and_find_app/widgets/small_text.dart';
 import 'package:lost_and_find_app/widgets/status_widget.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
@@ -17,7 +18,26 @@ class ItemsDetails extends StatefulWidget {
   State<ItemsDetails> createState() => _ItemsDetailsState();
 }
 
+
 class _ItemsDetailsState extends State<ItemsDetails> {
+  final List<String> imageUrls = [
+    AppAssets.airpods,
+    AppAssets.airpods,
+    AppAssets.airpods,
+    AppAssets.airpods,
+  ];
+  final PageController _pageController = PageController();
+  double currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(() {
+      setState(() {
+        currentPage = _pageController.page ?? 0;
+      });
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,11 +75,33 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 child: Text('Items', style: Theme.of(context).textTheme.displayMedium,),
               ),
               Gap(AppLayout.getHeight(20)),
+
               Container(
                 margin: EdgeInsets.only(left: 20),
                 height: AppLayout.getHeight(350),
                 width: AppLayout.getWidth(350),
-                child: Image.asset(AppAssets.airpods, fit: BoxFit.fill),
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: imageUrls.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(imageUrls[index],fit: BoxFit.fill,));
+                    // child: Image.network(imageUrls[index],fit: BoxFit.fill,));               );
+                  },
+                ),
+              ),
+              Center(
+                child: DotsIndicator(
+                  dotsCount: imageUrls.length,
+                  position: currentPage,
+                  decorator: const DotsDecorator(
+                    size: Size.square(10.0),
+                    activeSize: Size(20.0, 10.0),
+                    activeColor: Colors.blue,
+                    spacing: EdgeInsets.all(3.0),
+                  ),
+                ),
               ),
               Gap(AppLayout.getHeight(20)),
               Container(
