@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lost_and_find_app/pages/items/Items_grid_main.dart';
+import 'package:lost_and_find_app/pages/items/create_item.dart';
 import 'package:lost_and_find_app/pages/items/items_grid.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/widgets/big_text.dart';
@@ -15,12 +15,12 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-
 class _HomeScreenState extends State<HomeScreen> {
+  final List<String> categories = ['All', 'Mobile', 'Documents', 'Laptop', 'Paper', 'Card', 'Panel'];
+  List<String> selectedCategories = [];
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -58,42 +58,83 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text('Items', style: Theme.of(context).textTheme.displayMedium,),
               ),
               Gap(AppLayout.getHeight(25)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  BigText(
-                    text: "Alls",
-                    size: 17,
-                    color: AppColors.primaryColor,
-                    fontW: FontWeight.w500,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: categories
+                        .map((category) => GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (selectedCategories.contains(category)) {
+                            selectedCategories.remove(category);
+                          } else {
+                            selectedCategories.add(category);
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 16),
+                        child: BigText(
+                          text: category,
+                          color: selectedCategories.contains(category)
+                              ? AppColors.primaryColor // Selected text color
+                              : AppColors.secondPrimaryColor,
+                          fontW: FontWeight.w500,
+                        ),
+                      ),
+                    ))
+                        .toList(),
                   ),
-                  BigText(
-                    text: "Mobile",
-                    size: 17,
-                    color: AppColors.secondPrimaryColor,
-                    fontW: FontWeight.w500,
-                  ),
-                  BigText(
-                    text: "Documents",
-                    size: 17,
-                    color: AppColors.secondPrimaryColor,
-                    fontW: FontWeight.w500,
-                  ),
-                  BigText(
-                    text: "Laptop",
-                    size: 17,
-                    color: AppColors.secondPrimaryColor,
-                    fontW: FontWeight.w500,
-                  ),
-                ],
+                ),
               ),
               Gap(AppLayout.getHeight(25)),
-              ItemsGridMain()
-
+              GridView(
+                padding: EdgeInsets.all(15),
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: AppLayout.getWidth(200),
+                    childAspectRatio: 0.55,
+                    crossAxisSpacing: AppLayout.getWidth(20),
+                    mainAxisSpacing: AppLayout.getHeight(20)
+                ),
+                children: DUMMY_DATA.map((item) => ItemsGird(item.id, item.title)).toList(),
+              )
             ],
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => CreateItem()));
+        },
+        tooltip: 'Create Items',
+        backgroundColor: AppColors.primaryColor,
+        child: const Icon(Icons.add),
+      ),
+
     );
   }
 }
+
+const DUMMY_DATA = [
+  Category(id: '1', title: "Item 1"),
+  Category(id: '2', title: "Item 2"),
+  Category(id: '3', title: "Item 3"),
+  Category(id: '4', title: "Item 4"),
+  Category(id: '5', title: "Item 5"),
+  Category(id: '6', title: "Item 6"),
+  Category(id: '7', title: "Item 7"),
+  Category(id: '8', title: "Item 8"),
+  Category(id: '9', title: "Item 9"),
+  Category(id: '10', title: "Item 10"),
+  Category(id: '11', title: "Item 11"),
+  Category(id: '12', title: "Item 12"),
+  Category(id: '13', title: "Item 13"),
+  Category(id: '14', title: "Item 14"),
+];
