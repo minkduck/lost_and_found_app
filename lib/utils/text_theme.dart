@@ -23,7 +23,7 @@ class TTextTheme {
     titleMedium: AppStyles.h5.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
     labelSmall: AppStyles.h6.copyWith(color: Colors.grey),
     titleSmall: AppStyles.h6.copyWith(color: Colors.white),
-    headlineSmall: AppStyles.h6.copyWith(color: Colors.black),
+    headlineSmall: AppStyles.h6.copyWith(color: Colors.white),
 
   );
 }
