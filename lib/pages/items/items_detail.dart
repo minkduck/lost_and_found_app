@@ -122,7 +122,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       top: AppLayout.getHeight(8)),
                   child: IconAndTextWidget(
                       icon: Icons.timer_sharp,
-                      text: "2 days ago",
+                      text: "2 days ago  -  5/10/2023",
                       iconColor: Colors.grey)),
               //location
               Container(

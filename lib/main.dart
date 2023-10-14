@@ -11,6 +11,7 @@ import 'package:lost_and_find_app/pages/home_login_page.dart';
 import 'package:lost_and_find_app/pages/items/create_item.dart';
 import 'package:lost_and_find_app/pages/items/items_detail.dart';
 import 'package:lost_and_find_app/pages/items/take_picture.dart';
+import 'package:lost_and_find_app/pages/message/message_page.dart';
 import 'package:lost_and_find_app/pages/post/post_detail.dart';
 import 'package:lost_and_find_app/pages/post/post_screen.dart';
 import 'package:lost_and_find_app/pages/splash/login_signup_page.dart';
@@ -47,7 +48,7 @@ class MyApp extends StatelessWidget {
 
         theme: TAppTheme.lightTheme,
         darkTheme: TAppTheme.darkTheme,
-        themeMode: ThemeMode.dark,
+        themeMode: ThemeMode.system,
 
         // initialRoute: RouteHelper.initial,
         // getPages: RouteHelper.routes,
