@@ -67,7 +67,7 @@ class ItemsGird extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "2 day ago",
+                      "2 days ago",
                       style: TextStyle(fontSize: 15),
                     ),
                   ),
