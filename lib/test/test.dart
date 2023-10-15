@@ -38,41 +38,53 @@ class _TestPageState extends State<TestPage> {
       appBar: AppBar(
         title: Text('hello'),
       ),
-      body: Column(
-        children: [
-          Center(
-            child: AppDropdownFieldTitle(
-              hintText: "sdfsdfsdfsdf",
-              selectedValue: _selectedValue,
-              items: _productSizeList.map((e) {
-                return DropdownMenuItem(child: Text(e), value: e,);
-              }).toList(),
-              onChanged: (val){
-                setState(() {
-                  _selectedValue = val as String;
-                });
-              },
-              titleText: "titleText",
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Center(
+              child: AppDropdownFieldTitle(
+                hintText: "sdfsdfsdfsdf",
+                selectedValue: _selectedValue,
+                items: _productSizeList.map((e) {
+                  return DropdownMenuItem(child: Text(e), value: e,);
+                }).toList(),
+                onChanged: (val){
+                  setState(() {
+                    _selectedValue = val as String;
+                  });
+                },
+                titleText: "titleText",
+              ),
             ),
-          ),
-          Gap(AppLayout.getHeight(80)),
-          ElevatedButton(
-            onPressed: () async {
-              // fcmToken = await AppConstrants.getFcmToken();
-              // accessToken = await AppConstrants.getToken();
-              SnackbarUtils().showSuccess(title: "Successs", message: "Login google successfully");
-              SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
-              SnackbarUtils().showInfo(title: "Info", message: "Info");
-              SnackbarUtils().showLoading(message: "loading");
-            },
-            child: Text('button'),
-          ),
-          Column(
-            children:[
-              Text(fcmToken ?? ''),
-              Text(accessToken ?? ''),]
-          )
-        ],
+            Gap(AppLayout.getHeight(80)),
+            ElevatedButton(
+              onPressed: () async {
+                // fcmToken = await AppConstrants.getFcmToken();
+                // accessToken = await AppConstrants.getToken();
+                SnackbarUtils().showSuccess(title: "Successs", message: "Login google successfully");
+                SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
+                SnackbarUtils().showInfo(title: "Info", message: "Info");
+                SnackbarUtils().showLoading(message: "loading");
+              },
+              child: Text('button'),
+            ),
+            Column(
+              children:[
+                // Text(fcmToken ?? ''),
+                // Text(accessToken ?? ''),
+                LayoutBuilder(builder: (context, contraints) {
+                  return SizedBox(
+                    height: AppLayout.getScreenHeight() / 2,
+                    child: TextField(
+                      expands: true,
+                      maxLines: null,
+                    ),
+                  );
+                }),
+              ]
+            )
+          ],
+        ),
       ),
     );
   }
