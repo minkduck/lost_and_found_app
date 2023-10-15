@@ -39,7 +39,7 @@ class AppDropdownFieldTitle extends StatelessWidget {
               left: AppLayout.getHeight(20),
               right: AppLayout.getHeight(20)),
           decoration: BoxDecoration(
-            color: Color(0xFFF4F4F4),
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(AppLayout.getHeight(20)),
             boxShadow: [
               BoxShadow(

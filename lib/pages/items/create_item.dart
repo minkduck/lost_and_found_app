@@ -6,6 +6,7 @@ import 'package:lost_and_find_app/widgets/app_button.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/app_drop_menu_filed_title.dart';
+import '../../widgets/app_text_field_description.dart';
 import '../../widgets/app_text_filed_title.dart';
 import '../../widgets/big_text.dart';
 
@@ -21,6 +22,7 @@ class _CreateItemState extends State<CreateItem> {
   var titleController = TextEditingController(); // Separate controller for title
   var descriptionController = TextEditingController(); // Separate controller for description
   var locationController = TextEditingController(); // Separate controller for location
+  bool isDescriptionFocused = false;
 
   final _productSizeList =["Small", "Medium", "Large", "XLarge"];
   String? _selectedValue = "";
@@ -91,10 +93,16 @@ class _CreateItemState extends State<CreateItem> {
               Gap(AppLayout.getHeight(45)),
 
               //description
-              AppTextFieldTitle(
-                  textController: descriptionController,
-                  hintText: "Describe important information",
-                  titleText: "Description"),
+              AppTextFieldDescription(
+                textController: descriptionController,
+                hintText: "Describe important information",
+                titleText: "Description",
+                onFocusChange: (isFocused) {
+                  setState(() {
+                    isDescriptionFocused = isFocused;
+                  });
+                },
+              ),
               Gap(AppLayout.getHeight(45)),
 
               //Location

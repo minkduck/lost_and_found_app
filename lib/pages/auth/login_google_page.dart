@@ -22,14 +22,14 @@ class _LoginGooglePageState extends State<LoginGooglePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Gap(AppLayout.getHeight(100)),
+            Gap(AppLayout.getHeight(200)),
             Container(
               alignment: Alignment.center,
               child: Container(
                 alignment: Alignment.center,
                 padding: EdgeInsets.only(top: 80),
                 child: Image.asset(
-                  AppAssets.fptLogo,
+                  AppAssets.lostAndFound,
                   fit: BoxFit.fitWidth,
                 ),
               ),
