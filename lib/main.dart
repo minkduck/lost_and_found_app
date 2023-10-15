@@ -8,6 +8,7 @@ import 'package:lost_and_find_app/pages/auth/sign_up_page.dart';
 import 'package:lost_and_find_app/pages/home/home_page.dart';
 import 'package:lost_and_find_app/pages/home/home_screen.dart';
 import 'package:lost_and_find_app/pages/home_login_page.dart';
+import 'package:lost_and_find_app/pages/intro/intro_screen.dart';
 import 'package:lost_and_find_app/pages/items/create_item.dart';
 import 'package:lost_and_find_app/pages/items/items_detail.dart';
 import 'package:lost_and_find_app/pages/items/take_picture.dart';

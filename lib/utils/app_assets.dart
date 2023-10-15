@@ -11,5 +11,9 @@ class AppAssets {
   static final String airpods = imagePath + 'airpods.png';
   static final String avatarDefault = imagePath + 'avatar_default.png';
   static final String upPictureScreen = imagePath + 'up_picture_screen.png';
+  static final String lostAndFound = imagePath + 'logo-no-background.png';
+  static final String recover = imagePath + 'recover.png';
+  static final String reconnect = imagePath + 'reconnect.png';
+  static final String revive = imagePath + 'revive.png';
 
 }

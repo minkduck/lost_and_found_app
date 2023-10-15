@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lost_and_find_app/pages/post/create_post.dart';
 import 'package:lost_and_find_app/pages/post/post_detail.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
@@ -125,6 +126,16 @@ class _PostScreenState extends State<PostScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => CreatePost()));
+        },
+        tooltip: 'Create Post',
+        backgroundColor: AppColors.primaryColor,
+        child: const Icon(Icons.add),
+      ),
+
     );
   }
 }
