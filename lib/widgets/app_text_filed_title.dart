@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
@@ -35,7 +37,7 @@ class AppTextFieldTitle extends StatelessWidget {
           margin: EdgeInsets.only(
               left: AppLayout.getHeight(20), right: AppLayout.getHeight(20)),
           decoration: BoxDecoration(
-              color: Color(0xFFF4F4F4),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(AppLayout.getHeight(20)),
               boxShadow: [
                 BoxShadow(
