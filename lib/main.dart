@@ -20,17 +20,23 @@ import 'package:lost_and_find_app/routes/route_helper.dart';
 import 'package:lost_and_find_app/test/filter/product_list.dart';
 import 'package:lost_and_find_app/test/test.dart';
 import 'package:lost_and_find_app/test/upload%20file%20and%20picture/upload-file.dart';
+import 'package:lost_and_find_app/utils/error.dart';
 import 'package:lost_and_find_app/utils/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:lost_and_find_app/data/api/auth/google_sign_in.dart';
+import 'helper/dependencies.dart' as dep;
 
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await FirebaseNotification().initNotifications();
+  await dep.init();
 
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return ErrorScreen(details.exception.toString());
+  };
   runApp(const MyApp());
 }
 
@@ -53,7 +59,8 @@ class MyApp extends StatelessWidget {
 
         // initialRoute: RouteHelper.initial,
         // getPages: RouteHelper.routes,
-        home: HomeLoginPage(),
+        home: PostScreen(),
+        getPages: RouteHelper.routes,
       ),
     );
   }

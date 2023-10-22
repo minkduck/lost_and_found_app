@@ -1,7 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:get/get.dart';
 import 'package:lost_and_find_app/data/api/auth/google_sign_in.dart';
+import 'package:lost_and_find_app/data/api/category/category_controller.dart';
+import 'package:lost_and_find_app/data/api/item/item_controller.dart';
+import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/app_styles.dart';
@@ -61,10 +65,13 @@ class _TestPageState extends State<TestPage> {
               onPressed: () async {
                 // fcmToken = await AppConstrants.getFcmToken();
                 // accessToken = await AppConstrants.getToken();
-                SnackbarUtils().showSuccess(title: "Successs", message: "Login google successfully");
-                SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
-                SnackbarUtils().showInfo(title: "Info", message: "Info");
-                SnackbarUtils().showLoading(message: "loading");
+                // SnackbarUtils().showSuccess(title: "Successs", message: "Login google successfully");
+                // SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
+                // SnackbarUtils().showInfo(title: "Info", message: "Info");
+                // SnackbarUtils().showLoading(message: "loading");
+                // Get.find<ItemController>().getItemList();
+                // Get.find<CategoryController>().getCategoryList();
+                Get.find<PostController>().getPostList();
               },
               child: Text('button'),
             ),

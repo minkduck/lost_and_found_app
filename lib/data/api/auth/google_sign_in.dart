@@ -31,6 +31,7 @@ class GoogleSignInProvider extends ChangeNotifier {
   late String email = "String";
   late String avatar = "String";
   late String fcmToken ;
+  late String accessToken = "";
 
   User? getUser() {
     userP.value = _auth.currentUser;
@@ -42,6 +43,36 @@ class GoogleSignInProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     fcmToken = prefs.getString('fcmToken')!;
   }
+  Future<void> postAuthen() async {
+    await getFcmToken();
+    accessToken = await AppConstrants.getToken();
+
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('POST', Uri.parse(AppConstrants.AUTHENTICATE_URL+fcmToken));
+    request.body = json.encode({
+      "userDeviceToken" : fcmToken
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      print("post Authen device token successful");
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+
+  }
+  Future<void> postGGLogin() async {
+
+
+  }
+
 
   Future googleLogin() async {
     await Firebase.initializeApp();
@@ -65,13 +96,13 @@ class GoogleSignInProvider extends ChangeNotifier {
       await FirebaseAuth.instance.authStateChanges().listen((User? user) {
         userP.value = user;
         uid = user!.uid;
-        print("uid 2:$uid");
+        // print("uid 2:$uid");
         email = user.email!;
-        print("email:$email");
+        // print("email:$email");
         name = user.displayName!;
-        print("displayname:$name");
+        // print("displayname:$name");
         avatar = user.photoURL!;
-        print("avatar:$avatar");
+        // print("avatar:$avatar");
       });
 /*final response = await http.post(
         Uri.parse('https://lostandfound.io.vn/auth/googleLoginAuthenticate'),
@@ -84,7 +115,6 @@ class GoogleSignInProvider extends ChangeNotifier {
       var headers = {
         'Content-Type': 'application/json'
       };
-      await getFcmToken();
       var request = await http.Request('POST', Uri.parse(AppConstrants.LOGINGOOGLE_URL));
       request.body = json.encode({
         "uid": uid,
@@ -92,7 +122,6 @@ class GoogleSignInProvider extends ChangeNotifier {
         "name": name,
         "avatar": avatar,
         "phone": "string",
-        "deviceToken": fcmToken
       });
       request.headers.addAll(headers);
 
@@ -110,6 +139,7 @@ class GoogleSignInProvider extends ChangeNotifier {
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('access_token', idTokenUser.toString());
+        await postAuthen();
       }
       else {
         print(response.reasonPhrase);

@@ -17,18 +17,20 @@ class AppConstrants{
   static const String BASE_URL = "https://lostandfound.io.vn";
   static String TOKEN = '';
 
-  static void init() async {
-    TOKEN = await getToken();
-  }
 
+  //auth
   static const String LOGINGOOGLE_URL = "$BASE_URL/auth/googleLoginAuthenticate";
-  static const String PROJECT_URL = "/api/v1/projects";
-  static const String POST_URL = "/api/v1/posts";
-  static const String STUDENT_URL = "/api/v1/students";
-  static const String CATEGORY_URL = "/api/v1/categories";
-  static const String MAJOR_URL = "/api/v1/majors";
-  static const String ROLE_URL = "/api/v1/roles";
+  static const String AUTHENTICATE_URL = "$BASE_URL/auth/authenticate?userDeviceToken=";
 
+  //category
+  static const String GETCATEGORYWITHPAGINATION_URL = "$BASE_URL/api/categories";
 
+  //item
+  static const String GETITEMWITHPAGINATION_URL = "$BASE_URL/api/items?ItemStatus=";
+  static const String GETITEMBYID_URL = "$BASE_URL/api/items/id/";
+
+  //post
+  static const String GETPOSTWITHPAGINATION_URL = "$BASE_URL/api/posts";
+  static const String GETPOSTBYID_URL = "$BASE_URL/api/posts/";
 
 }
