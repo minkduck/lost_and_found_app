@@ -23,23 +23,15 @@ class _PostScreenState extends State<PostScreen> {
   final PostController postController = Get.put(PostController());
   bool _isMounted = false;
 
-  String? getUrlFromItem(Map<String, dynamic> item) {
-    if (item.containsKey('postMedias')) {
-      final itemMedias = item['postMedias'] as List;
-      if (itemMedias.isNotEmpty) {
-        final media = itemMedias as Map<String, dynamic>;
-        if (media.containsKey('media')) {
-          final mediaData = media['media'] as Map<String, dynamic>;
-          if (mediaData.containsKey('url')) {
-            return mediaData['url'] as String;
-          }
-        }
+  Future<void> _refreshData() async {
+    await postController.getPostList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          postList = result;
+        });
       }
-    }
-    // Return a default URL or null if no URL is found.
-    return "https://wowmart.vn/wp-content/uploads/2020/10/null-image.png";
+    });
   }
-
   @override
   void initState() {
     super.initState();
@@ -51,7 +43,6 @@ class _PostScreenState extends State<PostScreen> {
         });
       }
     });
-
   }
 
   @override
@@ -59,131 +50,187 @@ class _PostScreenState extends State<PostScreen> {
     _isMounted = false;
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView( // Wrap with SingleChildScrollView
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              Gap(AppLayout.getHeight(20)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    child: BigText(
-                      text: "Post",
-                      size: 20,
-                      color: AppColors.secondPrimaryColor,
-                      fontW: FontWeight.w500,
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                Gap(AppLayout.getHeight(20)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      child: BigText(
+                        text: "Post",
+                        size: 20,
+                        color: AppColors.secondPrimaryColor,
+                        fontW: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  Container(
-                    child: Icon(
-                      Icons.search,
-                      color: Colors.grey,
-                      size: 40,
+                    Container(
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.grey,
+                        size: 40,
+                      ),
                     ),
+                  ],
+                ),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Post',
+                    style: Theme.of(context).textTheme.displayMedium,
                   ),
-                ],
-              ),
-              Container(
-                alignment: Alignment.centerLeft,
-                child: Text('Post', style: Theme.of(context).textTheme.displayMedium,),
-              ),
-              GetBuilder<PostController>(builder: (posts) {
-                return posts.isLoaded
-                    ? ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: postList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => PostDetail(), // Navigate to PostDetail
-                            ),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Theme.of(context).cardColor,
-                          ),
-                          margin: EdgeInsets.only(bottom: AppLayout.getHeight(20)),
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 25,
-                                    backgroundImage: AssetImage(AppAssets.avatarDefault!),
+                ),
+                GetBuilder<PostController>(builder: (posts) {
+                  return posts.isLoaded
+                      ? ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: postList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => PostDetail(
+                                          pageId: postList[index]['id'],
+                                          page: "post"), // Navigate to PostDetail
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: Theme.of(context).cardColor,
                                   ),
-                                  Gap(AppLayout.getHeight(15)),
-                                  Column(
+                                  margin: EdgeInsets.only(
+                                      bottom: AppLayout.getHeight(20)),
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
                                     children: [
-                                      Text(postList[index]['user']['fullName'], style: Theme.of(context).textTheme.titleSmall,),
-                                      Gap(AppLayout.getHeight(5)),
-                                      Text("16h ago", style: TextStyle(fontSize: 12, color: Colors.grey),)
+                                      Row(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 25,
+                                            backgroundImage: NetworkImage(
+                                                postList[index]['user']
+                                                    ['avatar']!),
+                                          ),
+                                          Gap(AppLayout.getHeight(15)),
+                                          Column(
+                                            children: [
+                                              Text(
+                                                postList[index]['user']
+                                                    ['fullName'],
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleSmall,
+                                              ),
+                                              Gap(AppLayout.getHeight(5)),
+                                              Text(
+                                                "16h ago",
+                                                style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey),
+                                              )
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      Gap(AppLayout.getHeight(30)),
+                                      Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          postList[index]['title'],
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
+                                      ),
+                                      Container(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.3,
+                                        // Set a fixed height or use any other value
+                                        child: ListView.builder(
+                                          padding: EdgeInsets.zero, // Add this line to set zero padding
+                                          shrinkWrap: true,
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: postList[index]['postMedias']
+                                              .length,
+                                          itemBuilder: (context, indexs) {
+                                            return Container(
+                                              alignment: Alignment.centerLeft,
+                                              margin: EdgeInsets.only(
+                                                  left: AppLayout.getWidth(20)),
+                                              height: AppLayout.getHeight(151),
+                                              width: AppLayout.getWidth(180),
+                                              child: Image.network(
+                                                  postList[index]['postMedias']
+                                                      [indexs]['media']['url'] ?? Container(),
+                                                  fit: BoxFit.fill),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Container(
+                                        child: Text(
+                                          postList[index]['postContent'],
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall,
+                                        ),
+                                      ),
+                                      Gap(AppLayout.getHeight(30)),
+                                      IconAndTextWidget(
+                                        icon: Icons.location_on,
+                                        text: postList[index]['LocationName'] ??
+                                            'No Location',
+                                        size: 15,
+                                        iconColor: Colors.black,
+                                      ),
+                                      Gap(AppLayout.getHeight(30)),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          IconAndTextWidget(
+                                              icon: Icons.bookmark,
+                                              text: "100",
+                                              iconColor: Colors.grey),
+                                          IconAndTextWidget(
+                                              icon: Icons.comment,
+                                              text: "100",
+                                              iconColor: Colors.grey),
+                                          IconAndTextWidget(
+                                              icon: Icons.flag,
+                                              text: "100",
+                                              iconColor: Colors.grey),
+                                        ],
+                                      )
                                     ],
-                                  )
-                                ],
-                              ),
-                              Gap(AppLayout.getHeight(30)),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                child: Text(postList[index]['title'], style: Theme.of(context).textTheme.titleMedium,),
-                              ),
-                              Gap(AppLayout.getHeight(15)),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                margin: EdgeInsets.only(left: AppLayout.getWidth(20)),
-                                height: AppLayout.getHeight(151),
-                                width: AppLayout.getWidth(180),
-                                child: Image.network(postList[index]['postMedias'][0]['media']['url']!, fit: BoxFit.fill),
-                              ),
-                              Gap(AppLayout.getHeight(10)),
-                              Container(
-                                child: Text(
-                                  postList[index]['postContent'],
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                ),
-                              ),
-                              Gap(AppLayout.getHeight(30)),
-                              IconAndTextWidget(
-                                icon: Icons.location_on,
-                                text: postList[index]['LocationName'] ?? 'No Location',
-                                size: 15,
-                                iconColor: Colors.black,
-                              ),
-
-                              Gap(AppLayout.getHeight(30)),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconAndTextWidget(icon: Icons.bookmark, text: "100", iconColor: Colors.grey),
-                                  IconAndTextWidget(icon: Icons.comment, text: "100", iconColor: Colors.grey),
-                                  IconAndTextWidget(icon: Icons.flag, text: "100", iconColor: Colors.grey),
-                                ],
-                              )
-                            ],
+                                  ),
+                                ));
+                          },
+                        )
+                      : SizedBox(
+                          width: AppLayout.getWidth(100),
+                          height: AppLayout.getHeight(300),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
                           ),
-                        ));
-                  },
-                )
-                    : SizedBox(
-                  width: AppLayout.getWidth(100),
-                  height: AppLayout.getHeight(300),
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }),
-
-            ],
+                        );
+                }),
+              ],
+            ),
           ),
         ),
       ),
@@ -196,8 +243,6 @@ class _PostScreenState extends State<PostScreen> {
         backgroundColor: AppColors.primaryColor,
         child: const Icon(Icons.add),
       ),
-
     );
   }
 }
-

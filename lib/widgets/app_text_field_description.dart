@@ -81,6 +81,12 @@ class _AppTextFieldDescriptionState extends State<AppTextFieldDescription> {
                     borderSide: BorderSide(width: 1.0, color: Colors.white),
                   ),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please input description";
+                  }
+                  return null;
+                },
               ),
             );
           },

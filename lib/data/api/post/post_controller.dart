@@ -58,14 +58,13 @@ class PostController extends GetxController{
       final jsonResponse = json.decode(responseBody);
 
       final resultList = jsonResponse['result'];
-      _postList = resultList;
       _isLoaded = true;
       update();
-      print("itemlistByid " + _postList.toString());
+      print("itemlistByid " + resultList.toString());
       return resultList;
     } else {
       print(response.reasonPhrase);
-      throw Exception('Failed to load Item');
+      throw Exception('Failed to load PostById');
     }
   }
 

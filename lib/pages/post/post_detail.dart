@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:get/get.dart';
+import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 
 import '../../utils/app_assets.dart';
 import '../../utils/app_layout.dart';
@@ -8,13 +10,35 @@ import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
 
 class PostDetail extends StatefulWidget {
-  const PostDetail({super.key});
+  final int pageId;
+  final String page;
+
+  const PostDetail({Key? key, required this.pageId, required this.page})
+      : super(key: key);
 
   @override
   State<PostDetail> createState() => _PostDetailState();
 }
 
 class _PostDetailState extends State<PostDetail> {
+  bool _isMounted = false;
+
+  Map<String, dynamic> postList = {};
+  final PostController postController = Get.put(PostController());
+
+  @override
+  void initState() {
+    super.initState();
+    _isMounted = true;
+    postController.getPostListById(widget.pageId).then((result) {
+      if (_isMounted) {
+        setState(() {
+          postList = result;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,10 +46,10 @@ class _PostDetailState extends State<PostDetail> {
         children: [
           Expanded(
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Column(
-            children: [
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: postList.isNotEmpty ? Column(
+                children: [
                   Gap(AppLayout.getHeight(50)),
                   Row(
                     children: [
@@ -69,7 +93,7 @@ class _PostDetailState extends State<PostDetail> {
                             Column(
                               children: [
                                 Text(
-                                  "John",
+                                  postList['user']['fullName'] ?? 'No Name',
                                   style: Theme.of(context).textTheme.titleSmall,
                                 ),
                                 Gap(AppLayout.getHeight(5)),
@@ -86,26 +110,51 @@ class _PostDetailState extends State<PostDetail> {
                         Container(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "Airpods lost at the library",
+                              postList['title'] ?? 'No title',
                               style: Theme.of(context).textTheme.titleMedium,
                             )),
                         Gap(AppLayout.getHeight(15)),
                         Container(
-                          alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.only(left: AppLayout.getWidth(20)),
-                          height: AppLayout.getHeight(151),
-                          width: AppLayout.getWidth(180),
-                          child:
-                              Image.asset(AppAssets.airpods, fit: BoxFit.fill),
+                          height:
+                          MediaQuery.of(context).size.height *
+                              0.25,
+                          // Set a fixed height or use any other value
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero, // Add this line to set zero padding
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: postList['postMedias']
+                                .length,
+                            itemBuilder: (context, indexs) {
+                              return Container(
+                                alignment: Alignment.centerLeft,
+                                margin: EdgeInsets.only(
+                                    left: AppLayout.getWidth(20)),
+                                height: AppLayout.getHeight(151),
+                                width: AppLayout.getWidth(180),
+                                child: Image.network(
+                                    postList['postMedias']
+                                    [indexs]['media']['url'] ?? Container(),
+                                    fit: BoxFit.fill),
+                              );
+                            },
+                          ),
                         ),
                         Gap(AppLayout.getHeight(10)),
                         Container(
-                          child: Text(
-                            'Lorem ipsum dolor sit amet consectetur. Mattis nunc eu mauris vulputate vulputate massa ipsum est. Leo adipiscing massa vitae consequat. Sagittis nunc egestas senectus mi erat eget. Purus sapien nam maecenas.',
+                          child: Text(postList['postContent'],
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                         ),
-                        Gap(AppLayout.getHeight(50)),
+                        Gap(AppLayout.getHeight(30)),
+                        IconAndTextWidget(
+                          icon: Icons.location_on,
+                          text: postList['locationName'] ?? 'No Location',
+                          size: 15,
+                          iconColor: Colors.black,
+                        ),
+
+                        Gap(AppLayout.getHeight(30)),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -183,14 +232,19 @@ class _PostDetailState extends State<PostDetail> {
                       ],
                     ),
                   ),
-            ],
-          ),
+                ],
+              )
+                  : SizedBox(
+                width: AppLayout.getWidth(100),
+                height: AppLayout.getHeight(300),
+                child: const Center(
+                  child: CircularProgressIndicator(),
                 ),
-              )),
-          Container(
-            padding: const EdgeInsets.only(
-              left: 20, right: 20, bottom: 20
+              ),
             ),
+          )),
+          Container(
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
               boxShadow: [
