@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
 import 'package:lost_and_find_app/widgets/small_text.dart';
 import 'package:lost_and_find_app/widgets/status_widget.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:get/get.dart';
 
+import '../../data/api/item/item_controller.dart';
+import '../../routes/route_helper.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/big_text.dart';
 
 class ItemsDetails extends StatefulWidget {
-  const ItemsDetails({super.key});
+  final int pageId;
+  final String page;
+  const ItemsDetails({Key? key, required this.pageId, required this.page}) : super(key: key);
 
   @override
   State<ItemsDetails> createState() => _ItemsDetailsState();
@@ -20,14 +26,20 @@ class ItemsDetails extends StatefulWidget {
 
 
 class _ItemsDetailsState extends State<ItemsDetails> {
-  final List<String> imageUrls = [
-    AppAssets.airpods,
-    AppAssets.airpods,
-    AppAssets.airpods,
-    AppAssets.airpods,
+
+  late List<String> imageUrls = [
+    // AppAssets.airpods,
+    // AppAssets.airpods,
+    // AppAssets.airpods,
+    // AppAssets.airpods,
   ];
   final PageController _pageController = PageController();
   double currentPage = 0;
+
+  bool _isMounted = false;
+
+  Map<String, dynamic> itemlist = {};
+  final ItemController itemController = Get.put(ItemController());
 
   @override
   void initState() {
@@ -37,6 +49,26 @@ class _ItemsDetailsState extends State<ItemsDetails> {
         currentPage = _pageController.page ?? 0;
       });
     });
+    _isMounted = true;
+    itemController.getItemListById(widget.pageId).then((result) {
+      if (_isMounted) {
+        setState(() {
+          itemlist = result;
+          if (itemlist != null) {
+            var itemMedias = itemlist['itemMedias'];
+
+            if (itemMedias != null && itemMedias is List) {
+              List mediaList = itemMedias;
+
+              for (var media in mediaList) {
+                String imageUrl = media['media']['url'];
+                imageUrls.add(imageUrl);
+              }
+            }
+          }
+        });
+      }
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -44,7 +76,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Column(
+          child: itemlist.isNotEmpty ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             // Align children to the left
             children: [
@@ -86,14 +118,14 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Image.asset(imageUrls[index],fit: BoxFit.fill,));
+                      child: Image.network(imageUrls[index]??"https://wowmart.vn/wp-content/uploads/2020/10/null-image.png",fit: BoxFit.fill,));
                     // child: Image.network(imageUrls[index],fit: BoxFit.fill,));               );
                   },
                 ),
               ),
               Center(
                 child: DotsIndicator(
-                  dotsCount: imageUrls.length,
+                  dotsCount: imageUrls.isEmpty ? 1 : imageUrls.length,
                   position: currentPage,
                   decorator: const DotsDecorator(
                     size: Size.square(10.0),
@@ -104,16 +136,19 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 ),
               ),
               Gap(AppLayout.getHeight(20)),
-              Container(
-                  padding: EdgeInsets.only(left: AppLayout.getWidth(20)),
-                  child: StatusWidget(text: "Found", color: Colors.grey)),
+              // Container(
+              //     padding: EdgeInsets.only(left: AppLayout.getWidth(20)),
+              //     child: StatusWidget(text: "Found", color: Colors.grey)),
               Padding(
                 padding: EdgeInsets.only(
                     left: AppLayout.getWidth(16), top: AppLayout.getHeight(16)),
                 child: Text(
-                  "Airpods lost at the libraries.",
+                  itemlist.isNotEmpty 
+                      ? itemlist['name']
+                      : 'No Name', // Provide a default message if item is not found
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
+
               ),
               // time
               Container(
@@ -122,7 +157,9 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       top: AppLayout.getHeight(8)),
                   child: IconAndTextWidget(
                       icon: Icons.timer_sharp,
-                      text: "2 days ago  -  5/10/2023",
+                      text: itemlist['createdDate'] != null
+                          ? DateFormat('dd-MM-yyyy').format(DateTime.parse(itemlist['createdDate']))
+                          : 'No Date',
                       iconColor: Colors.grey)),
               //location
               Container(
@@ -131,7 +168,9 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       top: AppLayout.getHeight(8)),
                   child: IconAndTextWidget(
                       icon: Icons.location_on,
-                      text: "Libraries",
+                      text: itemlist.isNotEmpty 
+                          ? itemlist['LocationName']
+                          : 'No Location',
                       iconColor: Colors.black)),
               //description
               Gap(AppLayout.getHeight(10)),
@@ -140,7 +179,9 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       left: AppLayout.getWidth(18),
                       top: AppLayout.getHeight(8)),
                   child: SmallText(
-                    text: "Airpods lost at the libraries.",
+                    text: itemlist.isNotEmpty 
+                        ? itemlist['description']
+                        : 'No Description',
                     size: 15,
                   )),
               //profile user
@@ -156,18 +197,28 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       radius: 50,
                       child: CircleAvatar(
                         radius: 50,
-                        backgroundImage: AssetImage(AppAssets.avatarDefault!),
+                        backgroundImage: NetworkImage(itemlist['user']['avatar']??"https://wowmart.vn/wp-content/uploads/2020/10/null-image.png"),
                       ),
                     ),
                   ),
                   Gap(AppLayout.getHeight(50)),
-                  Text("Nguyen Van A", style: TextStyle(fontSize: 20),)
+                  Text(
+                    itemlist.isNotEmpty
+                      ? itemlist['user']['fullName'] :
+                      'No Name', style: TextStyle(fontSize: 20),)
                 ],
               ),
               Gap(AppLayout.getHeight(40)),
               Center(
                   child: AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Send Message", onTap: () {})),
             ],
+          )
+              : SizedBox(
+            width: AppLayout.getWidth(100),
+            height: AppLayout.getHeight(300),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
         ),
       ),

@@ -88,7 +88,7 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
               children: [
                 AppButtonUpLoadImage(
                     boxColor: AppColors.primaryColor,
-                    textButton: "Take a photo",
+                    textButton: "Take photo",
                     onTap: () {
                       takePicture();
                     }),
