@@ -10,6 +10,7 @@ class AppDropdownFieldTitle extends StatelessWidget {
   final ValueChanged<String?> onChanged;
   final String titleText;
   final String hintText;
+  final String validator;
 
   AppDropdownFieldTitle({
     Key? key,
@@ -18,6 +19,7 @@ class AppDropdownFieldTitle extends StatelessWidget {
     required this.onChanged,
     required this.titleText,
     required this.hintText,
+    required this.validator
   }) : super(key: key);
 
   @override
@@ -75,6 +77,13 @@ class AppDropdownFieldTitle extends StatelessWidget {
                 ),
               ),
             ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return validator;
+              }
+              return null;
+            },
+
           ),
         ),
       ],

@@ -25,6 +25,8 @@ class AppConstrants{
   //category
   static const String GETCATEGORYWITHPAGINATION_URL = "$BASE_URL/api/categories";
 
+  //location
+  static const String GETLOCATIONWITHPAGINATION_URL = "$BASE_URL/api/locations";
   //item
   static const String GETITEMWITHPAGINATION_URL = "$BASE_URL/api/items?ItemStatus=";
   static const String GETITEMBYID_URL = "$BASE_URL/api/items/id/";
@@ -32,5 +34,7 @@ class AppConstrants{
   //post
   static const String GETPOSTWITHPAGINATION_URL = "$BASE_URL/api/posts";
   static const String GETPOSTBYID_URL = "$BASE_URL/api/posts/";
+
+
 
 }

@@ -90,12 +90,16 @@ class _LoginPageState extends State<LoginPage> {
             AppTextFieldTitle(
                 textController: emailController,
                 hintText: "",
-                titleText: "EMAIL"),
+                titleText: "EMAIL",
+              validator: 'Please input email',
+            ),
             Gap(AppLayout.getHeight(40)),
             AppTextFieldTitle(
                 textController: passwordController,
                 hintText: "",
-                titleText: "PASSWORD"),
+                titleText: "PASSWORD",
+              validator: 'Please input password',
+            ),
             Gap(AppLayout.getHeight(40)),
             Container(
               alignment: Alignment.centerRight,
