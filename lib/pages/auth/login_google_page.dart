@@ -37,9 +37,9 @@ class _LoginGooglePageState extends State<LoginGooglePage> {
             Gap(AppLayout.getHeight(160)),
 
             InkWell(
-              onTap: () {
+              onTap: () async {
                 final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
-                provider.googleLogin();
+                await provider.googleLogin();
               },
               child: Ink(
                 width: AppLayout.getWidth(325) ,

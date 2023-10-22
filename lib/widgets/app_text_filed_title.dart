@@ -10,13 +10,14 @@ class AppTextFieldTitle extends StatelessWidget {
   late var textController;
   final String hintText;
   final String titleText;
-
+  final String validator;
 
   AppTextFieldTitle(
       {Key? key,
         required this.textController,
         required this.hintText,
-        required this.titleText
+        required this.titleText,
+        required this.validator
       })
       : super(key: key);
 
@@ -64,6 +65,13 @@ class AppTextFieldTitle extends StatelessWidget {
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppLayout.getHeight(20)),
                     borderSide: BorderSide(width: 1.0, color: Colors.white))),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return validator;
+              }
+              return null;
+            },
+
           ),
         ),
       ],

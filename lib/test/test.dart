@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:lost_and_find_app/data/api/auth/google_sign_in.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/api/item/item_controller.dart';
+import 'package:lost_and_find_app/data/api/location/location_controller.dart';
 import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
@@ -48,6 +49,7 @@ class _TestPageState extends State<TestPage> {
             Center(
               child: AppDropdownFieldTitle(
                 hintText: "sdfsdfsdfsdf",
+                validator: "v",
                 selectedValue: _selectedValue,
                 items: _productSizeList.map((e) {
                   return DropdownMenuItem(child: Text(e), value: e,);
@@ -71,7 +73,9 @@ class _TestPageState extends State<TestPage> {
                 // SnackbarUtils().showLoading(message: "loading");
                 // Get.find<ItemController>().getItemList();
                 // Get.find<CategoryController>().getCategoryList();
-                Get.find<PostController>().getPostList();
+                // Get.find<PostController>().getPostList();
+                Get.find<LocationController>().getLocationList();
+
               },
               child: Text('button'),
             ),

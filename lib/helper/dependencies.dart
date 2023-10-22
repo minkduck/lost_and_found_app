@@ -2,6 +2,7 @@
 
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/api/item/item_controller.dart';
+import 'package:lost_and_find_app/data/api/location/location_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 
@@ -20,6 +21,9 @@ Future<void> init() async {
 
   //item
   Get.lazyPut(() => ItemController());
+
+  //location
+  Get.lazyPut(() => LocationController());
 
   //category
   Get.lazyPut(() => CategoryController());
