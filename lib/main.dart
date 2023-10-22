@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
 
         // initialRoute: RouteHelper.initial,
         // getPages: RouteHelper.routes,
-        home: PostScreen(),
+        home: HomeLoginPage(),
         getPages: RouteHelper.routes,
       ),
     );
