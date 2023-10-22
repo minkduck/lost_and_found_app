@@ -128,7 +128,7 @@ class _CreatePostState extends State<CreatePost> {
                             Gap(AppLayout.getHeight(20)), // Add a gap between the buttons
                             AppButtonUpLoadImage(
                               boxColor: AppColors.secondPrimaryColor,
-                              textButton: "Upload a photo",
+                              textButton: "Upload photo",
                               onTap: () {
                                 selectImagesFromGallery();
                                 Navigator.pop(context); // Close the dialog after selecting an image
@@ -140,7 +140,8 @@ class _CreatePostState extends State<CreatePost> {
                     },
                   );
                 },
-                child: Text('Select a picture'),
+                child: Text('Select'
+                    ),
               ),
               SizedBox(
                 height: AppLayout.getHeight(250), // Set a fixed height or any desired value
@@ -184,7 +185,7 @@ class _CreatePostState extends State<CreatePost> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: Center(
-                  child: AppButton(boxColor: AppColors.primaryColor, textButton: "Create Post", onTap: (){
+                  child: AppButton(boxColor: AppColors.primaryColor, textButton: "Create", onTap: (){
 
                   }),
                 ),
