@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/auth/google_sign_in.dart';
 import '../../utils/app_assets.dart';
@@ -40,6 +41,8 @@ class _LoginGooglePageState extends State<LoginGooglePage> {
               onTap: () async {
                 final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
                 await provider.googleLogin();
+                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setString('firstLogin', 'firstLogin');
               },
               child: Ink(
                 width: AppLayout.getWidth(325) ,

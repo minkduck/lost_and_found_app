@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:lost_and_find_app/data/api/comment/comment_controller.dart';
 import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 
+import '../../test/time/time_widget.dart';
 import '../../utils/app_assets.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
@@ -25,6 +28,20 @@ class _PostDetailState extends State<PostDetail> {
 
   Map<String, dynamic> postList = {};
   final PostController postController = Get.put(PostController());
+  List<dynamic> commentList = [];
+  final CommentController commentController = Get.put(CommentController());
+  var commentTextController = TextEditingController();
+
+  Future<void> postCommentAndReloadComments(String comment) async {
+    await CommentController().postCommentByPostId(widget.pageId, comment);
+    commentTextController.clear();
+    final result = await commentController.getCommentByPostId(widget.pageId);
+    if (_isMounted) {
+      setState(() {
+        commentList = result;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -37,7 +54,15 @@ class _PostDetailState extends State<PostDetail> {
         });
       }
     });
+    commentController.getCommentByPostId(widget.pageId).then((result) {
+      if (_isMounted) {
+        setState(() {
+          commentList = result;
+        });
+      }
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +116,7 @@ class _PostDetailState extends State<PostDetail> {
                             ),
                             Gap(AppLayout.getHeight(15)),
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   postList['user']['fullName'] ?? 'No Name',
@@ -98,9 +124,13 @@ class _PostDetailState extends State<PostDetail> {
                                 ),
                                 Gap(AppLayout.getHeight(5)),
                                 Text(
-                                  "16h ago",
+                                  postList['createdDate'] != null
+                                      ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(postList['createdDate']))}  --  '
+                                      '${DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['createdDate']))}'
+                                      : 'No Date',
                                   style: TextStyle(
-                                      fontSize: 12, color: Colors.grey),
+                                      fontSize: 13,
+                                      color: Colors.grey),
                                 )
                               ],
                             )
@@ -164,7 +194,7 @@ class _PostDetailState extends State<PostDetail> {
                                 iconColor: Colors.grey),
                             IconAndTextWidget(
                                 icon: Icons.comment,
-                                text: "100",
+                                text: commentList.length.toString(),
                                 iconColor: Colors.grey),
                             IconAndTextWidget(
                                 icon: Icons.flag,
@@ -194,7 +224,7 @@ class _PostDetailState extends State<PostDetail> {
                         ),
                         ListView.builder(
                           shrinkWrap: true,
-                          itemCount: 5,
+                          itemCount: commentList.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Container(
                               margin: EdgeInsets.only(
@@ -205,22 +235,34 @@ class _PostDetailState extends State<PostDetail> {
                                   CircleAvatar(
                                     radius: 30,
                                     backgroundImage:
-                                        AssetImage(AppAssets.avatarDefault!),
+                                        NetworkImage(commentList[index]['user']['avatar']!),
                                   ),
                                   Gap(AppLayout.getWidth(10)),
                                   Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        "John",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall,
+                                      Row(
+                                        children: [
+                                          Text(
+                                            commentList[index]['user']['fullName'] + " - " ,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(commentList[index]['createdDate'] != null
+                                              ? DateFormat('dd-MM-yyyy').format(DateTime.parse(commentList[index]['createdDate']))
+                                              : 'No Date' ,style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey)),
+                                        ],
                                       ),
-                                      Text(
-                                        "Lorem ipsum dolor sit amet",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall,
+                                      SizedBox(
+                                        width: MediaQuery.of(context).size.width - AppLayout.getWidth(120), // Adjust this width
+                                        child: Text(
+                                          commentList[index]['commentContent'] ?? 'No Comment',
+                                          style: Theme.of(context).textTheme.titleSmall,
+                                          softWrap: true,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -260,7 +302,11 @@ class _PostDetailState extends State<PostDetail> {
               padding: EdgeInsets.only(top: 30),
               child: Row(
                 children: [
-                  const Icon(Icons.send, color: Color(0xFF00BF6D)),
+                  GestureDetector(
+                    onTap: () {
+                      postCommentAndReloadComments(commentTextController.text);
+                    },
+                      child: Icon(Icons.send, color: Color(0xFF00BF6D))),
                   const SizedBox(width: 20),
                   Expanded(
                     child: Container(
@@ -271,11 +317,12 @@ class _PostDetailState extends State<PostDetail> {
                         color: Color(0xFF00BF6D).withOpacity(0.05),
                         borderRadius: BorderRadius.circular(40),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          SizedBox(width: 20 / 4),
+                          SizedBox(width: AppLayout.getWidth(5)),
                           Expanded(
                             child: TextField(
+                              controller: commentTextController,
                               decoration: InputDecoration(
                                 hintText: "Type message",
                                 border: InputBorder.none,

@@ -4,16 +4,20 @@ import 'package:intl/intl.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/model/item/item_model.dart';
 import 'package:lost_and_find_app/pages/items/create_item.dart';
+import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/widgets/big_text.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/item/item_controller.dart';
 import '../../routes/route_helper.dart';
 import '../../test/other/cagory.dart';
+import '../../test/time/time_widget.dart';
 import '../../utils/app_assets.dart';
 import '../../utils/colors.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/custom_search_bar.dart';
 import '../../widgets/icon_and_text_widget.dart';
 import '../items/items_detail.dart';
 
@@ -25,20 +29,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<dynamic> categoryList = [
-    // 'All',
-    // 'Mobile',
-    // 'Documents',
-    // 'Laptop',
-    // 'Paper',
-    // 'Card',
-    // 'Panel'
-  ];
+  List<dynamic> categoryList = [];
   final CategoryController categoryController = Get.put(CategoryController());
   List<String> selectedCategories = [];
   List<dynamic> itemlist = [];
   final ItemController itemController = Get.put(ItemController());
-
+  String filterText = '';
+  bool itemsSelected = true;
+  bool myItemsSelected = false;
   bool _isMounted = false;
 
   String? getUrlFromItem(Map<String, dynamic> item) {
@@ -54,17 +52,18 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     }
-    // Return a default URL or null if no URL is found.
     return "https://wowmart.vn/wp-content/uploads/2020/10/null-image.png";
   }
 
-  List<dynamic> filterItemsByCategories(List<String> selectedCategories) {
-    return itemlist.where((item) {
-      return selectedCategories.contains(item['categoryName']);
-    }).toList();
+  String? firstLogin = '';
+
+  void firstLoged() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    firstLogin = prefs.getString('firstLogin');
   }
 
   Future<void> _refreshData() async {
+    _isMounted = true;
     await itemController.getItemList().then((result) {
       if (_isMounted) {
         setState(() {
@@ -85,20 +84,58 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _isMounted = true;
-    itemController.getItemList().then((result) {
-      if (_isMounted) {
-        setState(() {
-          itemlist = result;
-        });
-      }
+    setState(() {
+      firstLoged();
     });
-    categoryController.getCategoryList().then((result) {
-      if (_isMounted) {
-        setState(() {
-          categoryList = result;
+    if (firstLogin == 'firstLogin') {
+      Future.delayed(Duration(seconds: 3), () {
+        itemController.getItemList().then((result) {
+          if (_isMounted) {
+            setState(() {
+              itemlist = result;
+            });
+          }
         });
-      }
+        categoryController.getCategoryList().then((result) {
+          if (_isMounted) {
+            setState(() {
+              categoryList = result;
+            });
+          }
+        });
+      });
+      setState(() {
+        firstLogin = 'h';
+      });
+    } else {
+      Future.delayed(Duration(seconds: 1), () {
+        itemController.getItemList().then((result) {
+          if (_isMounted) {
+            setState(() {
+              itemlist = result;
+            });
+          }
+        });
+        categoryController.getCategoryList().then((result) {
+          if (_isMounted) {
+            setState(() {
+              categoryList = result;
+            });
+          }
+        });
+      });
+    }
+  }
+
+  void onFilterTextChanged(String text) {
+    setState(() {
+      filterText = text;
     });
+  }
+
+  void onSubmitted() {
+    // Handle search submission here
+    print('Search submitted with text: $filterText');
   }
 
   @override
@@ -109,6 +146,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final filteredItems = itemlist
+        .where((item) =>
+    selectedCategories.isEmpty ||
+        selectedCategories.contains(item['categoryName']))
+        .where((item) =>
+    filterText.isEmpty ||
+        (item['name'] != null &&
+            item['name']
+                .toLowerCase()
+                .contains(filterText.toLowerCase())))
+        .toList();
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -129,23 +177,54 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontW: FontWeight.w500,
                       ),
                     ),
-                    Container(
-                      child: Icon(
-                        Icons.search,
-                        color: Colors.grey,
-                        size: 40,
-                      ),
-                    )
                   ],
                 ),
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'All',
-                    style: Theme.of(context).textTheme.displayMedium,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'All',
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
+                    ),
+                    CustomSearchBar(
+                      filterText: filterText, // Pass the filter text
+                      onFilterTextChanged: onFilterTextChanged, // Set the filter text handler
+                      onSubmitted: onSubmitted,
+                    ),
+
+                  ],
                 ),
-                Gap(AppLayout.getHeight(25)),
+                Gap(AppLayout.getHeight(15)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                  AppButton(
+                      boxColor: itemsSelected ? AppColors.primaryColor : AppColors.secondPrimaryColor,
+                      textButton: "Items",
+                      width: AppLayout.getWidth(150),
+                      height: AppLayout.getHeight(35),
+                      onTap: (){
+                        setState(() {
+                          itemsSelected = true;
+                          myItemsSelected = false;
+                        });
+                  }),
+                    AppButton(
+                        boxColor: myItemsSelected ? AppColors.primaryColor : AppColors.secondPrimaryColor,
+                        textButton: "My Items",
+                        width: AppLayout.getWidth(150),
+                        height: AppLayout.getHeight(35),
+                        onTap: (){
+                          setState(() {
+                            itemsSelected = false;
+                            myItemsSelected = true;
+                          });
+                    })
+                ],),
+                Gap(AppLayout.getHeight(10)),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SingleChildScrollView(
@@ -181,121 +260,118 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Gap(AppLayout.getHeight(25)),
-                itemlist.isNotEmpty
-                    ? Center(
-                  child: GridView.builder(
-                    padding: EdgeInsets.all(15),
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: AppLayout.getWidth(200),
-                      childAspectRatio: 0.55,
-                      crossAxisSpacing: AppLayout.getWidth(20),
-                      mainAxisSpacing: AppLayout.getHeight(20),
-                    ),
-                    itemCount: selectedCategories.isNotEmpty
-                        ? filterItemsByCategories(selectedCategories).length
-                        : itemlist.length,
-                    itemBuilder: (context, index) {
-                      final List<dynamic> filteredItems = selectedCategories.isNotEmpty
-                          ? filterItemsByCategories(selectedCategories)
-                          : itemlist;
+                GetBuilder<ItemController>(builder: (item) {
+                  return itemlist.isNotEmpty
+                      ? Center(
+                    child: GridView.builder(
+                      padding: EdgeInsets.all(15),
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: AppLayout.getWidth(200),
+                        childAspectRatio: 0.55,
+                        crossAxisSpacing: AppLayout.getWidth(20),
+                        mainAxisSpacing: AppLayout.getHeight(20),
+                      ),
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
 
-                      final item = filteredItems[index];
-                      final mediaUrl = getUrlFromItem(item) ?? "https://wowmart.vn/wp-content/uploads/2020/10/null-image.png";
+                        final item = filteredItems[index];
+                        final mediaUrl = getUrlFromItem(item) ?? "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png";
 
-                      return Container(
-                        decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: AppLayout.getHeight(151),
-                              width: AppLayout.getWidth(180),
-                              child: Image.network(
+                        return Container(
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(15)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: AppLayout.getHeight(151),
+                                width: AppLayout.getWidth(180),
+                                child: Image.network(
                                   mediaUrl,
                                   fit: BoxFit.fill,
-                                errorBuilder: (context, error, stackTrace) {
-                                  // Handle image loading errors
-                                  return Image.network("https://wowmart.vn/wp-content/uploads/2020/10/null-image.png", fit: BoxFit.fill);
-                                },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    // Handle image loading errors
+                                    return Image.network("https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png", fit: BoxFit.fill);
+                                  },
+                                ),
                               ),
-                            ),
-                            Container(
-                              color: Theme.of(context).cardColor,
-                              padding: EdgeInsets.only(
-                                bottom: AppLayout.getHeight(28.5),
-                                left: AppLayout.getWidth(8),
-                                right: AppLayout.getWidth(8),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Gap(AppLayout.getHeight(8)),
-                                  Text(
-                                    item['name'] ?? 'No Name',                                  maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Gap(AppLayout.getHeight(15)),
-                                  IconAndTextWidget(
-                                    icon: Icons.location_on,
-                                    text: item['LocationName'] ?? 'No Location',
-                                    size: 15,
-                                    iconColor: Colors.black,
-                                  ),
-                                  Gap(AppLayout.getWidth(15)),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        item['createdDate'] != null
-                                            ? DateFormat('dd-MM-yyyy').format(DateTime.parse(item['createdDate']))
-                                            : 'No Date',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(fontSize: 15),
+                              Container(
+                                color: Theme.of(context).cardColor,
+                                padding: EdgeInsets.only(
+                                  bottom: AppLayout.getHeight(28.5),
+                                  left: AppLayout.getWidth(8),
+                                  right: AppLayout.getWidth(8),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Gap(AppLayout.getHeight(8)),
+                                    Text(
+                                      item['name'] ?? 'No Name',                                  maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Gap(AppLayout.getHeight(15)),
+                                    IconAndTextWidget(
+                                      icon: Icons.location_on,
+                                      text: item['LocationName'] ?? 'No Location',
+                                      size: 15,
+                                      iconColor: Colors.black,
+                                    ),
+                                    Gap(AppLayout.getWidth(15)),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          item['createdDate'] != null
+                                              ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(item['createdDate']))}'
+                                              : 'No Date',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontSize: 15),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            Spacer(),
-                            Container(
-                              child: AppButton(
-                                boxColor: AppColors.secondPrimaryColor,
-                                textButton: "Details",
-                                fontSize: 18,
-                                height: AppLayout.getHeight(30),
-                                width: AppLayout.getWidth(180),
-                                topLeft: 1,
-                                topRight: 1,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ItemsDetails(pageId: item['id'], page: "item"),
-                                    ),
-                                  );
+                              Spacer(),
+                              Container(
+                                child: AppButton(
+                                  boxColor: AppColors.secondPrimaryColor,
+                                  textButton: "Details",
+                                  fontSize: 18,
+                                  height: AppLayout.getHeight(30),
+                                  width: AppLayout.getWidth(180),
+                                  topLeft: 1,
+                                  topRight: 1,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ItemsDetails(pageId: item['id'], page: "item"),
+                                      ),
+                                    );
                                   },
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                )
-                    : SizedBox(
-                  width: AppLayout.getWidth(100),
-                  height: AppLayout.getHeight(300),
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                      : SizedBox(
+                    width: AppLayout.getWidth(100),
+                    height: AppLayout.getHeight(300),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }),
 
               ],
             ),

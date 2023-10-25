@@ -4,13 +4,16 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:lost_and_find_app/data/api/auth/google_sign_in.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
+import 'package:lost_and_find_app/data/api/comment/comment_controller.dart';
 import 'package:lost_and_find_app/data/api/item/item_controller.dart';
 import 'package:lost_and_find_app/data/api/location/location_controller.dart';
 import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/app_styles.dart';
+import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/app_drop_menu_filed_title.dart';
+import 'package:anim_search_bar/anim_search_bar.dart';
 
 import '../utils/snackbar_utils.dart';
 
@@ -26,7 +29,7 @@ class _TestPageState extends State<TestPage> {
   String? _selectedValue = "";
   late String fcmToken = "";
   late String accessToken = "";
-
+  TextEditingController textController = TextEditingController();
 
 
   @override
@@ -71,10 +74,11 @@ class _TestPageState extends State<TestPage> {
                 // SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
                 // SnackbarUtils().showInfo(title: "Info", message: "Info");
                 // SnackbarUtils().showLoading(message: "loading");
-                // Get.find<ItemController>().getItemList();
+                // Get.find<ItemController>().getItemByUidList();
                 // Get.find<CategoryController>().getCategoryList();
-                // Get.find<PostController>().getPostList();
-                Get.find<LocationController>().getLocationList();
+                Get.find<PostController>().getPostByUidList();
+                // Get.find<LocationController>().getLocationList();
+                // Get.find<CommentController>().getCommentByPostId(1);
 
               },
               child: Text('button'),
@@ -83,15 +87,14 @@ class _TestPageState extends State<TestPage> {
               children:[
                 // Text(fcmToken ?? ''),
                 // Text(accessToken ?? ''),
-                LayoutBuilder(builder: (context, contraints) {
-                  return SizedBox(
-                    height: AppLayout.getScreenHeight() / 2,
-                    child: TextField(
-                      expands: true,
-                      maxLines: null,
-                    ),
-                  );
-                }),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                    ],
+                  ),
+                ),
               ]
             )
           ],

@@ -3,10 +3,13 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../routes/route_helper.dart';
 import '../../../utils/app_constraints.dart';
+import '../../../utils/snackbar_utils.dart';
 
 class PostController extends GetxController{
   late String accessToken = "";
+  late String uid = "";
 
   List<dynamic> _postList = [];
   List<dynamic> get postList => _postList;
@@ -21,6 +24,7 @@ class PostController extends GetxController{
       'Authorization': 'Bearer $accessToken'
     };
     var request = http.Request('GET', Uri.parse(AppConstrants.GETPOSTWITHPAGINATION_URL));
+    // var request = http.Request('GET', Uri.parse("https://lostandfound.io.vn/api/posts/query-with-status?PostStatus=All"));
 
     request.headers.addAll(headers);
 
@@ -68,4 +72,96 @@ class PostController extends GetxController{
     }
   }
 
+  Future<Map<String, dynamic>> getPostMediaById(int id) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse(AppConstrants.GETPOSTMEDIABYID_URL+id.toString()+'/media'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("PostMediaById " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.reasonPhrase);
+      throw Exception('Failed to load PostMediaById');
+    }
+  }
+
+  Future<List<dynamic>> getPostByUidList() async {
+    accessToken = await AppConstrants.getToken();
+    uid = await AppConstrants.getUid();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETPOSTBYUID_URL}$uid&PostStatus=ALL'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getPostByUidList " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.reasonPhrase);
+      throw Exception('Failed to load Posts By Uid');
+    }
+  }
+
+
+  Future<void> createPost(
+      String title,
+      String postContent,
+      String postLocationId,
+      String postCategoryId,
+      List<String> medias ) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTPOST_URL));
+    request.fields.addAll({
+      'Title': title,
+      'PostContent': postContent,
+      'PostLocationId': postLocationId,
+      'PostCategoryId': postCategoryId,
+    });
+    for (var media in medias) {
+      request.files.add(await http.MultipartFile.fromPath('Medias', media));
+    }
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 201) {
+      print('create post success');
+      print(await response.stream.bytesToString());
+      SnackbarUtils().showSuccess(title: "Successs", message: "Create new post successfully");
+      Get.toNamed(RouteHelper.getInitial());
+    }
+    else {
+      print(response.reasonPhrase);
+      print(response.statusCode);
+      throw Exception('Failed to create Post');
+    }
+  }
 }
