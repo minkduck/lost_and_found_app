@@ -10,6 +10,10 @@ class AppConstrants{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('fcmToken') ?? '';
   }
+  static Future<String> getUid() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('uid') ?? '';
+  }
 
   static const String APP_NAME = "Lost&Find";
   static const int APP_VERSION = 1;
@@ -27,14 +31,22 @@ class AppConstrants{
 
   //location
   static const String GETLOCATIONWITHPAGINATION_URL = "$BASE_URL/api/locations";
+
   //item
   static const String GETITEMWITHPAGINATION_URL = "$BASE_URL/api/items?ItemStatus=";
   static const String GETITEMBYID_URL = "$BASE_URL/api/items/id/";
+  static const String GETITEMBYUID_URL = "$BASE_URL/api/items?FoundUserId=";
+  static const String POSTITEM_URL = "$BASE_URL/api/items";
 
   //post
   static const String GETPOSTWITHPAGINATION_URL = "$BASE_URL/api/posts";
   static const String GETPOSTBYID_URL = "$BASE_URL/api/posts/";
+  static const String POSTPOST_URL = "$BASE_URL/api/posts/";
+  static const String GETPOSTMEDIABYID_URL = "$BASE_URL/api/posts/";
+  static const String GETPOSTBYUID_URL = "$BASE_URL/api/posts/query-with-status?PostUserId=";
 
-
+  //comment
+  static const String GETCOMMENTBYPOSTBID_URL = "$BASE_URL/api/comments/get-by-post/";
+  static const String POSTCOMMENTREPLYBYPOSTID_URL = "$BASE_URL/api/comments/reply-post/";
 
 }

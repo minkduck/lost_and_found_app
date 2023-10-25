@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 
 import '../../data/api/item/item_controller.dart';
 import '../../routes/route_helper.dart';
+import '../../test/time/time_widget.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/big_text.dart';
@@ -158,7 +159,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                   child: IconAndTextWidget(
                       icon: Icons.timer_sharp,
                       text: itemlist['createdDate'] != null
-                          ? DateFormat('dd-MM-yyyy').format(DateTime.parse(itemlist['createdDate']))
+                          ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(itemlist['createdDate']))}  --  ${DateFormat('dd-MM-yyyy').format(DateTime.parse(itemlist['createdDate']))}'
                           : 'No Date',
                       iconColor: Colors.grey)),
               //location

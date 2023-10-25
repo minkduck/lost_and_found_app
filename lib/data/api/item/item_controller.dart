@@ -4,10 +4,13 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:lost_and_find_app/data/model/item/item_model.dart';
 
+import '../../../routes/route_helper.dart';
 import '../../../utils/app_constraints.dart';
+import '../../../utils/snackbar_utils.dart';
 
 class ItemController extends GetxController{
   late String accessToken = "";
+  late String uid = "";
 
   List<dynamic> _itemList = [];
   List<dynamic> get itemList => _itemList;
@@ -22,7 +25,7 @@ class ItemController extends GetxController{
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'
     };
-    var request = http.Request('GET', Uri.parse('${AppConstrants.GETITEMWITHPAGINATION_URL}ALL'));
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETITEMWITHPAGINATION_URL}ACTIVE'));
 
     request.headers.addAll(headers);
 
@@ -75,6 +78,71 @@ class ItemController extends GetxController{
       print(response.reasonPhrase);
       throw Exception('Failed to load Item');
     }
+  }
+
+  Future<List<dynamic>> getItemByUidList() async {
+    accessToken = await AppConstrants.getToken();
+    uid = await AppConstrants.getUid();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETITEMBYUID_URL}$uid&ItemStatus=ALL'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getItemByUidList " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.reasonPhrase);
+      throw Exception('Failed to load Item By Uid');
+    }
+  }
+
+  Future<void> createItem(
+      String name,
+      String description,
+      String CategoryId,
+      String LocationId,
+      List<String> medias ) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTITEM_URL));
+    request.fields.addAll({
+      'Name': name,
+      'Description': description,
+      'CategoryId': CategoryId,
+      'LocationId': LocationId,
+    });
+    for (var media in medias) {
+      request.files.add(await http.MultipartFile.fromPath('Medias', media));
+    }
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      SnackbarUtils().showSuccess(title: "Successs", message: "Create new item successfully");
+      Get.toNamed(RouteHelper.getInitial());
+    }
+    else {
+      print(response.reasonPhrase);
+      print(response.statusCode);
+      throw Exception('Failed to create Item');
+    }
+
   }
 
 }
