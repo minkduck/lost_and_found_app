@@ -1,5 +1,10 @@
+import 'package:anim_search_bar/anim_search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:lost_and_find_app/test/filter/product.dart';
+
+import '../../utils/colors.dart';
+import '../../widgets/custom_search_bar.dart';
 
 class ProductListPage extends StatefulWidget {
   const ProductListPage({super.key});
@@ -13,6 +18,17 @@ class _ProductListPageState extends State<ProductListPage> {
 
   List<String> selectedCategories = [];
   String filterText = '';
+
+  void onFilterTextChanged(String text) {
+    setState(() {
+      filterText = text;
+    });
+  }
+
+  void onSubmitted() {
+    // Handle search submission here
+    print('Search submitted with text: $filterText');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +60,20 @@ class _ProductListPageState extends State<ProductListPage> {
                 });
               },
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("All", style: TextStyle(fontSize: 20),),
+              Gap(20),
+              CustomSearchBar(
+                filterText: filterText, // Pass the filter text
+                onFilterTextChanged: onFilterTextChanged, // Set the filter text handler
+                onSubmitted: onSubmitted,
+
+
+              ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),

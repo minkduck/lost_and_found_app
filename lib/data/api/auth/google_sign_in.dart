@@ -139,6 +139,7 @@ class GoogleSignInProvider extends ChangeNotifier {
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('access_token', idTokenUser.toString());
+        await prefs.setString('uid', uid);
         await postAuthen();
       }
       else {

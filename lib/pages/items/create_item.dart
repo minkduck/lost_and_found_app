@@ -21,8 +21,10 @@ class CreateItem extends StatefulWidget {
 }
 
 class _CreateItemState extends State<CreateItem> {
-  var titleController = TextEditingController(); // Separate controller for title
-  var descriptionController = TextEditingController(); // Separate controller for description
+  var titleController =
+      TextEditingController();
+  var descriptionController =
+      TextEditingController();
   bool isDescriptionFocused = false;
   bool _isMounted = false;
   final _formKey = GlobalKey<FormState>();
@@ -54,7 +56,6 @@ class _CreateItemState extends State<CreateItem> {
         });
       }
     });
-
   }
 
   @override
@@ -91,13 +92,16 @@ class _CreateItemState extends State<CreateItem> {
                 ),
                 Padding(
                   padding: EdgeInsets.only(
-                      left: AppLayout.getWidth(30), top: AppLayout.getHeight(10)),
-                  child: Text('Create Items', style: Theme.of(context).textTheme.displayMedium,),
+                      left: AppLayout.getWidth(30),
+                      top: AppLayout.getHeight(10)),
+                  child: Text(
+                    'Create Items',
+                    style: Theme.of(context).textTheme.displayMedium,
+                  ),
                 ),
                 Gap(AppLayout.getHeight(20)),
 
                 //category
-//category
                 AppDropdownFieldTitle(
                   hintText: "Select a category",
                   validator: "Please choose category",
@@ -105,11 +109,12 @@ class _CreateItemState extends State<CreateItem> {
                   // selectedValue: categoryList.isNotEmpty ? selectedCategoryValue ?? categoryList.first['id']?.toString() ?? '': '',
                   items: categoryList.map((category) {
                     return DropdownMenuItem<String>(
-                      value: category['id']?.toString() ?? '', // Ensure a valid value
+                      value: category['id']?.toString() ?? '',
+                      // Ensure a valid value
                       child: Text(category['name']?.toString() ?? ''),
                     );
                   }).toList(),
-                  onChanged: (val){
+                  onChanged: (val) {
                     setState(() {
                       selectedCategoryValue = val;
                     });
@@ -120,9 +125,9 @@ class _CreateItemState extends State<CreateItem> {
 
                 //title
                 AppTextFieldTitle(
-                    textController: titleController,
-                    hintText: "A title needs at least 10 characters",
-                    titleText: "Title",
+                  textController: titleController,
+                  hintText: "A title needs at least 10 characters",
+                  titleText: "Title",
                   validator: 'Please input title',
                 ),
                 Gap(AppLayout.getHeight(45)),
@@ -152,7 +157,7 @@ class _CreateItemState extends State<CreateItem> {
                       child: Text(location['locationName']?.toString() ?? ''),
                     );
                   }).toList(),
-                  onChanged: (val){
+                  onChanged: (val) {
                     setState(() {
                       selectedLocationValue = val?.toString();
                     });
@@ -163,17 +168,23 @@ class _CreateItemState extends State<CreateItem> {
                 Gap(AppLayout.getHeight(100)),
 
                 Center(
-                  child: AppButton(boxColor: AppColors.primaryColor, textButton: "Continue", onTap: (){
-    if (_formKey.currentState!.validate()) {
-      Navigator.push(
-            context, MaterialPageRoute(builder: (context) => TakePictureScreen()));
-
-    }
-
-                  }),
+                  child: AppButton(
+                      boxColor: AppColors.primaryColor,
+                      textButton: "Continue",
+                      onTap: () {
+                        if (_formKey.currentState!.validate()) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TakePictureScreen(
+                                        title: titleController.text,
+                                        description: descriptionController.text,
+                                        category: selectedCategoryValue!,
+                                        location: selectedLocationValue!,
+                                      )));
+                        }
+                      }),
                 ),
-
-
               ],
             ),
           ),
