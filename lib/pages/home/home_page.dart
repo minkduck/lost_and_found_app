@@ -8,13 +8,18 @@ import 'package:lost_and_find_app/pages/post/post_screen.dart';
 import '../../utils/colors.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final int initialIndex;
+
+  HomePage({Key? key, this.initialIndex = 0}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState(initialIndex);
 }
 
 class _HomePageState extends State<HomePage> {
+  int _selectedIndex;
+
+  _HomePageState(this._selectedIndex);
   int _selectIndex = 0;
   List pages =[
     HomeScreen(),
@@ -33,7 +38,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    _selectIndex = _selectedIndex;
   }
 
 
