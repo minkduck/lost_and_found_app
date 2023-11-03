@@ -28,6 +28,7 @@ class AppConstrants{
 
   //category
   static const String GETCATEGORYWITHPAGINATION_URL = "$BASE_URL/api/categories";
+  static const String GETCATEGORYGROUPWITHPAGINATION_URL = "$BASE_URL/api/categoryGroups?IsActive=All";
 
   //location
   static const String GETLOCATIONWITHPAGINATION_URL = "$BASE_URL/api/locations";

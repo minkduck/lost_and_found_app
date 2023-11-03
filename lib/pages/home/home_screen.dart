@@ -30,15 +30,21 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> categoryList = [];
-  final CategoryController categoryController = Get.put(CategoryController());
+  List<dynamic> categoryGroupList = [];
   List<String> selectedCategories = [];
+  dynamic selectedCategoryGroup;
+  dynamic previouslySelectedCategoryGroup;
+  final CategoryController categoryController = Get.put(CategoryController());
+
   List<dynamic> itemlist = [];
   List<dynamic> myItemlist = [];
   final ItemController itemController = Get.put(ItemController());
   String filterText = '';
   bool itemsSelected = true;
   bool myItemsSelected = false;
+
   bool _isMounted = false;
+  String? firstLogin = '';
 
   String? getUrlFromItem(Map<String, dynamic> item) {
     if (item.containsKey('itemMedias')) {
@@ -56,11 +62,79 @@ class _HomeScreenState extends State<HomeScreen> {
     return "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg";
   }
 
-  String? firstLogin = '';
-
   void firstLoged() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     firstLogin = prefs.getString('firstLogin');
+  }
+  void onFilterTextChanged(String text) {
+    setState(() {
+      filterText = text;
+    });
+  }
+  void onSubmitted() {
+    // Handle search submission here
+    print('Search submitted with text: $filterText');
+  }
+
+  void selectCategoryGroup(dynamic categoryGroup) {
+    setState(() {
+      previouslySelectedCategoryGroup = selectedCategoryGroup;
+
+      // If the clicked category group is the same as the previously selected one, clear the selection
+      if (selectedCategoryGroup == categoryGroup) {
+        selectedCategoryGroup = null;
+        selectedCategories.clear(); // Clear selected categories
+      } else {
+        selectedCategoryGroup = categoryGroup;
+      }
+    });
+  }
+  List<dynamic> filterItemsByCategories() {
+    // Apply category filtering first
+    final List<dynamic> filteredByCategories = selectedCategoryGroup == null
+        ? itemlist
+        : itemlist.where((item) {
+      final category = item['categoryName'];
+      return selectedCategoryGroup['categories']
+          .any((selectedCategory) => selectedCategory['name'] == category);
+    }).toList();
+
+    // Apply text filter
+    final filteredByText = filteredByCategories
+        .where((item) =>
+    selectedCategories.isEmpty ||
+        selectedCategories.contains(item['categoryName']))
+        .where((item) =>
+    filterText.isEmpty ||
+        (item['name'] != null &&
+            item['name'].toLowerCase().contains(filterText.toLowerCase())))
+        .toList();
+
+    return filteredByText;
+  }
+
+  List<dynamic> filterMyItemsByCategories() {
+    // Apply category filtering first
+    final List<dynamic> filteredByCategories = selectedCategoryGroup == null
+        ? myItemlist
+        : myItemlist.where((item) {
+      final category = item['categoryName'];
+      return selectedCategoryGroup['categories']
+          .any((selectedCategory) => selectedCategory['name'] == category);
+    }).toList();
+
+    // Apply text filter
+    final filteredByText = filteredByCategories
+        .where((item) =>
+    selectedCategories.isEmpty ||
+        selectedCategories.contains(item['categoryName']))
+        .where((item) =>
+    filterText.isEmpty ||
+        (item['name'] != null &&
+            item['name'].toLowerCase().contains(filterText.toLowerCase())))
+        .toList();
+
+    return filteredByText;
   }
 
   Future<void> _refreshData() async {
@@ -86,6 +160,13 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     });
+    await categoryController.getCategoryGroupList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          categoryGroupList = result;
+        });
+      }
+    });
   }
 
   @override
@@ -108,6 +189,13 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_isMounted) {
             setState(() {
               categoryList = result;
+            });
+          }
+        });
+        categoryController.getCategoryGroupList().then((result) {
+          if (_isMounted) {
+            setState(() {
+              categoryGroupList = result;
             });
           }
         });
@@ -138,19 +226,15 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           }
         });
+        await categoryController.getCategoryGroupList().then((result) {
+          if (_isMounted) {
+            setState(() {
+              categoryGroupList = result;
+            });
+          }
+        });
       });
     }
-  }
-
-  void onFilterTextChanged(String text) {
-    setState(() {
-      filterText = text;
-    });
-  }
-
-  void onSubmitted() {
-    // Handle search submission here
-    print('Search submitted with text: $filterText');
   }
 
   @override
@@ -161,24 +245,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredItems = itemlist
-        .where((item) =>
-            selectedCategories.isEmpty ||
-            selectedCategories.contains(item['categoryName']))
-        .where((item) =>
-            filterText.isEmpty ||
-            (item['name'] != null &&
-                item['name'].toLowerCase().contains(filterText.toLowerCase())))
-        .toList();
-    final filteredMyItems = myItemlist
-        .where((item) =>
-    selectedCategories.isEmpty ||
-        selectedCategories.contains(item['categoryName']))
-        .where((item) =>
-    filterText.isEmpty ||
-        (item['name'] != null &&
-            item['name'].toLowerCase().contains(filterText.toLowerCase())))
-        .toList();
+    final filteredItems = filterItemsByCategories();
+    final filteredMyItems = filterMyItemsByCategories();
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -259,36 +327,69 @@ class _HomeScreenState extends State<HomeScreen> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: categoryList
-                          .map((category) => GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (selectedCategories
-                                        .contains(category['name'])) {
-                                      selectedCategories
-                                          .remove(category['name']);
-                                    } else {
-                                      selectedCategories.add(category['name']);
-                                    }
-                                  });
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8, horizontal: 16),
-                                  child: BigText(
-                                    text: category['name'] != null
-                                        ? category['name'].toString()
-                                        : 'No Category',
-                                    color: selectedCategories
-                                            .contains(category['name'])
-                                        ? AppColors
-                                            .primaryColor // Selected text color
-                                        : AppColors.secondPrimaryColor,
-                                    fontW: FontWeight.w500,
-                                  ),
-                                ),
-                              ))
-                          .toList(),
+                      children: categoryGroupList.map((categoryGroup) {
+                        return GestureDetector(
+                          onTap: () {
+                            // Call the selectCategoryGroup function when a categoryGroup is clicked
+                            selectCategoryGroup(categoryGroup);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 16),
+                            child: BigText(
+                              text: categoryGroup['name'] != null
+                                  ? categoryGroup['name'].toString()
+                                  : 'No Category',
+                              color: categoryGroup == selectedCategoryGroup
+                                  ? AppColors.primaryColor
+                                  : AppColors.secondPrimaryColor,
+                              fontW: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                Gap(AppLayout.getHeight(10)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: selectedCategoryGroup != null
+                          ? (selectedCategoryGroup['categories'] as List<dynamic>)
+                          .map((category) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (selectedCategories.contains(category['name'])) {
+                                selectedCategories.remove(category['name']);
+                              } else {
+                                selectedCategories.add(category['name']);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 16,
+                            ),
+                            child: BigText(
+                              text: category['name'] != null
+                                  ? category['name'].toString()
+                                  : 'No Category',
+                              color: selectedCategories.contains(category['name'])
+                                  ? AppColors.primaryColor
+                                  : AppColors.secondPrimaryColor,
+                              fontW: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      })
+                          .toList()
+                          : [],
                     ),
                   ),
                 ),
@@ -487,7 +588,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Gap(AppLayout.getHeight(15)),
                                     IconAndTextWidget(
                                       icon: Icons.location_on,
-                                      text: item['LocationName'] ??
+                                      text: item['locationName'] ??
                                           'No Location',
                                       size: 15,
                                       iconColor: Colors.black,
