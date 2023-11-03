@@ -5,7 +5,8 @@ import 'package:lost_and_find_app/pages/auth/login_google_page.dart';
 import 'home/home_page.dart';
 
 class HomeLoginPage extends StatelessWidget {
-  const HomeLoginPage({Key? key}) : super(key: key);
+  final int initialIndex;
+  const HomeLoginPage({Key? key, required this.initialIndex}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class HomeLoginPage extends StatelessWidget {
             return Center(child: Text('Something Went Wrong!'),);
           } else if (snapshot.hasData) {
 
-            return HomePage();
+            return HomePage(initialIndex: initialIndex,);
           } else {
             return LoginGooglePage();
           }

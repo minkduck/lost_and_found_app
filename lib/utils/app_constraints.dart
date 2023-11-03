@@ -31,6 +31,8 @@ class AppConstrants{
 
   //location
   static const String GETLOCATIONWITHPAGINATION_URL = "$BASE_URL/api/locations";
+  static const String GETALLLOCATION_URL = "$BASE_URL/api/locations/all";
+
 
   //item
   static const String GETITEMWITHPAGINATION_URL = "$BASE_URL/api/items?ItemStatus=";
@@ -48,5 +50,15 @@ class AppConstrants{
   //comment
   static const String GETCOMMENTBYPOSTBID_URL = "$BASE_URL/api/comments/get-by-post/";
   static const String POSTCOMMENTREPLYBYPOSTID_URL = "$BASE_URL/api/comments/reply-post/";
+  static const String PUTCOMMENTBYPOSTID_URL = "$BASE_URL/api/comments/";
+
+  //user
+  static const String GETUSERBYUID_URL = "$BASE_URL/api/users/";
+  static const String PUTUSERBYUID_URL = "$BASE_URL/api/users/";
+  static const String POSTAVATARUSER_URL = "$BASE_URL/api/users/media";
+
+  //claim
+  static const String POSTCLAIMITEM_URL = "$BASE_URL/api/items/claim/";
+  static const String POSTUNCLAIMITEM_URL = "$BASE_URL/api/items/unclaim/";
 
 }
