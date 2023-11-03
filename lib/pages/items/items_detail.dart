@@ -110,6 +110,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
       uid = await AppConstrants.getUid();
+      // uid = "FLtIEJvuMgfg58u4sXhzxPn9qr73";
       await itemController.getItemListById(widget.pageId).then((result) {
         if (_isMounted) {
           setState(() {
@@ -133,7 +134,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 );
 
                 if (matchingClaim != null) {
-                  isItemClaimed = matchingClaim['claimStatus'] == 1 ? true : false;
+                  isItemClaimed = matchingClaim['claimStatus'] == true ? true : false;
                 }
               }
             }
