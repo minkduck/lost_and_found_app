@@ -23,7 +23,7 @@ class ClaimController extends GetxController{
 
     http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 204) {
       print(await response.stream.bytesToString());
       SnackbarUtils().showSuccess(title: "Successs", message: "Claim item successfully");
     }

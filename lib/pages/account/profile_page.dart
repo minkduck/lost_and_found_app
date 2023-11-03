@@ -1,4 +1,4 @@
-/*import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
@@ -58,78 +58,82 @@ class _AccountPageState extends State<AccountPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      body: userList.isNotEmpty ? RefreshIndicator(
+      body: RefreshIndicator(
         onRefresh: _refreshData,
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Gap(AppLayout.getHeight(70)),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => EditUserPage()));
-                      },
-                      child: Text("Edit", style: TextStyle(color: AppColors.primaryColor, fontSize: 20),),
-                    )
-                  ],
-                ),
-              ),
-              Gap(AppLayout.getHeight(30)),
-              CircleAvatar(
-                radius: 80,
-                backgroundImage:
-                NetworkImage(userList['avatar']),
-              ),
-              Gap(AppLayout.getHeight(30)),
-              Text(userList['fullName']?? '-', style: Theme.of(context).textTheme.headlineMedium,),
-              Gap(AppLayout.getHeight(30)),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 30),
-                padding: EdgeInsets.only(top: AppLayout.getHeight(20), bottom: AppLayout.getHeight(20)),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                    boxShadow: [
-                      BoxShadow(
-                          blurRadius: 4,
-                          spreadRadius: 4,
-                          offset: Offset(0, 4),
-                          color: Colors.grey.withOpacity(0.2))
-                    ]),
-                // color: Colors.red,
-                child: Column(
-                  // crossAxisAlignment: CrossAxisAlignment.center,
-                   children: [
-                     Padding(
-                       padding:  EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
-                       child: IconAndTextWidget(icon: Icons.email, text: userList['email']?? '-', iconColor: AppColors.secondPrimaryColor),
-                     ),
+              userList.isNotEmpty ? Column(
+                children: [
+                  Gap(AppLayout.getHeight(70)),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context, MaterialPageRoute(builder: (context) => EditUserPage()));
+                          },
+                          child: Text("Edit", style: TextStyle(color: AppColors.primaryColor, fontSize: 20),),
+                        )
+                      ],
+                    ),
+                  ),
+                  Gap(AppLayout.getHeight(30)),
+                  CircleAvatar(
+                    radius: 80,
+                    backgroundImage:
+                    NetworkImage(userList['avatar']),
+                  ),
+                  Gap(AppLayout.getHeight(30)),
+                  Text(userList['fullName']?? '-', style: Theme.of(context).textTheme.headlineMedium,),
+                  Gap(AppLayout.getHeight(30)),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 30),
+                    padding: EdgeInsets.only(top: AppLayout.getHeight(20), bottom: AppLayout.getHeight(20)),
+                    decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                        boxShadow: [
+                          BoxShadow(
+                              blurRadius: 4,
+                              spreadRadius: 4,
+                              offset: Offset(0, 4),
+                              color: Colors.grey.withOpacity(0.2))
+                        ]),
+                    // color: Colors.red,
+                    child: Column(
+                      // crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding:  EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                          child: IconAndTextWidget(icon: Icons.email, text: userList['email']?? '-', iconColor: AppColors.secondPrimaryColor),
+                        ),
 
-                     Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
-                     Gap(AppLayout.getHeight(10)),
+                        Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
+                        Gap(AppLayout.getHeight(10)),
 
-                     Padding(
-                       padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
-                       child: IconAndTextWidget(icon: FontAwesomeIcons.genderless, text: userList['gender'] ?? '-', iconColor: AppColors.secondPrimaryColor),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                          child: IconAndTextWidget(icon: FontAwesomeIcons.genderless, text: userList['gender'] ?? '-', iconColor: AppColors.secondPrimaryColor),
 
-                     ),
-                     Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
-                     Gap(AppLayout.getHeight(10)),
+                        ),
+                        Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
+                        Gap(AppLayout.getHeight(10)),
 
-                     Padding(
-                       padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
-                       child: IconAndTextWidget(icon: Icons.phone, text: userList['phone']?? '-', iconColor: AppColors.secondPrimaryColor),
-                     ),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                          child: IconAndTextWidget(icon: Icons.phone, text: userList['phone']?? '-', iconColor: AppColors.secondPrimaryColor),
+                        ),
 
-                   ],
-                ),
-              ),
-              Gap(AppLayout.getHeight(150)),
+                      ],
+                    ),
+                  ),
+                  Gap(AppLayout.getHeight(150)),
+                ],
+              ) :const Center(child: CircularProgressIndicator(),),
               InkWell(
                 onTap: () async {
                   final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
@@ -167,11 +171,11 @@ class _AccountPageState extends State<AccountPage> {
             ],
           ),
         ),
-      ) : Center(child: CircularProgressIndicator(),),
+      ),
     );
   }
-}*/
-import 'package:firebase_auth/firebase_auth.dart';
+}
+/*import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
@@ -286,4 +290,4 @@ class _AccountPageState extends State<AccountPage> {
       ),
     );
   }
-}
+}*/

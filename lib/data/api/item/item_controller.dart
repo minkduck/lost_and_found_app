@@ -85,6 +85,7 @@ class ItemController extends GetxController{
   Future<List<dynamic>> getItemByUidList() async {
     accessToken = await AppConstrants.getToken();
     uid = await AppConstrants.getUid();
+    // uid = 'FLtIEJvuMgfg58u4sXhzxPn9qr73';
     var headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'

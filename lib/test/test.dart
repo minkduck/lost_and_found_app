@@ -33,6 +33,26 @@ class _TestPageState extends State<TestPage> {
   late String accessToken = "";
   TextEditingController textController = TextEditingController();
 
+/*
+  List<dynamic> filterMyItemsByCategories() {
+    // Apply category filtering first
+    final List<dynamic> filteredByCategories = myItemlist.where((item) {
+      final category = item['categoryName'];
+      return selectedCategories.isEmpty ||
+          selectedCategories.contains(category);
+    }).toList();
+
+    // Apply text filter
+    final filteredByText = filteredByCategories
+        .where((item) =>
+    filterText.isEmpty ||
+        (item['name'] != null &&
+            item['name'].toLowerCase().contains(filterText.toLowerCase())))
+        .toList();
+
+    return filteredByText;
+  }
+*/
 
   @override
   void initState() {
@@ -75,8 +95,8 @@ class _TestPageState extends State<TestPage> {
               // SnackbarUtils().showInfo(title: "Info", message: "Info");
               // SnackbarUtils().showLoading(message: "loading");
               // Get.find<ItemController>().getItemByUidList();
-              // Get.find<CategoryController>().getCategoryList();
-              Get.find<PostController>().getPostByUidList();
+              Get.find<CategoryController>().getCategoryGroupList();
+              // Get.find<PostController>().getPostByUidList();
               // Get.find<LocationController>().getLocationList();
               // Get.find<CommentController>().getCommentByPostId(1);
 
@@ -87,57 +107,6 @@ class _TestPageState extends State<TestPage> {
             children:[
               // Text(fcmToken ?? ''),
               // Text(accessToken ?? ''),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: 5,
-                        itemBuilder: (context, builder) {
-                          return Container(
-                            height: 200, // Set the desired height
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 80,
-                                  backgroundImage: AssetImage(AppAssets.avatarDefault!),
-                                ),
-                                Column(
-                                  children: [
-                                    Text('Name'),
-                                    Text('Email'),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    AppButton(
-                                      boxColor: AppColors.primaryColor,
-                                      textButton: "Claim",
-                                      width: 50,
-                                      onTap: () {
-                                        // Handle the Claim button action
-                                      },
-                                    ),
-                                    AppButton(
-                                      boxColor: AppColors.secondPrimaryColor,
-                                      textButton: "Decline",
-                                      width: 50,
-                                      onTap: () {
-                                        // Handle the Decline button action
-                                      },
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          );
-                        }
-                    )
-                  ],
-                ),
-              ),
             ]
           )
         ],

@@ -26,19 +26,106 @@ class PostScreen extends StatefulWidget {
 }
 
 class _PostScreenState extends State<PostScreen> {
+  List<dynamic> categoryList = [];
+  List<dynamic> categoryGroupList = [];
+  List<String> selectedCategories = [];
+  dynamic selectedCategoryGroup;
+  dynamic previouslySelectedCategoryGroup;
+  final CategoryController categoryController = Get.put(CategoryController());
+
   List<dynamic> postList = [];
   List<dynamic> mypostList = [];
   final PostController postController = Get.put(PostController());
-  bool _isMounted = false;
-  List<dynamic> categoryList = [];
-  final CategoryController categoryController = Get.put(CategoryController());
-  List<String> selectedCategories = [];
   String filterText = '';
   bool postsSelected = true;
   bool myPostsSelected = false;
+
+  bool _isMounted = false;
+
   final CommentController commentController = Get.put(CommentController());
   List<dynamic> commentList = [];
   List<dynamic> commentMyList = [];
+
+  int getCommentCountForPost(int postId) {
+    return commentList.where((comment) => comment['postId'] == postId).length;
+  }
+
+  int getCommentCountForMyPost(int postId) {
+    return commentMyList.where((comment) => comment['postId'] == postId).length;
+  }
+
+  void onFilterTextChanged(String text) {
+    setState(() {
+      filterText = text;
+    });
+  }
+
+  void onSubmitted() {
+    // Handle search submission here
+    print('Search submitted with text: $filterText');
+  }
+
+  void selectCategoryGroup(dynamic categoryGroup) {
+    setState(() {
+      previouslySelectedCategoryGroup = selectedCategoryGroup;
+
+      // If the clicked category group is the same as the previously selected one, clear the selection
+      if (selectedCategoryGroup == categoryGroup) {
+        selectedCategoryGroup = null;
+        selectedCategories.clear(); // Clear selected categories
+      } else {
+        selectedCategoryGroup = categoryGroup;
+      }
+    });
+  }
+
+  List<dynamic> filterPostsByCategories() {
+    // Apply category filtering first
+    final List<dynamic> filteredByCategories = selectedCategoryGroup == null
+        ? postList
+        : postList.where((post) {
+      final category = post['categoryName'];
+      return selectedCategoryGroup['categories']
+          .any((selectedCategory) => selectedCategory['name'] == category);
+    }).toList();
+
+    // Apply text filter
+    final filteredByText = filteredByCategories
+        .where((post) =>
+    selectedCategories.isEmpty ||
+        selectedCategories.contains(post['categoryName']))
+        .where((post) =>
+    filterText.isEmpty ||
+        (post['title'] != null &&
+            post['title'].toLowerCase().contains(filterText.toLowerCase())))
+        .toList();
+
+    return filteredByText;
+  }
+
+  List<dynamic> filterMyPostsByCategories() {
+    // Apply category filtering first
+    final List<dynamic> filteredByCategories = selectedCategoryGroup == null
+        ? mypostList
+        : mypostList.where((item) {
+      final category = item['categoryName'];
+      return selectedCategoryGroup['categories']
+          .any((selectedCategory) => selectedCategory['name'] == category);
+    }).toList();
+
+    // Apply text filter
+    final filteredByText = filteredByCategories
+        .where((post) =>
+    selectedCategories.isEmpty ||
+        selectedCategories.contains(post['categoryName']))
+        .where((post) =>
+    filterText.isEmpty ||
+        (post['name'] != null &&
+            post['name'].toLowerCase().contains(filterText.toLowerCase())))
+        .toList();
+
+    return filteredByText;
+  }
 
   Future<void> _refreshData() async {
     await postController.getPostList().then((result) {
@@ -83,6 +170,13 @@ class _PostScreenState extends State<PostScreen> {
         });
       }
     }
+    await categoryController.getCategoryGroupList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          categoryGroupList = result;
+        });
+      }
+    });
 
   }
   @override
@@ -131,29 +225,18 @@ class _PostScreenState extends State<PostScreen> {
           });
         }
       }
-
+      await categoryController.getCategoryGroupList().then((result) {
+        if (_isMounted) {
+          setState(() {
+            categoryGroupList = result;
+          });
+        }
+      });
     });
 
   }
 
-  int getCommentCountForPost(int postId) {
-    return commentList.where((comment) => comment['postId'] == postId).length;
-  }
 
-  int getCommentCountForMyPost(int postId) {
-    return commentMyList.where((comment) => comment['postId'] == postId).length;
-  }
-
-  void onFilterTextChanged(String text) {
-    setState(() {
-      filterText = text;
-    });
-  }
-
-  void onSubmitted() {
-    // Handle search submission here
-    print('Search submitted with text: $filterText');
-  }
 
   @override
   void dispose() {
@@ -163,28 +246,8 @@ class _PostScreenState extends State<PostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<dynamic> filteredPost = postList
-        .where((post) =>
-    selectedCategories.isEmpty ||
-        selectedCategories.contains(post['categoryName']))
-        .where((post) =>
-    filterText.isEmpty ||
-        (post['title'] != null &&
-            post['title']
-                .toLowerCase()
-                .contains(filterText.toLowerCase())))
-        .toList();
-    final List<dynamic> filteredMyPost = mypostList
-        .where((post) =>
-    selectedCategories.isEmpty ||
-        selectedCategories.contains(post['categoryName']))
-        .where((post) =>
-    filterText.isEmpty ||
-        (post['title'] != null &&
-            post['title']
-                .toLowerCase()
-                .contains(filterText.toLowerCase())))
-        .toList();
+    final List<dynamic> filteredPost = filterPostsByCategories();
+    final List<dynamic> filteredMyPost = filterMyPostsByCategories();
 
     return Scaffold(
       body: RefreshIndicator(
@@ -260,31 +323,69 @@ class _PostScreenState extends State<PostScreen> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: categoryList
-                          .map((category) => GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (selectedCategories.contains(category['name'])) {
-                              selectedCategories.remove(category['name']);
-                            } else {
-                              selectedCategories.add(category['name']);
-                            }
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8, horizontal: 16),
-                          child: BigText(
-                            text: category['name'] != null ? category['name'].toString() : 'No Category',
-                            color: selectedCategories.contains(category['name'])
-                                ? AppColors
-                                .primaryColor // Selected text color
-                                : AppColors.secondPrimaryColor,
-                            fontW: FontWeight.w500,
+                      children: categoryGroupList.map((categoryGroup) {
+                        return GestureDetector(
+                          onTap: () {
+                            // Call the selectCategoryGroup function when a categoryGroup is clicked
+                            selectCategoryGroup(categoryGroup);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 16),
+                            child: BigText(
+                              text: categoryGroup['name'] != null
+                                  ? categoryGroup['name'].toString()
+                                  : 'No Category',
+                              color: categoryGroup == selectedCategoryGroup
+                                  ? AppColors.primaryColor
+                                  : AppColors.secondPrimaryColor,
+                              fontW: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                      ))
-                          .toList(),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                Gap(AppLayout.getHeight(10)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: selectedCategoryGroup != null
+                          ? (selectedCategoryGroup['categories'] as List<dynamic>)
+                          .map((category) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (selectedCategories.contains(category['name'])) {
+                                selectedCategories.remove(category['name']);
+                              } else {
+                                selectedCategories.add(category['name']);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 16,
+                            ),
+                            child: BigText(
+                              text: category['name'] != null
+                                  ? category['name'].toString()
+                                  : 'No Category',
+                              color: selectedCategories.contains(category['name'])
+                                  ? AppColors.primaryColor
+                                  : AppColors.secondPrimaryColor,
+                              fontW: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      })
+                          .toList()
+                          : [],
                     ),
                   ),
                 ),
