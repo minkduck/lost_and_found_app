@@ -52,7 +52,7 @@ class _CreatePostState extends State<CreatePost> {
         });
       }
     });
-    locationController.getLocationList().then((result) {
+    locationController.getAllLocationPages().then((result) {
       if (_isMounted) {
         setState(() {
           locationList = result;

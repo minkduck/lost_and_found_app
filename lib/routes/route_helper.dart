@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:lost_and_find_app/pages/home_login_page.dart';
 import 'package:lost_and_find_app/pages/items/items_detail.dart';
 
-
 class RouteHelper {
   static const String splashPage = "/splash-page";
   static const String initial = "/";
@@ -21,7 +20,10 @@ class RouteHelper {
   static List<GetPage> routes = [
     GetPage(
       name: initial,
-      page: () => const HomeLoginPage(),
+      page: () {
+        var initialIndex = int.tryParse(Get.parameters['initialIndex'] ?? '0');
+        return HomeLoginPage(initialIndex: initialIndex ?? 0);
+      },
     ),
     GetPage(
       name: item,

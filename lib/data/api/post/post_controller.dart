@@ -17,6 +17,8 @@ class PostController extends GetxController{
   bool _isLoaded = false;
   bool get isLoaded => _isLoaded;
 
+  RxBool isLoading = false.obs;
+
   Future<List<dynamic>> getPostList() async {
     accessToken = await AppConstrants.getToken();
     var headers = {
@@ -41,8 +43,9 @@ class PostController extends GetxController{
       print("_postList $_postList");
       return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
-      throw Exception('Failed to load Post');
+      throw Exception('Failed to load getPostList');
     }
   }
   Future<Map<String, dynamic>> getPostListById(int id) async {
@@ -67,6 +70,7 @@ class PostController extends GetxController{
       print("itemlistByid " + resultList.toString());
       return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
       throw Exception('Failed to load PostById');
     }
@@ -93,6 +97,7 @@ class PostController extends GetxController{
       print("PostMediaById " + resultList.toString());
       return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
       throw Exception('Failed to load PostMediaById');
     }
@@ -121,6 +126,7 @@ class PostController extends GetxController{
       print("getPostByUidList " + resultList.toString());
       return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
       throw Exception('Failed to load Posts By Uid');
     }
@@ -133,35 +139,43 @@ class PostController extends GetxController{
       String postLocationId,
       String postCategoryId,
       List<String> medias ) async {
-    accessToken = await AppConstrants.getToken();
-    var headers = {
-      'Authorization': 'Bearer $accessToken'
-    };
-    var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTPOST_URL));
-    request.fields.addAll({
-      'Title': title,
-      'PostContent': postContent,
-      'PostLocationId': postLocationId,
-      'PostCategoryId': postCategoryId,
-    });
-    for (var media in medias) {
-      request.files.add(await http.MultipartFile.fromPath('Medias', media));
-    }
+    try {
+      accessToken = await AppConstrants.getToken();
+      var headers = {
+        'Authorization': 'Bearer $accessToken'
+      };
+      var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTPOST_URL));
+      request.fields.addAll({
+        'Title': title,
+        'PostContent': postContent,
+        'PostLocationId': postLocationId,
+        'PostCategoryId': postCategoryId,
+      });
+      for (var media in medias) {
+        request.files.add(await http.MultipartFile.fromPath('Medias', media));
+      }
 
-    request.headers.addAll(headers);
+      request.headers.addAll(headers);
 
-    http.StreamedResponse response = await request.send();
+      http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 201) {
-      print('create post success');
-      print(await response.stream.bytesToString());
-      SnackbarUtils().showSuccess(title: "Successs", message: "Create new post successfully");
-      Get.toNamed(RouteHelper.getInitial());
-    }
-    else {
-      print(response.reasonPhrase);
-      print(response.statusCode);
-      throw Exception('Failed to create Post');
+      if (response.statusCode == 201) {
+        print('create post success');
+        print(await response.stream.bytesToString());
+        SnackbarUtils().showSuccess(title: "Successs", message: "Create new post successfully");
+        Get.toNamed(RouteHelper.getInitial());
+      }
+      else {
+        print(response.reasonPhrase);
+        print(response.statusCode);
+        throw Exception('Failed to create Post');
+      }
+    } catch (e) {
+      isLoading.value = false;
+      SnackbarUtils().showError(title: "Error", message: e.toString());
+      print("Error creating the post: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 }

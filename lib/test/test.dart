@@ -15,7 +15,9 @@ import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/app_drop_menu_filed_title.dart';
 import 'package:anim_search_bar/anim_search_bar.dart';
 
+import '../utils/app_assets.dart';
 import '../utils/snackbar_utils.dart';
+import '../widgets/app_button.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({super.key});
@@ -40,65 +42,105 @@ class _TestPageState extends State<TestPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text('hello'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Center(
-              child: AppDropdownFieldTitle(
-                hintText: "sdfsdfsdfsdf",
-                validator: "v",
-                selectedValue: _selectedValue,
-                items: _productSizeList.map((e) {
-                  return DropdownMenuItem(child: Text(e), value: e,);
-                }).toList(),
-                onChanged: (val){
-                  setState(() {
-                    _selectedValue = val as String;
-                  });
-                },
-                titleText: "titleText",
-              ),
-            ),
-            Gap(AppLayout.getHeight(80)),
-            ElevatedButton(
-              onPressed: () async {
-                // fcmToken = await AppConstrants.getFcmToken();
-                // accessToken = await AppConstrants.getToken();
-                // SnackbarUtils().showSuccess(title: "Successs", message: "Login google successfully");
-                // SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
-                // SnackbarUtils().showInfo(title: "Info", message: "Info");
-                // SnackbarUtils().showLoading(message: "loading");
-                // Get.find<ItemController>().getItemByUidList();
-                // Get.find<CategoryController>().getCategoryList();
-                Get.find<PostController>().getPostByUidList();
-                // Get.find<LocationController>().getLocationList();
-                // Get.find<CommentController>().getCommentByPostId(1);
-
+      body: Column(
+        children: [
+          Center(
+            child: AppDropdownFieldTitle(
+              hintText: "sdfsdfsdfsdf",
+              validator: "v",
+              selectedValue: _selectedValue,
+              items: _productSizeList.map((e) {
+                return DropdownMenuItem(child: Text(e), value: e,);
+              }).toList(),
+              onChanged: (val){
+                setState(() {
+                  _selectedValue = val as String;
+                });
               },
-              child: Text('button'),
+              titleText: "titleText",
             ),
-            Column(
-              children:[
-                // Text(fcmToken ?? ''),
-                // Text(accessToken ?? ''),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                    ],
-                  ),
+          ),
+          Gap(AppLayout.getHeight(80)),
+          ElevatedButton(
+            onPressed: () async {
+              // fcmToken = await AppConstrants.getFcmToken();
+              // accessToken = await AppConstrants.getToken();
+              // SnackbarUtils().showSuccess(title: "Successs", message: "Login google successfully");
+              // SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
+              // SnackbarUtils().showInfo(title: "Info", message: "Info");
+              // SnackbarUtils().showLoading(message: "loading");
+              // Get.find<ItemController>().getItemByUidList();
+              // Get.find<CategoryController>().getCategoryList();
+              Get.find<PostController>().getPostByUidList();
+              // Get.find<LocationController>().getLocationList();
+              // Get.find<CommentController>().getCommentByPostId(1);
+
+            },
+            child: Text('button'),
+          ),
+          Column(
+            children:[
+              // Text(fcmToken ?? ''),
+              // Text(accessToken ?? ''),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: 5,
+                        itemBuilder: (context, builder) {
+                          return Container(
+                            height: 200, // Set the desired height
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 80,
+                                  backgroundImage: AssetImage(AppAssets.avatarDefault!),
+                                ),
+                                Column(
+                                  children: [
+                                    Text('Name'),
+                                    Text('Email'),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    AppButton(
+                                      boxColor: AppColors.primaryColor,
+                                      textButton: "Claim",
+                                      width: 50,
+                                      onTap: () {
+                                        // Handle the Claim button action
+                                      },
+                                    ),
+                                    AppButton(
+                                      boxColor: AppColors.secondPrimaryColor,
+                                      textButton: "Decline",
+                                      width: 50,
+                                      onTap: () {
+                                        // Handle the Decline button action
+                                      },
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          );
+                        }
+                    )
+                  ],
                 ),
-              ]
-            )
-          ],
-        ),
+              ),
+            ]
+          )
+        ],
       ),
     );
   }

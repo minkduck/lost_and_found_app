@@ -48,8 +48,9 @@ class ItemController extends GetxController{
         // print("itemlist " + _itemList.toString());
         return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
-      throw Exception('Failed to load Item');
+      throw Exception('Failed to load getItemList');
     }
   }
   Future<Map<String, dynamic>> getItemListById(int id) async {
@@ -75,8 +76,9 @@ class ItemController extends GetxController{
       print("itemlistByid " + _itemList.toString());
       return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
-      throw Exception('Failed to load Item');
+      throw Exception('Failed to load getItemListById');
     }
   }
 
@@ -103,8 +105,9 @@ class ItemController extends GetxController{
       print("getItemByUidList " + resultList.toString());
       return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
-      throw Exception('Failed to load Item By Uid');
+      throw Exception('Failed to load getItemByUidList');
     }
   }
 
