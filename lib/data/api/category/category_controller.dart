@@ -37,6 +37,7 @@ class CategoryController extends GetxController{
       print("_categoryList " + _categoryList.toString());
       return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
       throw Exception('Failed to load Category');
     }

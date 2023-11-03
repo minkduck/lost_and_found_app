@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final CategoryController categoryController = Get.put(CategoryController());
   List<String> selectedCategories = [];
   List<dynamic> itemlist = [];
+  List<dynamic> myItemlist = [];
   final ItemController itemController = Get.put(ItemController());
   String filterText = '';
   bool itemsSelected = true;
@@ -52,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     }
-    return "https://wowmart.vn/wp-content/uploads/2020/10/null-image.png";
+    return "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg";
   }
 
   String? firstLogin = '';
@@ -75,6 +76,13 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_isMounted) {
         setState(() {
           categoryList = result;
+        });
+      }
+    });
+    await itemController.getItemByUidList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          myItemlist = result;
         });
       }
     });
@@ -108,18 +116,25 @@ class _HomeScreenState extends State<HomeScreen> {
         firstLogin = 'h';
       });
     } else {
-      Future.delayed(Duration(seconds: 1), () {
-        itemController.getItemList().then((result) {
+      Future.delayed(Duration(seconds: 1), () async {
+        await itemController.getItemList().then((result) {
           if (_isMounted) {
             setState(() {
               itemlist = result;
             });
           }
         });
-        categoryController.getCategoryList().then((result) {
+        await categoryController.getCategoryList().then((result) {
           if (_isMounted) {
             setState(() {
               categoryList = result;
+            });
+          }
+        });
+        await itemController.getItemByUidList().then((result) {
+          if (_isMounted) {
+            setState(() {
+              myItemlist = result;
             });
           }
         });
@@ -148,14 +163,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final filteredItems = itemlist
         .where((item) =>
+            selectedCategories.isEmpty ||
+            selectedCategories.contains(item['categoryName']))
+        .where((item) =>
+            filterText.isEmpty ||
+            (item['name'] != null &&
+                item['name'].toLowerCase().contains(filterText.toLowerCase())))
+        .toList();
+    final filteredMyItems = myItemlist
+        .where((item) =>
     selectedCategories.isEmpty ||
         selectedCategories.contains(item['categoryName']))
         .where((item) =>
     filterText.isEmpty ||
         (item['name'] != null &&
-            item['name']
-                .toLowerCase()
-                .contains(filterText.toLowerCase())))
+            item['name'].toLowerCase().contains(filterText.toLowerCase())))
         .toList();
     return Scaffold(
       body: RefreshIndicator(
@@ -190,40 +212,46 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     CustomSearchBar(
-                      filterText: filterText, // Pass the filter text
-                      onFilterTextChanged: onFilterTextChanged, // Set the filter text handler
+                      filterText: filterText,
+                      // Pass the filter text
+                      onFilterTextChanged: onFilterTextChanged,
+                      // Set the filter text handler
                       onSubmitted: onSubmitted,
                     ),
-
                   ],
                 ),
                 Gap(AppLayout.getHeight(15)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                  AppButton(
-                      boxColor: itemsSelected ? AppColors.primaryColor : AppColors.secondPrimaryColor,
-                      textButton: "Items",
-                      width: AppLayout.getWidth(150),
-                      height: AppLayout.getHeight(35),
-                      onTap: (){
-                        setState(() {
-                          itemsSelected = true;
-                          myItemsSelected = false;
-                        });
-                  }),
                     AppButton(
-                        boxColor: myItemsSelected ? AppColors.primaryColor : AppColors.secondPrimaryColor,
+                        boxColor: itemsSelected
+                            ? AppColors.primaryColor
+                            : AppColors.secondPrimaryColor,
+                        textButton: "Items",
+                        width: AppLayout.getWidth(150),
+                        height: AppLayout.getHeight(35),
+                        onTap: () {
+                          setState(() {
+                            itemsSelected = true;
+                            myItemsSelected = false;
+                          });
+                        }),
+                    AppButton(
+                        boxColor: myItemsSelected
+                            ? AppColors.primaryColor
+                            : AppColors.secondPrimaryColor,
                         textButton: "My Items",
                         width: AppLayout.getWidth(150),
                         height: AppLayout.getHeight(35),
-                        onTap: (){
+                        onTap: () {
                           setState(() {
                             itemsSelected = false;
                             myItemsSelected = true;
                           });
-                    })
-                ],),
+                        })
+                  ],
+                ),
                 Gap(AppLayout.getHeight(10)),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -235,8 +263,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           .map((category) => GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    if (selectedCategories.contains(category['name'])) {
-                                      selectedCategories.remove(category['name']);
+                                    if (selectedCategories
+                                        .contains(category['name'])) {
+                                      selectedCategories
+                                          .remove(category['name']);
                                     } else {
                                       selectedCategories.add(category['name']);
                                     }
@@ -246,8 +276,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 8, horizontal: 16),
                                   child: BigText(
-                                    text: category['name'] != null ? category['name'].toString() : 'No Category',
-                                    color: selectedCategories.contains(category['name'])
+                                    text: category['name'] != null
+                                        ? category['name'].toString()
+                                        : 'No Category',
+                                    color: selectedCategories
+                                            .contains(category['name'])
                                         ? AppColors
                                             .primaryColor // Selected text color
                                         : AppColors.secondPrimaryColor,
@@ -261,30 +294,163 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Gap(AppLayout.getHeight(25)),
                 GetBuilder<ItemController>(builder: (item) {
-                  return itemlist.isNotEmpty
-                      ? Center(
+                  return itemsSelected
+                      ? itemlist.isNotEmpty
+                          ? Center(
+                              child: GridView.builder(
+                                padding: EdgeInsets.all(15),
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: AppLayout.getWidth(200),
+                                  childAspectRatio: 0.55,
+                                  crossAxisSpacing: AppLayout.getWidth(20),
+                                  mainAxisSpacing: AppLayout.getHeight(20),
+                                ),
+                                itemCount: filteredItems.length,
+                                itemBuilder: (context, index) {
+                                  final item = filteredItems[index];
+                                  final mediaUrl = getUrlFromItem(item) ??
+                                      "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png";
+
+                                  return Container(
+                                    decoration: const BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(15)),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          height: AppLayout.getHeight(151),
+                                          width: AppLayout.getWidth(180),
+                                          child: Image.network(
+                                            mediaUrl,
+                                            fit: BoxFit.fill,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              // Handle image loading errors
+                                              return Image.network(
+                                                  "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png",
+                                                  fit: BoxFit.fill);
+                                            },
+                                          ),
+                                        ),
+                                        Container(
+                                          color: Theme.of(context).cardColor,
+                                          padding: EdgeInsets.only(
+                                            bottom: AppLayout.getHeight(28.5),
+                                            left: AppLayout.getWidth(8),
+                                            right: AppLayout.getWidth(8),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Gap(AppLayout.getHeight(8)),
+                                              Text(
+                                                item['name'] ?? 'No Name',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Gap(AppLayout.getHeight(15)),
+                                              IconAndTextWidget(
+                                                icon: Icons.location_on,
+                                                text: item['locationName'] ??
+                                                    'No Location',
+                                                size: 15,
+                                                iconColor: Colors.black,
+                                              ),
+                                              Gap(AppLayout.getWidth(15)),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 8.0),
+                                                child: Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Text(
+                                                    item['createdDate'] != null
+                                                        ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(item['createdDate']))}'
+                                                        : 'No Date',
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style:
+                                                        TextStyle(fontSize: 15),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Spacer(),
+                                        Container(
+                                          child: AppButton(
+                                            boxColor:
+                                                AppColors.secondPrimaryColor,
+                                            textButton: "Details",
+                                            fontSize: 18,
+                                            height: AppLayout.getHeight(30),
+                                            width: AppLayout.getWidth(180),
+                                            topLeft: 1,
+                                            topRight: 1,
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ItemsDetails(
+                                                          pageId: item['id'],
+                                                          page: "item"),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          : SizedBox(
+                              width: AppLayout.getWidth(100),
+                              height: AppLayout.getHeight(300),
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                      : myItemsSelected // Check if the "My Items" button is selected
+                          ? myItemlist
+                                  .isNotEmpty // Render myItemList grid view when My Items button is selected
+                              ? Center(
                     child: GridView.builder(
                       padding: EdgeInsets.all(15),
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      gridDelegate:
+                      SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: AppLayout.getWidth(200),
                         childAspectRatio: 0.55,
                         crossAxisSpacing: AppLayout.getWidth(20),
                         mainAxisSpacing: AppLayout.getHeight(20),
                       ),
-                      itemCount: filteredItems.length,
+                      itemCount: filteredMyItems.length,
                       itemBuilder: (context, index) {
-
-                        final item = filteredItems[index];
-                        final mediaUrl = getUrlFromItem(item) ?? "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png";
+                        final item = filteredMyItems[index];
+                        final mediaUrl = getUrlFromItem(item) ??
+                            "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg";
 
                         return Container(
                           decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(15)),
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(15)),
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
                             children: [
                               Container(
                                 height: AppLayout.getHeight(151),
@@ -292,9 +458,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Image.network(
                                   mediaUrl,
                                   fit: BoxFit.fill,
-                                  errorBuilder: (context, error, stackTrace) {
+                                  errorBuilder:
+                                      (context, error, stackTrace) {
                                     // Handle image loading errors
-                                    return Image.network("https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png", fit: BoxFit.fill);
+                                    return Image.network(
+                                        "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg",
+                                        fit: BoxFit.fill);
                                   },
                                 ),
                               ),
@@ -306,32 +475,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                   right: AppLayout.getWidth(8),
                                 ),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
                                   children: [
                                     Gap(AppLayout.getHeight(8)),
                                     Text(
-                                      item['name'] ?? 'No Name',                                  maxLines: 1,
+                                      item['name'] ?? 'No Name',
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     Gap(AppLayout.getHeight(15)),
                                     IconAndTextWidget(
                                       icon: Icons.location_on,
-                                      text: item['LocationName'] ?? 'No Location',
+                                      text: item['LocationName'] ??
+                                          'No Location',
                                       size: 15,
                                       iconColor: Colors.black,
                                     ),
                                     Gap(AppLayout.getWidth(15)),
                                     Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 8.0),
                                       child: Align(
-                                        alignment: Alignment.centerLeft,
+                                        alignment:
+                                        Alignment.centerLeft,
                                         child: Text(
                                           item['createdDate'] != null
                                               ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(item['createdDate']))}'
                                               : 'No Date',
                                           maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(fontSize: 15),
+                                          overflow:
+                                          TextOverflow.ellipsis,
+                                          style:
+                                          TextStyle(fontSize: 15),
                                         ),
                                       ),
                                     ),
@@ -341,7 +517,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               Spacer(),
                               Container(
                                 child: AppButton(
-                                  boxColor: AppColors.secondPrimaryColor,
+                                  boxColor:
+                                  AppColors.secondPrimaryColor,
                                   textButton: "Details",
                                   fontSize: 18,
                                   height: AppLayout.getHeight(30),
@@ -352,7 +529,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => ItemsDetails(pageId: item['id'], page: "item"),
+                                        builder: (context) =>
+                                            ItemsDetails(
+                                                pageId: item['id'],
+                                                page: "item"),
                                       ),
                                     );
                                   },
@@ -364,15 +544,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   )
-                      : SizedBox(
-                    width: AppLayout.getWidth(100),
-                    height: AppLayout.getHeight(300),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
+                              : SizedBox(
+                                  width: AppLayout.getWidth(100),
+                                  height: AppLayout.getHeight(300),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                          : Container();
                 }),
-
               ],
             ),
           ),

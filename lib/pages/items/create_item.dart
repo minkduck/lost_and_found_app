@@ -49,7 +49,7 @@ class _CreateItemState extends State<CreateItem> {
         });
       }
     });
-    locationController.getLocationList().then((result) {
+    locationController.getAllLocationPages().then((result) {
       if (_isMounted) {
         setState(() {
           locationList = result;

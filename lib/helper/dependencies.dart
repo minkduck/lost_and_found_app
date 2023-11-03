@@ -1,7 +1,9 @@
 
 
+import 'package:lost_and_find_app/data/api/auth/user_controller.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/api/comment/comment_controller.dart';
+import 'package:lost_and_find_app/data/api/item/claim_controller.dart';
 import 'package:lost_and_find_app/data/api/item/item_controller.dart';
 import 'package:lost_and_find_app/data/api/location/location_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,5 +36,11 @@ Future<void> init() async {
 
   //comment
   Get.lazyPut(() => CommentController());
+
+  //user
+  Get.lazyPut(() => UserController());
+
+  //claim
+  Get.lazyPut(() => ClaimController());
 
 }

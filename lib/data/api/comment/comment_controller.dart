@@ -11,7 +11,7 @@ class CommentController extends GetxController {
   bool _isLoaded = false;
   bool get isLoaded => _isLoaded;
 
-  Future<List<dynamic>> getCommentByPostId(int PostId) async {
+  Future<List<dynamic>> getCommentByPostId(int postId) async {
     accessToken = await AppConstrants.getToken();
     var headers = {
       'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ class CommentController extends GetxController {
     };
     var request = http.Request(
         'GET',
-        Uri.parse(AppConstrants.GETCOMMENTBYPOSTBID_URL + PostId.toString()));
+        Uri.parse(AppConstrants.GETCOMMENTBYPOSTBID_URL + postId.toString()));
 
     request.headers.addAll(headers);
 
@@ -35,6 +35,7 @@ class CommentController extends GetxController {
       print("commentList " + resultList.toString());
       return resultList;
     } else {
+      print(response.statusCode);
       print(response.reasonPhrase);
       throw Exception('Failed to load Comment');
     }
@@ -64,6 +65,52 @@ class CommentController extends GetxController {
       print(response.reasonPhrase);
       print(response.statusCode);
       throw Exception('Failed to post Comment');
+    }
+  }
+
+  Future<void> putCommentByPostId(int postId, String comment) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('PUT',
+        Uri.parse(AppConstrants.PUTCOMMENTBYPOSTID_URL + postId.toString()));
+    request.body = json.encode({
+      "commentContent": comment
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    }
+    else {
+      print(response.reasonPhrase);
+      print(response.statusCode);
+      throw Exception('Failed to put Comment');
+    }
+  }
+  Future<void> deleteCommentByCommentId(int postId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('DELETE',
+        Uri.parse(AppConstrants.PUTCOMMENTBYPOSTID_URL + postId.toString()));
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 204) {
+      print(await response.stream.bytesToString());
+    }
+    else {
+      print(response.reasonPhrase);
+      print(response.statusCode);
+      throw Exception('Failed to delete Comment');
     }
   }
 

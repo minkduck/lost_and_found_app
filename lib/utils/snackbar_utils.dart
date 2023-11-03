@@ -59,7 +59,7 @@ class SnackbarUtils {
     String message = "",
   }) {
     Get.snackbar(
-      "General.Loading".tr, // title
+      "Loading", // title
       message, // message
       icon: Container(
         padding: const EdgeInsets.all(10),

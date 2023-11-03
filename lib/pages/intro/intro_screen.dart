@@ -68,7 +68,7 @@ class _IntroPageState extends State<IntroPage> {
         final prefs = await SharedPreferences.getInstance();
         prefs.setBool('showHome', true);
 
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> HomeLoginPage()),
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> HomeLoginPage(initialIndex: 0,)),
         );
       },
           child: const Text('Get Started', style: TextStyle(fontSize: 24),)):Container(

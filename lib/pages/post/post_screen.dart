@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
 
 import '../../data/api/category/category_controller.dart';
+import '../../data/api/comment/comment_controller.dart';
 import '../../test/time/time_widget.dart';
 import '../../utils/colors.dart';
 import '../../widgets/app_button.dart';
@@ -25,6 +27,7 @@ class PostScreen extends StatefulWidget {
 
 class _PostScreenState extends State<PostScreen> {
   List<dynamic> postList = [];
+  List<dynamic> mypostList = [];
   final PostController postController = Get.put(PostController());
   bool _isMounted = false;
   List<dynamic> categoryList = [];
@@ -33,12 +36,22 @@ class _PostScreenState extends State<PostScreen> {
   String filterText = '';
   bool postsSelected = true;
   bool myPostsSelected = false;
+  final CommentController commentController = Get.put(CommentController());
+  List<dynamic> commentList = [];
+  List<dynamic> commentMyList = [];
 
   Future<void> _refreshData() async {
     await postController.getPostList().then((result) {
       if (_isMounted) {
         setState(() {
           postList = result;
+        });
+      }
+    });
+    await postController.getPostByUidList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          mypostList = result;
         });
       }
     });
@@ -49,28 +62,86 @@ class _PostScreenState extends State<PostScreen> {
         });
       }
     });
+    for (var post in postList) {
+      var idPost = post['id'];
+      final commentResult = await commentController.getCommentByPostId(idPost);
+      if (_isMounted) {
+        setState(() {
+          // Filter comments for the specific post and update commentList
+          commentList.removeWhere((comment) => comment['postId'] == idPost);
+          commentList.addAll(commentResult);
+        });
+      }
+    }
+    for (var post in mypostList) {
+      var idPost = post['id'];
+      final commentResult = await commentController.getCommentByPostId(idPost);
+      if (_isMounted) {
+        setState(() {
+          commentMyList.removeWhere((comment) => comment['postId'] == idPost);
+          commentMyList.addAll(commentResult);
+        });
+      }
+    }
 
   }
   @override
   void initState() {
     super.initState();
     _isMounted = true;
-    Future.delayed(Duration(seconds: 1), () {
-      postController.getPostList().then((result) {
+    Future.delayed(Duration(seconds: 1), () async {
+      await postController.getPostList().then((result) {
         if (_isMounted) {
           setState(() {
             postList = result;
           });
         }
       });
-      categoryController.getCategoryList().then((result) {
+      await postController.getPostByUidList().then((result) {
+        if (_isMounted) {
+          setState(() {
+            mypostList = result;
+          });
+        }
+      });
+      await categoryController.getCategoryList().then((result) {
         if (_isMounted) {
           setState(() {
             categoryList = result;
           });
         }
       });
+      for (var post in postList) {
+        var idPost = post['id'];
+        final commentResult = await commentController.getCommentByPostId(idPost);
+        if (_isMounted) {
+          setState(() {
+            commentList.removeWhere((comment) => comment['postId'] == idPost);
+            commentList.addAll(commentResult);
+          });
+        }
+      }
+      for (var post in mypostList) {
+        var idPost = post['id'];
+        final commentResult = await commentController.getCommentByPostId(idPost);
+        if (_isMounted) {
+          setState(() {
+            commentMyList.removeWhere((comment) => comment['postId'] == idPost);
+            commentMyList.addAll(commentResult);
+          });
+        }
+      }
+
     });
+
+  }
+
+  int getCommentCountForPost(int postId) {
+    return commentList.where((comment) => comment['postId'] == postId).length;
+  }
+
+  int getCommentCountForMyPost(int postId) {
+    return commentMyList.where((comment) => comment['postId'] == postId).length;
   }
 
   void onFilterTextChanged(String text) {
@@ -92,7 +163,7 @@ class _PostScreenState extends State<PostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<dynamic> filteredItems = postList
+    final List<dynamic> filteredPost = postList
         .where((post) =>
     selectedCategories.isEmpty ||
         selectedCategories.contains(post['categoryName']))
@@ -102,7 +173,18 @@ class _PostScreenState extends State<PostScreen> {
             post['title']
                 .toLowerCase()
                 .contains(filterText.toLowerCase())))
-        .toList(); 
+        .toList();
+    final List<dynamic> filteredMyPost = mypostList
+        .where((post) =>
+    selectedCategories.isEmpty ||
+        selectedCategories.contains(post['categoryName']))
+        .where((post) =>
+    filterText.isEmpty ||
+        (post['title'] != null &&
+            post['title']
+                .toLowerCase()
+                .contains(filterText.toLowerCase())))
+        .toList();
 
     return Scaffold(
       body: RefreshIndicator(
@@ -208,16 +290,17 @@ class _PostScreenState extends State<PostScreen> {
                 ),
 
                 GetBuilder<PostController>(builder: (posts) {
-                  return postList.isNotEmpty
+                  return postsSelected ?
+                    postList.isNotEmpty
                       ? RefreshIndicator(
                     onRefresh: _refreshData,
                         child: ListView.builder(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
-                            itemCount: filteredItems.length,
+                            itemCount: filteredPost.length,
                             itemBuilder: (BuildContext context, int index) {
 
-                              final post = filteredItems[index];
+                              final post = filteredPost[index];
                               return GestureDetector(
                                   onTap: () {
                                     Navigator.of(context).push(
@@ -317,7 +400,7 @@ class _PostScreenState extends State<PostScreen> {
                                         Gap(AppLayout.getHeight(30)),
                                         IconAndTextWidget(
                                           icon: Icons.location_on,
-                                          text: post['LocationName'] ??
+                                          text: post['locationName'] ??
                                               'No Location',
                                           size: 15,
                                           iconColor: Colors.black,
@@ -333,7 +416,7 @@ class _PostScreenState extends State<PostScreen> {
                                                 iconColor: Colors.grey),
                                             IconAndTextWidget(
                                                 icon: Icons.comment,
-                                                text: "100",
+                                                text: getCommentCountForPost(post['id']).toString(),
                                                 iconColor: Colors.grey),
                                             IconAndTextWidget(
                                                 icon: Icons.flag,
@@ -353,7 +436,154 @@ class _PostScreenState extends State<PostScreen> {
                           child: const Center(
                             child: CircularProgressIndicator(),
                           ),
-                        );
+                        )
+                      : myPostsSelected ? mypostList.isNotEmpty
+                      ? RefreshIndicator(
+                    onRefresh: _refreshData,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: filteredMyPost.length,
+                      itemBuilder: (BuildContext context, int index) {
+
+                        final post = filteredMyPost[index];
+                        return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => PostDetail(
+                                      pageId: post['id'],
+                                      page: "post"), // Navigate to PostDetail
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              margin: EdgeInsets.only(
+                                  bottom: AppLayout.getHeight(20)),
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 25,
+                                        backgroundImage: NetworkImage(
+                                            post['user']
+                                            ['avatar']!),
+                                      ),
+                                      Gap(AppLayout.getHeight(15)),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            post['user']
+                                            ['fullName'],
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleSmall,
+                                          ),
+                                          Gap(AppLayout.getHeight(5)),
+                                          Text(
+                                            post['createdDate'] != null
+                                                ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
+                                                : 'No Date',
+                                            style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.grey),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  Gap(AppLayout.getHeight(30)),
+                                  Container(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      post['title'],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                  ),
+                                  Container(
+                                    height:
+                                    MediaQuery.of(context).size.height *
+                                        0.3,
+                                    // Set a fixed height or use any other value
+                                    child: ListView.builder(
+                                      padding: EdgeInsets.zero, // Add this line to set zero padding
+                                      shrinkWrap: true,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: post['postMedias']
+                                          .length,
+                                      itemBuilder: (context, indexs) {
+                                        return Container(
+                                          alignment: Alignment.centerLeft,
+                                          margin: EdgeInsets.only(
+                                              left: AppLayout.getWidth(20)),
+                                          height: AppLayout.getHeight(151),
+                                          width: AppLayout.getWidth(180),
+                                          child: Image.network(
+                                              post['postMedias']
+                                              [indexs]['media']['url'] ?? Container(),
+                                              fit: BoxFit.fill),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Container(
+                                    child: Text(
+                                      post['postContent'],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall,
+                                    ),
+                                  ),
+                                  Gap(AppLayout.getHeight(30)),
+                                  IconAndTextWidget(
+                                    icon: Icons.location_on,
+                                    text: post['locationName'] ??
+                                        'No Location',
+                                    size: 15,
+                                    iconColor: Colors.black,
+                                  ),
+                                  Gap(AppLayout.getHeight(30)),
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      IconAndTextWidget(
+                                          icon: Icons.bookmark,
+                                          text: "100",
+                                          iconColor: Colors.grey),
+                                      IconAndTextWidget(
+                                          icon: Icons.comment,
+                                          text: getCommentCountForMyPost(post['id']).toString(),
+                                          iconColor: Colors.grey),
+                                      IconAndTextWidget(
+                                          icon: Icons.flag,
+                                          text: "100",
+                                          iconColor: Colors.grey),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ));
+                      },
+                    ),
+                  )
+                      : SizedBox(
+                    width: AppLayout.getWidth(100),
+                    height: AppLayout.getHeight(300),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                      : Container();
                 }),
               ],
             ),
