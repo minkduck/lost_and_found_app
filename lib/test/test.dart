@@ -14,6 +14,8 @@ import 'package:lost_and_find_app/utils/app_styles.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/app_drop_menu_filed_title.dart';
 import 'package:anim_search_bar/anim_search_bar.dart';
+import 'package:lost_and_find_app/widgets/generator_qrcode.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../utils/app_assets.dart';
 import '../utils/snackbar_utils.dart';
@@ -67,49 +69,47 @@ class _TestPageState extends State<TestPage> {
       appBar: AppBar(
         title: Text('hello'),
       ),
-      body: Column(
-        children: [
-          Center(
-            child: AppDropdownFieldTitle(
-              hintText: "sdfsdfsdfsdf",
-              validator: "v",
-              selectedValue: _selectedValue,
-              items: _productSizeList.map((e) {
-                return DropdownMenuItem(child: Text(e), value: e,);
-              }).toList(),
-              onChanged: (val){
-                setState(() {
-                  _selectedValue = val as String;
-                });
-              },
-              titleText: "titleText",
-            ),
-          ),
-          Gap(AppLayout.getHeight(80)),
-          ElevatedButton(
-            onPressed: () async {
-              // fcmToken = await AppConstrants.getFcmToken();
-              // accessToken = await AppConstrants.getToken();
-              // SnackbarUtils().showSuccess(title: "Successs", message: "Login google successfully");
-              // SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
-              // SnackbarUtils().showInfo(title: "Info", message: "Info");
-              // SnackbarUtils().showLoading(message: "loading");
-              // Get.find<ItemController>().getItemByUidList();
-              Get.find<CategoryController>().getCategoryGroupList();
-              // Get.find<PostController>().getPostByUidList();
-              // Get.find<LocationController>().getLocationList();
-              // Get.find<CommentController>().getCommentByPostId(1);
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                // fcmToken = await AppConstrants.getFcmToken();
+                // accessToken = await AppConstrants.getToken();
+                // SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
+                // SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
+                // SnackbarUtils().showInfo(title: "Info", message: "Info");
+                // SnackbarUtils().showLoading(message: "loading");
+                // Get.find<ItemController>().getItemByUidList();
+                // Get.find<CategoryController>().getCategoryGroupList();
+                // Get.find<PostController>().getPostByUidList();
+                Get.find<LocationController>().getAllLocationPages();
+                // Get.find<CommentController>().getCommentByPostId(1);
 
-            },
-            child: Text('button'),
-          ),
-          Column(
-            children:[
-              // Text(fcmToken ?? ''),
-              // Text(accessToken ?? ''),
-            ]
-          )
-        ],
+              },
+              child: Text('button'),
+            ),
+            Gap(AppLayout.getHeight(20)),
+            Column(
+              children:[
+                // QrImageView(
+                //   data: "anh dung day tu chieu",
+                //   padding: const EdgeInsets.all(0),
+                //   foregroundColor: AppColors.primaryColor,
+                //   embeddedImage: AssetImage('assets/images/app_icon_5.png'),
+                //   embeddedImageStyle: QrEmbeddedImageStyle(
+                //     size: const Size(100, 100),
+                //   ),
+                //   eyeStyle: const QrEyeStyle(
+                //     eyeShape: QrEyeShape.circle,
+                //
+                //   ),
+                // ),
+                const GeneratorQrCode(data: "anh dung day tu chieu")
+              ]
+            )
+          ],
+        ),
       ),
     );
   }

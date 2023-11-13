@@ -1,6 +1,6 @@
 
 
-import 'package:lost_and_find_app/data/api/auth/user_controller.dart';
+import 'package:lost_and_find_app/data/api/user/user_controller.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/api/comment/comment_controller.dart';
 import 'package:lost_and_find_app/data/api/item/claim_controller.dart';
