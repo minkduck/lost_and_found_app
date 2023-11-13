@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<dynamic> itemlist = [];
   List<dynamic> myItemlist = [];
+  bool myItemsLoading = false;
   final ItemController itemController = Get.put(ItemController());
   String filterText = '';
   bool itemsSelected = true;
@@ -173,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _isMounted = true;
+    myItemsLoading = true;
     setState(() {
       firstLoged();
     });
@@ -223,6 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_isMounted) {
             setState(() {
               myItemlist = result;
+              myItemsLoading = false;
             });
           }
         });
@@ -524,8 +527,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             )
                       : myItemsSelected // Check if the "My Items" button is selected
-                          ? myItemlist
-                                  .isNotEmpty // Render myItemList grid view when My Items button is selected
+                      ? myItemsLoading ? SizedBox(
+                    width: AppLayout.getWidth(100),
+                    height: AppLayout.getHeight(300),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ) :
+                              myItemlist.isNotEmpty // Render myItemList grid view when My Items button is selected
                               ? Center(
                     child: GridView.builder(
                       padding: EdgeInsets.all(15),
@@ -644,14 +653,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
-                  )
-                              : SizedBox(
-                                  width: AppLayout.getWidth(100),
-                                  height: AppLayout.getHeight(300),
-                                  child: const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
+                  ) : SizedBox(
+                                width: AppLayout.getScreenWidth(),
+                                height: AppLayout.getScreenHeight()-400,
+                                child: Center(
+                                  child: Text("You haven't created any items yet"),
+                                ),
+                              )
                           : Container();
                 }),
               ],

@@ -53,6 +53,7 @@ class _CreateItemState extends State<CreateItem> {
       if (_isMounted) {
         setState(() {
           locationList = result;
+          print("locationList" + locationList.toString());
         });
       }
     });

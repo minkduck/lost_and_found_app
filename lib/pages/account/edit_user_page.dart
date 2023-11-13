@@ -6,7 +6,7 @@ import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 
-import '../../data/api/auth/user_controller.dart';
+import '../../data/api/user/user_controller.dart';
 import '../../widgets/app_button_upload_image.dart';
 
 class EditUserPage extends StatefulWidget {

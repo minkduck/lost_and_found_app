@@ -26,6 +26,7 @@ import 'package:lost_and_find_app/test/upload%20file%20and%20picture/upload-file
 import 'package:lost_and_find_app/utils/error.dart';
 import 'package:lost_and_find_app/utils/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:lost_and_find_app/widgets/scan_qrcode.dart';
 import 'package:provider/provider.dart';
 import 'package:lost_and_find_app/data/api/auth/google_sign_in.dart';
 import 'helper/dependencies.dart' as dep;
