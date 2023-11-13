@@ -11,6 +11,8 @@ import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/snackbar_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../message/database_service.dart';
+
 class GoogleSignInProvider extends ChangeNotifier {
   final googleSignIn = GoogleSignIn();
 
@@ -32,6 +34,7 @@ class GoogleSignInProvider extends ChangeNotifier {
   late String avatar = "String";
   late String fcmToken ;
   late String accessToken = "";
+  Stream? members;
 
   User? getUser() {
     userP.value = _auth.currentUser;
@@ -130,7 +133,7 @@ class GoogleSignInProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         print(await response.stream.bytesToString());
         print('login api success');
-        SnackbarUtils().showSuccess(title: "Successs", message: "Login google successfully");
+        SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
         final user = await FirebaseAuth.instance.currentUser!;
         final idTokenUser = await user.getIdToken();
         print("id Token User: " + idTokenUser.toString());
@@ -141,6 +144,12 @@ class GoogleSignInProvider extends ChangeNotifier {
         await prefs.setString('access_token', idTokenUser.toString());
         await prefs.setString('uid', uid);
         await postAuthen();
+        DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+            .gettingUserChats()
+            .then((val) {
+            members = val;
+          });
+        print("sn "+ members.toString());
       }
       else {
         print(response.reasonPhrase);

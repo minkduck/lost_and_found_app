@@ -21,17 +21,17 @@ import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/big_text.dart';
 
-class ItemsDetails extends StatefulWidget {
+class AnotherItemsDetails extends StatefulWidget {
   final int pageId;
   final String page;
-  const ItemsDetails({Key? key, required this.pageId, required this.page}) : super(key: key);
+  const AnotherItemsDetails({Key? key, required this.pageId, required this.page}) : super(key: key);
 
   @override
-  State<ItemsDetails> createState() => _ItemsDetailsState();
+  State<AnotherItemsDetails> createState() => _ItemsDetailsState();
 }
 
 
-class _ItemsDetailsState extends State<ItemsDetails> {
+class _ItemsDetailsState extends State<AnotherItemsDetails> {
 
   late List<String> imageUrls = [
     // AppAssets.airpods,
@@ -99,7 +99,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
   }
 
 
-    @override
+  @override
   void initState() {
     super.initState();
     _pageController.addListener(() {
@@ -145,7 +145,6 @@ class _ItemsDetailsState extends State<ItemsDetails> {
 
     });
 
-
   }
 
   @override
@@ -153,6 +152,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
     _isMounted = false;
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,8 +202,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                     itemCount: imageUrls.length,
                     itemBuilder: (context, index) {
                       return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.network(imageUrls[index]??"https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg",fit: BoxFit.fill,));
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.network(imageUrls[index]??"https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg",fit: BoxFit.fill,));
                       // child: Image.network(imageUrls[index],fit: BoxFit.fill,));               );
                     },
                   ),
@@ -269,36 +269,6 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                           : 'No Description',
                       size: 15,
                     )),
-                //profile user
-                Gap(AppLayout.getHeight(10)),
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.only(
-                          left: AppLayout.getWidth(16),
-                          top: AppLayout.getHeight(8)),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.grey[500],
-                        radius: 50,
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundImage: NetworkImage(itemlist['user']['avatar']??"https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg"),
-                        ),
-                      ),
-                    ),
-                    Gap(AppLayout.getHeight(50)),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => AnotherProfileUser( userId: itemlist['user']['id'],)));
-                      },
-                      child: Text(
-                        itemlist.isNotEmpty
-                          ? itemlist['user']['fullName'] :
-                          'No Name', style: TextStyle(fontSize: 20),),
-                    )
-                  ],
-                ),
                 Gap(AppLayout.getHeight(40)),
                 Center(
                     child: AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Send Message", onTap: () {})),
@@ -310,9 +280,9 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                         textButton: "List Claim",
                         onTap: () {
                           Navigator.push(
-                              context, MaterialPageRoute(builder: (context) => ClaimItems(pageId: widget.pageId, page: "Claim user",)));
+                              context, MaterialPageRoute(builder: (context) => ClaimItems(pageId: widget.pageId,page: "List Claim",)));
                         }))
-                : Center(
+                    : Center(
                     child: AppButton(
                       boxColor: isItemClaimed ? AppColors.primaryColor : AppColors.secondPrimaryColor,
                       textButton: isItemClaimed ? "Claimed" : "Claim",

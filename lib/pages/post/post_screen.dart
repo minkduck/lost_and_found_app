@@ -484,7 +484,7 @@ class _PostScreenState extends State<PostScreen> {
                                                 width: AppLayout.getWidth(180),
                                                 child: Image.network(
                                                     post['postMedias']
-                                                        [indexs]['media']['url'] ?? Container(),
+                                                        [indexs]['media']['url'] ?? 'https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png',
                                                     fit: BoxFit.fill),
                                               );
                                             },
@@ -630,7 +630,7 @@ class _PostScreenState extends State<PostScreen> {
                                           width: AppLayout.getWidth(180),
                                           child: Image.network(
                                               post['postMedias']
-                                              [indexs]['media']['url'] ?? Container(),
+                                              [indexs]['media']['url'] ?? 'https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png',
                                               fit: BoxFit.fill),
                                         );
                                       },

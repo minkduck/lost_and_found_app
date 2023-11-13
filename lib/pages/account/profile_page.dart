@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:lost_and_find_app/data/api/auth/user_controller.dart';
+import 'package:lost_and_find_app/data/api/user/user_controller.dart';
+import 'package:lost_and_find_app/pages/items/item_claim_by_user.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
+import 'package:lost_and_find_app/widgets/app_button.dart';
 import 'package:lost_and_find_app/widgets/big_text.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
 import 'package:provider/provider.dart';
@@ -131,9 +133,16 @@ class _AccountPageState extends State<AccountPage> {
                       ],
                     ),
                   ),
-                  Gap(AppLayout.getHeight(150)),
                 ],
               ) :const Center(child: CircularProgressIndicator(),),
+              Gap(AppLayout.getHeight(50)),
+              AppButton(boxColor: AppColors.primaryColor, textButton: "My List Claim Item", onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => ItemClaimByUser()));
+
+              }),
+              Gap(AppLayout.getHeight(50)),
+
               InkWell(
                 onTap: () async {
                   final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
