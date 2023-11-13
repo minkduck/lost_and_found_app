@@ -112,6 +112,34 @@ class ItemController extends GetxController{
     }
   }
 
+  Future<List<dynamic>> getItemByUserId(String id) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETITEMBYUID_URL}$id&ItemStatus=ACTIVE'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getItemByUidList " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getItemByUidList');
+    }
+  }
+
   Future<void> createItem(
       String name,
       String description,
@@ -138,7 +166,7 @@ class ItemController extends GetxController{
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
-      SnackbarUtils().showSuccess(title: "Successs", message: "Create new item successfully");
+      SnackbarUtils().showSuccess(title: "Success", message: "Create new item successfully");
       Get.toNamed(RouteHelper.getInitial());
     }
     else {

@@ -55,7 +55,8 @@ class LocationController extends GetxController{
         final responseBody = await response.stream.bytesToString();
         final jsonResponse = json.decode(responseBody);
 
-        final resultList = jsonResponse;
+        final resultList = jsonResponse['result'];
+        print("locationList:" + resultList.toString());
         return resultList;
       } else {
         print(response.statusCode);

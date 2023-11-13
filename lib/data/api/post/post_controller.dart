@@ -76,6 +76,35 @@ class PostController extends GetxController{
     }
   }
 
+  Future<List<dynamic>> getPostByUserId(String id) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETPOSTBYUSERID_URL}$id'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getItemByUidList " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getItemByUidList');
+    }
+  }
+
+
   Future<Map<String, dynamic>> getPostMediaById(int id) async {
     accessToken = await AppConstrants.getToken();
     var headers = {
@@ -162,7 +191,7 @@ class PostController extends GetxController{
       if (response.statusCode == 201) {
         print('create post success');
         print(await response.stream.bytesToString());
-        SnackbarUtils().showSuccess(title: "Successs", message: "Create new post successfully");
+        SnackbarUtils().showSuccess(title: "Success", message: "Create new post successfully");
         Get.toNamed(RouteHelper.getInitial());
       }
       else {

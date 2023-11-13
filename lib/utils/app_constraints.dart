@@ -27,7 +27,7 @@ class AppConstrants{
   static const String AUTHENTICATE_URL = "$BASE_URL/auth/authenticate?userDeviceToken=";
 
   //category
-  static const String GETCATEGORYWITHPAGINATION_URL = "$BASE_URL/api/categories";
+  static const String GETCATEGORYWITHPAGINATION_URL = "$BASE_URL/api/categories/all";
   static const String GETCATEGORYGROUPWITHPAGINATION_URL = "$BASE_URL/api/categoryGroups?IsActive=All";
 
   //location
@@ -47,6 +47,7 @@ class AppConstrants{
   static const String POSTPOST_URL = "$BASE_URL/api/posts/";
   static const String GETPOSTMEDIABYID_URL = "$BASE_URL/api/posts/";
   static const String GETPOSTBYUID_URL = "$BASE_URL/api/posts/query-with-status?PostUserId=";
+  static const String GETPOSTBYUSERID_URL = "$BASE_URL/api/posts?PostUserId=";
 
   //comment
   static const String GETCOMMENTBYPOSTBID_URL = "$BASE_URL/api/comments/get-by-post/";
@@ -61,5 +62,9 @@ class AppConstrants{
   //claim
   static const String POSTCLAIMITEM_URL = "$BASE_URL/api/items/claim/";
   static const String POSTUNCLAIMITEM_URL = "$BASE_URL/api/items/unclaim/";
+  static const String GETALLITEMCLAIMBYUSER_URL = "$BASE_URL/api/items/claims/member/all/";
+  static const String GETLISTFOUNDERUSER_URL = "$BASE_URL/api/items/claims/founder/item/";
+  static const String POSTDENYCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/deny/";
+  static const String POSTACCPECTCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/accept/";
 
 }
