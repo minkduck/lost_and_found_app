@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lost_and_find_app/pages/account/another_profile_user.dart';
-import 'package:lost_and_find_app/pages/items/claim_items.dart';
+import 'package:lost_and_find_app/pages/claims/claim_items.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';

@@ -11,7 +11,7 @@ import '../../utils/colors.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
-import 'another_items_detail.dart';
+import '../items/another_items_detail.dart';
 
 class ItemClaimByUser extends StatefulWidget {
   const ItemClaimByUser({super.key});
