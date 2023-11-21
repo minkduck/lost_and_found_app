@@ -62,7 +62,7 @@ class UserController extends GetxController {
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
       SnackbarUtils().showSuccess(title: "Success", message: "Update user information sucessful");
-      Get.toNamed(RouteHelper.getInitial());
+      Get.toNamed(RouteHelper.getInitial(3));
     }
     else {
       print(response.reasonPhrase);

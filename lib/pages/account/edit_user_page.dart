@@ -83,7 +83,7 @@ class _UserEditPageState extends State<EditUserPage> {
     String userGender = userList['gender'] ?? '';
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit User"),
+        title: Text("Edit Profile"),
       ),
       body: userList != null && userList!.isNotEmpty
           ? SingleChildScrollView(

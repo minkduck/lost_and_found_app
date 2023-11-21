@@ -192,7 +192,7 @@ class PostController extends GetxController{
         print('create post success');
         print(await response.stream.bytesToString());
         SnackbarUtils().showSuccess(title: "Success", message: "Create new post successfully");
-        Get.toNamed(RouteHelper.getInitial());
+        Get.toNamed(RouteHelper.getInitial(1));
       }
       else {
         print(response.reasonPhrase);

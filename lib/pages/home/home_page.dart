@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lost_and_find_app/pages/account/account_page.dart';
 import 'package:lost_and_find_app/pages/account/profile_page.dart';
 import 'package:lost_and_find_app/pages/home/home_screen.dart';
 import 'package:lost_and_find_app/pages/message/message_page.dart';

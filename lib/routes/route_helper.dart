@@ -8,7 +8,7 @@ class RouteHelper {
   static const String item = "/item";
   static const String post = "/post";
 
-  static String getInitial() => '$initial';
+  static String getInitial(int initialIndex) => '$initial?initialIndex=$initialIndex';
   static String getItem(int pageId, String page) {
     // Ensure that pageId and page are not null
     pageId ??= 0;

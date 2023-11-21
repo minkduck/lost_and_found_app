@@ -428,7 +428,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Container(
-                                          height: AppLayout.getHeight(151),
+                                          height: AppLayout.getHeight(135),
                                           width: AppLayout.getWidth(180),
                                           child: Image.network(
                                             mediaUrl,
@@ -563,7 +563,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             CrossAxisAlignment.start,
                             children: [
                               Container(
-                                height: AppLayout.getHeight(151),
+                                height: AppLayout.getHeight(135),
                                 width: AppLayout.getWidth(180),
                                 child: Image.network(
                                   mediaUrl,

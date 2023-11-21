@@ -4,7 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:lost_and_find_app/data/api/user/user_controller.dart';
-import 'package:lost_and_find_app/pages/items/item_claim_by_user.dart';
+import 'package:lost_and_find_app/pages/claims/item_claim_by_user.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
@@ -16,15 +16,15 @@ import '../../data/api/auth/google_sign_in.dart';
 import '../../utils/app_assets.dart';
 import 'edit_user_page.dart';
 
-class AccountPage extends StatefulWidget {
-  const AccountPage({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
   @override
-  State<AccountPage> createState() => _AccountPageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 
-class _AccountPageState extends State<AccountPage> {
+class _ProfilePageState extends State<ProfilePage> {
   bool _isMounted = false;
   Map<String, dynamic> userList = {};
   final UserController userController= Get.put(UserController());
@@ -71,8 +71,18 @@ class _AccountPageState extends State<AccountPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.grey,
+                            size: 30,
+                          ),
+                        ),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -135,47 +145,6 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                 ],
               ) :const Center(child: CircularProgressIndicator(),),
-              Gap(AppLayout.getHeight(50)),
-              AppButton(boxColor: AppColors.primaryColor, textButton: "My List Claim Item", onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => ItemClaimByUser()));
-
-              }),
-              Gap(AppLayout.getHeight(50)),
-
-              InkWell(
-                onTap: () async {
-                  final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
-                  await provider.logout();
-                },
-                child: Ink(
-                  width: AppLayout.getWidth(325),
-                  height: AppLayout.getHeight(50),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor, // Set the color here
-                    // borderRadius: BorderRadius.circular(AppLayout.getHeight(15)),
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-
-                    boxShadow: [
-                      BoxShadow(
-                          blurRadius: 4,
-                          spreadRadius: 4,
-                          offset: Offset(0, 4),
-                          color: Colors.grey.withOpacity(0.2))
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Log out",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 25,
-                      ),
-                    ),
-                  ),
-                ),
-              )
 
             ],
           ),
@@ -196,14 +165,14 @@ import 'package:provider/provider.dart';
 import '../../data/api/auth/google_sign_in.dart';
 import '../../utils/app_assets.dart';
 
-class AccountPage extends StatefulWidget {
-  const AccountPage({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
   @override
-  State<AccountPage> createState() => _AccountPageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
+class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser!;

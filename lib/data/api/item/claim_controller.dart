@@ -118,7 +118,11 @@ class ClaimController extends GetxController{
     var headers = {
       'Authorization': 'Bearer $accessToken'
     };
-    var request = http.Request('POST', Uri.parse('${AppConstrants.POSTDENYCLAIMBYITEMIDANDUSERID_URL}$itemId?userId=$userId'));
+    var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTDENYCLAIMBYITEMIDANDUSERID_URL));
+    request.fields.addAll({
+      'UserId': userId,
+      'ItemId': itemId.toString(),
+    });
 
     request.headers.addAll(headers);
 
@@ -140,8 +144,11 @@ class ClaimController extends GetxController{
     var headers = {
       'Authorization': 'Bearer $accessToken'
     };
-    var request = http.Request('POST', Uri.parse('${AppConstrants.POSTACCPECTCLAIMBYITEMIDANDUSERID_URL}$itemId?userId=$userId'));
-
+    var request = http.MultipartRequest('POST', Uri.parse('${AppConstrants.POSTACCPECTCLAIMBYITEMIDANDUSERID_URL}'));
+    request.fields.addAll({
+      'UserId': userId,
+      'ItemId': itemId.toString(),
+    });
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
@@ -153,7 +160,7 @@ class ClaimController extends GetxController{
     else {
       print(response.reasonPhrase);
       print(response.statusCode);
-      throw Exception('Failed to Deny claim');
+      throw Exception('Failed to Accept claim');
     }
 
   }
