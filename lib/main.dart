@@ -9,10 +9,11 @@ import 'package:lost_and_find_app/pages/home/home_page.dart';
 import 'package:lost_and_find_app/pages/home/home_screen.dart';
 import 'package:lost_and_find_app/pages/home_login_page.dart';
 import 'package:lost_and_find_app/pages/intro/intro_screen.dart';
-import 'package:lost_and_find_app/pages/items/claim_items.dart';
+import 'package:lost_and_find_app/pages/claims/claim_items.dart';
 import 'package:lost_and_find_app/pages/items/create_item.dart';
 import 'package:lost_and_find_app/pages/items/items_detail.dart';
 import 'package:lost_and_find_app/pages/items/take_picture.dart';
+import 'package:lost_and_find_app/pages/claims/take_picture_claim.dart';
 import 'package:lost_and_find_app/pages/message/message_page.dart';
 import 'package:lost_and_find_app/pages/post/create_post.dart';
 import 'package:lost_and_find_app/pages/post/post_detail.dart';
@@ -26,7 +27,7 @@ import 'package:lost_and_find_app/test/upload%20file%20and%20picture/upload-file
 import 'package:lost_and_find_app/utils/error.dart';
 import 'package:lost_and_find_app/utils/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:lost_and_find_app/widgets/scan_qrcode.dart';
+import 'package:lost_and_find_app/pages/claims/scan_qrcode.dart';
 import 'package:provider/provider.dart';
 import 'package:lost_and_find_app/data/api/auth/google_sign_in.dart';
 import 'helper/dependencies.dart' as dep;
@@ -63,7 +64,7 @@ class MyApp extends StatelessWidget {
 
         // initialRoute: RouteHelper.initial,
         // getPages: RouteHelper.routes,
-        home: HomeLoginPage(initialIndex: 0,),
+        home: HomeLoginPage(initialIndex: 0),
         getPages: RouteHelper.routes,
       ),
     );

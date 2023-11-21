@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class DatabaseService {
+class ChatController {
   final String? uid;
-  DatabaseService({this.uid});
+  ChatController({this.uid});
 
   // reference for our collections
   final CollectionReference chatsCollection =
@@ -20,11 +20,14 @@ class DatabaseService {
 
   gettingUserChats() async {
     DocumentReference userDocumentReference = usersCollection.doc("FLtIEJvuMgfg58u4sXhzxPn9qr73");
-    DocumentReference groupDocumentReference = userChatsCollection.doc("FLtIEJvuMgfg58u4sXhzxPn9qr73");
+    DocumentReference userChatsDocumentReference = userChatsCollection.doc("FLtIEJvuMgfg58u4sXhzxPn9qr73");
 
-    DocumentSnapshot documentSnapshot = await groupDocumentReference.get();
+    DocumentSnapshot documentSnapshot = await userChatsDocumentReference.get();
     List<dynamic> groups = await documentSnapshot['userChats'];
     return groups;
   }
 
+  getGroupChats(groupId) async {
+    return chatsCollection.doc(groupId).snapshots();
+  }
 }

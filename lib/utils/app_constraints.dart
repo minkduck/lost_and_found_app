@@ -64,7 +64,7 @@ class AppConstrants{
   static const String POSTUNCLAIMITEM_URL = "$BASE_URL/api/items/unclaim/";
   static const String GETALLITEMCLAIMBYUSER_URL = "$BASE_URL/api/items/claims/member/all/";
   static const String GETLISTFOUNDERUSER_URL = "$BASE_URL/api/items/claims/founder/item/";
-  static const String POSTDENYCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/deny/";
-  static const String POSTACCPECTCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/accept/";
+  static const String POSTDENYCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/deny";
+  static const String POSTACCPECTCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/accept";
 
 }

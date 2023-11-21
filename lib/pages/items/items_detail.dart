@@ -3,7 +3,8 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lost_and_find_app/pages/account/another_profile_user.dart';
-import 'package:lost_and_find_app/pages/items/claim_items.dart';
+import 'package:lost_and_find_app/pages/claims/claim_items.dart';
+import 'package:lost_and_find_app/pages/items/edit_item.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
@@ -165,31 +166,66 @@ class _ItemsDetailsState extends State<ItemsDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               // Align children to the left
               children: [
-                Gap(AppLayout.getHeight(20)),
+                Gap(AppLayout.getHeight(30)),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Icon(
-                        Icons.arrow_back_ios,
-                        color: Colors.grey,
-                        size: 30,
-                      ),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.grey,
+                            size: 30,
+                          ),
+                        ),
+                        BigText(
+                          text: "Home",
+                          size: 20,
+                          color: AppColors.secondPrimaryColor,
+                          fontW: FontWeight.w500,
+                        ),
+                      ],
                     ),
-                    BigText(
-                      text: "Items",
-                      size: 20,
-                      color: AppColors.secondPrimaryColor,
-                      fontW: FontWeight.w500,
-                    ),
+                    itemlist['user']['id'] == uid ? Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditItem(
+                                  itemId: itemId,
+                                  initialCategory: itemlist['categoryName'], // Pass the initial data
+                                  initialTitle: itemlist['name'], // Pass the initial data
+                                  initialDescription: itemlist['description'], // Pass the initial data
+                                  initialLocation: itemlist['locationName'],
+                                  status: itemlist['itemStatus'],
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text("Edit", style: TextStyle(color: AppColors.primaryColor, fontSize: 20),),
+                        ),
+                        Gap(AppLayout.getWidth(15)),
+                        GestureDetector(
+                          onTap: () async {
+                            await itemController.deleteItemById(itemId);
+                          },
+                          child: Text("Delete", style: TextStyle(color: Colors.redAccent, fontSize: 20),),
+                        ),
+
+                      ],
+                    ) : Container()
                   ],
                 ),
                 Padding(
                   padding: EdgeInsets.only(
                       left: AppLayout.getWidth(30), top: AppLayout.getHeight(10)),
-                  child: Text('Items', style: Theme.of(context).textTheme.displayMedium,),
+                  child: Text('Item Detail', style: Theme.of(context).textTheme.displayMedium,),
                 ),
                 Gap(AppLayout.getHeight(20)),
 

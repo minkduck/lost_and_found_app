@@ -11,6 +11,7 @@ import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/big_text.dart';
+import 'scan_qrcode.dart';
 
 class ClaimItems extends StatefulWidget {
   final int pageId;
@@ -95,7 +96,7 @@ class _ClaimItemsState extends State<ClaimItems> {
                 ),
                 margin: EdgeInsets.only(
                     bottom: AppLayout.getHeight(20)),
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(11.0),
                 child: Row(
                   children: [
                     Container(
@@ -153,6 +154,14 @@ class _ClaimItemsState extends State<ClaimItems> {
                             setState(() {
                               userClaimList = updatedUserClaimList;
                             });
+                            Future.delayed(Duration(seconds: 2), () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ScanQrCode(userId: claim['userId'],),
+                              ),
+                            );
+                          });
                           },
                           child: Container(
                             decoration: BoxDecoration(
