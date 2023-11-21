@@ -20,7 +20,6 @@ class _GeneratorQrCodeState extends State<GeneratorQrCode> {
       data: widget.data.toString(),
       padding: const EdgeInsets.all(0),
       foregroundColor: AppColors.primaryColor,
-      embeddedImage: const AssetImage('assets/images/app_icon_5.png'),
       embeddedImageStyle: QrEmbeddedImageStyle(
         size: const Size(100, 100),
       ),

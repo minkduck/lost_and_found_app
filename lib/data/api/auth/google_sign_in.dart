@@ -11,7 +11,7 @@ import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/snackbar_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../message/database_service.dart';
+import '../message/chat_controller.dart';
 
 class GoogleSignInProvider extends ChangeNotifier {
   final googleSignIn = GoogleSignIn();
@@ -144,7 +144,7 @@ class GoogleSignInProvider extends ChangeNotifier {
         await prefs.setString('access_token', idTokenUser.toString());
         await prefs.setString('uid', uid);
         await postAuthen();
-        DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+        ChatController(uid: FirebaseAuth.instance.currentUser!.uid)
             .gettingUserChats()
             .then((val) {
             members = val;
