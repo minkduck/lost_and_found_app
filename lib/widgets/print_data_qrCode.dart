@@ -48,12 +48,12 @@ class PrintDataQrCode extends StatelessWidget {
             Container(
               margin: EdgeInsets.only(bottom: 20),
               child: AppButton(boxColor: AppColors.primaryColor, textButton: "Take a photo", onTap: (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TakePictureClaim(resultScanQrCode: result, userId: userId,),
-                  ),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => TakePictureClaim(resultScanQrCode: result, userId: userId,),
+                //   ),
+                // );
               }),
             )
           ],

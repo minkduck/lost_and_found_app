@@ -15,7 +15,10 @@ import 'get_accpect_claim_details.dart';
 class TakePictureClaim extends StatefulWidget {
   final String resultScanQrCode;
   final String userId;
-  const TakePictureClaim({Key? key, required this.resultScanQrCode, required this.userId}) : super(key: key);
+  final String itemUserId;
+  final int itemId;
+
+  const TakePictureClaim({Key? key, required this.resultScanQrCode, required this.userId, required this.itemUserId, required this.itemId}) : super(key: key);
 
   @override
   State<TakePictureClaim> createState() => _TakePictureClaimState();
@@ -24,30 +27,22 @@ class TakePictureClaim extends StatefulWidget {
 class _TakePictureClaimState extends State<TakePictureClaim> {
   final ImagePicker imagePicker = ImagePicker();
 
-  List<XFile>? imageFileList = [];
-
-  Future<void> selectImagesFromGallery() async {
-    final List<XFile> selectedImages = await imagePicker.pickMultiImage();
-    if (selectedImages.isNotEmpty) {
-      imageFileList!.addAll(selectedImages);
-      setState(() {});
-    }
-  }
+  XFile? imageFile;
 
   Future<void> takePicture() async {
-    final XFile? picture = await imagePicker.pickImage(
-        source: ImageSource.camera);
+    final XFile? picture = await imagePicker.pickImage(source: ImageSource.camera);
     if (picture != null) {
-      imageFileList!.add(picture);
+      imageFile = picture; // Assign the new picture directly
       setState(() {});
     }
   }
 
-  void removeImage(int index) {
+  void removeImage() {
     setState(() {
-      imageFileList!.removeAt(index);
+      imageFile = null; // Clear the imageFile
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -89,39 +84,32 @@ class _TakePictureClaimState extends State<TakePictureClaim> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GridView.builder(
-                  itemCount: imageFileList!.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.9,
-                      crossAxisSpacing: AppLayout.getWidth(10),
-                      mainAxisSpacing: AppLayout.getHeight(10)
-                  ),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Stack(
-                      children: [
-                        Positioned.fill(
-                          child: Image.file(
-                            File(imageFileList![index].path),
-                            fit: BoxFit.cover,
-                          ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (imageFile != null)
+                      Positioned.fill(
+                        child: Image.file(
+                          File(imageFile!.path),
+                          fit: BoxFit.cover,
                         ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: IconButton(
-                            icon: Icon(FontAwesomeIcons.xmark,
-                                color: AppColors.primaryColor),
-                            onPressed: () {
-                              removeImage(index);
-                            },
+                      ),
+                    if (imageFile != null)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: IconButton(
+                          icon: Icon(
+                            FontAwesomeIcons.xmark,
+                            color: AppColors.primaryColor,
                           ),
+                          onPressed: () {
+                            removeImage();
+                          },
                         ),
-                      ],
-                    );
-                  },
+                      ),
+                  ],
                 ),
-
               ),
             ),
             Padding(
@@ -134,7 +122,13 @@ class _TakePictureClaimState extends State<TakePictureClaim> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => GetAccepctClaimDetail(imageFileList: imageFileList, userId: widget.userId, resultScanQrCode: widget.resultScanQrCode,),
+                        builder: (context) => GetAccepctClaimDetail(
+                          imageFile: imageFile,
+                          userId: widget.userId,
+                          resultScanQrCode: widget.resultScanQrCode,
+                          itemId: widget.itemId,
+                          itemUserId: widget.itemUserId,
+                        ),
                       ),
                     );
 

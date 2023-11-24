@@ -67,4 +67,7 @@ class AppConstrants{
   static const String POSTDENYCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/deny";
   static const String POSTACCPECTCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/accept";
 
+  //receipt
+  static const String POSTRECEIPT_URL = "$BASE_URL/api/receipts";
+
 }

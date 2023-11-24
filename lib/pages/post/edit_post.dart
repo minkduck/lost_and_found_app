@@ -18,19 +18,20 @@ import '../../widgets/app_button_upload_image.dart';
 import '../../widgets/app_drop_menu_filed_title.dart';
 import '../../widgets/big_text.dart';
 
-class CreatePost extends StatefulWidget {
-  const CreatePost({super.key});
+class EditPost extends StatefulWidget {
+  final Map<String, dynamic> postData;
+
+  const EditPost({Key? key, required this.postData}) : super(key: key);
 
   @override
-  State<CreatePost> createState() => _CreatePostState();
+  State<EditPost> createState() => _EditPostState();
 }
 
-class _CreatePostState extends State<CreatePost> {
+class _EditPostState extends State<EditPost> {
   bool _isMounted = false;
   final _formKey = GlobalKey<FormState>();
-  var titleController =
-      TextEditingController();
-  var postContentController = TextEditingController();
+  late TextEditingController titleController;
+  late TextEditingController postContentController;
 
   String? selectedCategoryValue;
   String? selectedLocationValue;
@@ -41,29 +42,57 @@ class _CreatePostState extends State<CreatePost> {
   List<dynamic> locationList = [];
   final LocationController locationController = Get.put(LocationController());
 
+  List<XFile>? imageFileList = [];
+
+  String findCategoryIdByName(String categoryName) {
+    var category = categoryList.firstWhere(
+          (category) => category['name'].toString() == categoryName,
+      orElse: () => {'id': 0}, // Assuming 'id' is an int, replace with the appropriate default value
+    );
+    return (category['id'] ?? 0).toString(); // Assuming 'id' is an int, convert to String
+  }
+
+  String findLocationIdByName(String locationName) {
+    var location = locationList.firstWhere(
+          (location) => location['locationName'].toString() == locationName,
+      orElse: () => {'id': 0}, // Assuming 'id' is an int, replace with the appropriate default value
+    );
+    return (location['id'] ?? 0).toString(); // Assuming 'id' is an int, convert to String
+  }
+
   @override
   void initState() {
     super.initState();
     _isMounted = true;
+
+    titleController = TextEditingController(text: widget.postData['title']);
+    postContentController =
+        TextEditingController(text: widget.postData['description']);
+
     categoryController.getCategoryList().then((result) {
       if (_isMounted) {
         setState(() {
           categoryList = result;
+          String initialCategoryId = findCategoryIdByName(widget.postData['postCategoryId'].toString());
+          // Set the initial value for AppDropdownFieldTitle
+          selectedCategoryValue = initialCategoryId.isNotEmpty ? initialCategoryId : null;
         });
       }
     });
+
     locationController.getAllLocationPages().then((result) {
       if (_isMounted) {
         setState(() {
           locationList = result;
+          String initialLocationId = findLocationIdByName(widget.postData['postLocationId'].toString());
+          // Set the initial value for AppDropdownFieldTitle
+          selectedLocationValue = initialLocationId.isNotEmpty ? initialLocationId : null;
         });
       }
     });
   }
 
   final ImagePicker imagePicker = ImagePicker();
-
-  List<XFile>? imageFileList = [];
 
   Future<void> selectImagesFromGallery() async {
     final List<XFile> selectedImages = await imagePicker.pickMultiImage();
@@ -75,7 +104,7 @@ class _CreatePostState extends State<CreatePost> {
 
   Future<void> takePicture() async {
     final XFile? picture =
-        await imagePicker.pickImage(source: ImageSource.camera);
+    await imagePicker.pickImage(source: ImageSource.camera);
     if (picture != null) {
       imageFileList!.add(picture);
       setState(() {});
@@ -113,20 +142,12 @@ class _CreatePostState extends State<CreatePost> {
                       ),
                     ),
                     BigText(
-                      text: "Post",
+                      text: "Edit Post",
                       size: 20,
                       color: AppColors.secondPrimaryColor,
                       fontW: FontWeight.w500,
                     ),
                   ],
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: AppLayout.getWidth(30), top: AppLayout.getHeight(10)),
-                  child: Text(
-                    'Create Post',
-                    style: Theme.of(context).textTheme.displayMedium,
-                  ),
                 ),
                 Gap(AppLayout.getHeight(20)),
 
@@ -140,7 +161,7 @@ class _CreatePostState extends State<CreatePost> {
                       maxLines: null,
                       onSaved: (value) => titleController.text = value!,
                       decoration: InputDecoration(
-                        hintText: 'Title', // Add your hint text here
+                        hintText: 'Title',
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -162,7 +183,7 @@ class _CreatePostState extends State<CreatePost> {
                       controller: postContentController,
                       maxLines: null,
                       decoration: InputDecoration(
-                        hintText: 'Description', // Add your hint text here
+                        hintText: 'Description',
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -180,11 +201,9 @@ class _CreatePostState extends State<CreatePost> {
                   hintText: "Select a category",
                   validator: "Please choose category",
                   selectedValue: selectedCategoryValue,
-                  // selectedValue: categoryList.isNotEmpty ? selectedCategoryValue ?? categoryList.first['id']?.toString() ?? '': '',
                   items: categoryList.map((category) {
                     return DropdownMenuItem<String>(
                       value: category['id']?.toString() ?? '',
-                      // Ensure a valid value
                       child: Text(category['name']?.toString() ?? ''),
                     );
                   }).toList(),
@@ -202,7 +221,6 @@ class _CreatePostState extends State<CreatePost> {
                   hintText: "Select a location",
                   validator: "Please choose location",
                   selectedValue: selectedLocationValue,
-                  // selectedValue: locationList.isNotEmpty ? selectedLocationValue ?? locationList.first['id']?.toString() ?? '' : '',
                   items: locationList.map((location) {
                     return DropdownMenuItem<String>(
                       value: location['id']?.toString() ?? '',
@@ -226,26 +244,22 @@ class _CreatePostState extends State<CreatePost> {
                         return AlertDialog(
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
-                            // Make the content size fit its children
                             children: [
                               AppButtonUpLoadImage(
                                 boxColor: AppColors.primaryColor,
                                 textButton: "Take a photo",
                                 onTap: () {
                                   takePicture();
-                                  Navigator.pop(
-                                      context); // Close the dialog after taking a photo
+                                  Navigator.pop(context);
                                 },
                               ),
                               Gap(AppLayout.getHeight(20)),
-                              // Add a gap between the buttons
                               AppButtonUpLoadImage(
                                 boxColor: AppColors.secondPrimaryColor,
                                 textButton: "Upload photo",
                                 onTap: () {
                                   selectImagesFromGallery();
-                                  Navigator.pop(
-                                      context); // Close the dialog after selecting an image
+                                  Navigator.pop(context);
                                 },
                               ),
                             ],
@@ -258,7 +272,6 @@ class _CreatePostState extends State<CreatePost> {
                 ),
                 SizedBox(
                   height: AppLayout.getHeight(250),
-                  // Set a fixed height or any desired value
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: GridView.builder(
@@ -301,32 +314,34 @@ class _CreatePostState extends State<CreatePost> {
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: Center(
                     child: AppButton(
-                        boxColor: AppColors.primaryColor,
-                        textButton: "Create",
-                        onTap: () async {
-                          try {
-                            if (_formKey.currentState!.validate()) {
-                              if (imageFileList != null && imageFileList!.isNotEmpty) {
-                                List<String> imagePaths = imageFileList!.map((image) => image.path).toList();
-                                print(titleController.text + '-' + postContentController.text +
-                                    '-' + selectedLocationValue! + '-' + selectedCategoryValue! + '-' + imagePaths.toString());
-                                await PostController().createPost(
-                                  titleController.text,
-                                  postContentController.text,
-                                  selectedLocationValue!,
-                                  selectedCategoryValue!,
-                                  imagePaths,
-                                );
-                              } else {
-                                SnackbarUtils().showError(title: "Image", message: "You must add image");
-                              }
+                      boxColor: AppColors.primaryColor,
+                      textButton: "Save Changes",
+                      onTap: () async {
+                        try {
+                          if (_formKey.currentState!.validate()) {
+                            if (imageFileList != null &&
+                                imageFileList!.isNotEmpty) {
+                              List<String> imagePaths =
+                              imageFileList!.map((image) => image.path).toList();
+                              await PostController().updatePostById(
+                                widget.postData['postId'],
+                                titleController.text,
+                                postContentController.text,
+                                selectedLocationValue!,
+                                selectedCategoryValue!,
+                              );
+                            } else {
+                              SnackbarUtils().showError(
+                                  title: "Image", message: "You must add image");
                             }
-                          } catch (e) {
-                            SnackbarUtils().showError(title: "Error", message: e.toString());
-                            print("Error creating the post: $e");
-                            // You can also display an error snackbar here if needed.
                           }
-                        }),
+                        } catch (e) {
+                          SnackbarUtils().showError(
+                              title: "Error", message: e.toString());
+                          print("Error updating the post: $e");
+                        }
+                      },
+                    ),
                   ),
                 )
               ],
@@ -335,5 +350,13 @@ class _CreatePostState extends State<CreatePost> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _isMounted = false;
+    titleController.dispose();
+    postContentController.dispose();
+    super.dispose();
   }
 }
