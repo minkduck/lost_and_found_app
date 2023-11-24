@@ -1,14 +1,17 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lost_and_find_app/pages/claims/take_picture_claim.dart';
 import 'package:lost_and_find_app/widgets/print_data_qrCode.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 import '../../utils/snackbar_utils.dart';
 
 class ScanQrCode extends StatefulWidget {
-  final String userId;
-  const ScanQrCode({Key? key, required this.userId}) : super(key: key);
+  final String userClaimId;
+  final String itemUserId;
+  final int itemId;
+  const ScanQrCode({Key? key, required this.userClaimId, required this.itemUserId, required this.itemId}) : super(key: key);
 
   @override
   State<ScanQrCode> createState() => _ScanQrCodeState();
@@ -31,15 +34,17 @@ class _ScanQrCodeState extends State<ScanQrCode> {
           });
 
           if (barcode != null) {
-            if (barcode.code == widget.userId) {
+            if (barcode.code == widget.userClaimId) {
               controller!.pauseCamera();
               Future.delayed(Duration(seconds: 1), () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PrintDataQrCode(
-                      result: barcode.code!,
-                      userId: widget.userId,
+                    builder: (context) => TakePictureClaim(
+                      resultScanQrCode: barcode.code!,
+                      userId: widget.userClaimId,
+                      itemUserId: widget.itemUserId,
+                      itemId: widget.itemId,
                     ),
                   ),
                 );

@@ -195,16 +195,16 @@ class ItemController extends GetxController{
       "description": description,
       "locationId": locationId,
       "categoryId": categoryId,
-      "cabinetId": 0,
+      "cabinetId": null,
       "itemStatus": status
     });
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 204) {
+    if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
-      SnackbarUtils().showSuccess(title: "Success", message: "Delete item successfully");
+      SnackbarUtils().showSuccess(title: "Success", message: "Edit item successfully");
       Get.toNamed(RouteHelper.getInitial(0));
     } else {
       print(response.statusCode);

@@ -37,6 +37,7 @@ class _TestPageState extends State<TestPage> {
   late String fcmToken = "";
   late String accessToken = "";
   TextEditingController textController = TextEditingController();
+  List<Map<String, dynamic>> userAndChatList = [];
 
   Future<void> fetchAndPrintUserChats() async {
     ChatController(uid: FirebaseAuth.instance.currentUser!.uid)
@@ -226,10 +227,41 @@ class _TestPageState extends State<TestPage> {
                           Map<String, dynamic> data = documents[0].data() as Map<String, dynamic>;
 
                           // TODO: Sử dụng dữ liệu ở đây, ví dụ: hiển thị trong ListView
-                          print("Document Data: $data");
+
+                          // Iterate over each UID in the document
+                          data.forEach((uid, userData) {
+                            // Perform your action here
+                            var uidUser = userData['uid'];
+
+                            // Retrieve data for each UID
+                            FirebaseFirestore.instance.collection("users").doc(uidUser).get().then((userSnapshot) {
+                              if (userSnapshot.exists) {
+                                // Retrieve data from the user document
+                                Map<String, dynamic> userMap = userSnapshot.data() as Map<String, dynamic>;
+
+                                // Create a Map to store user and user chat information
+                                Map<String, dynamic> userAndChatInfo = {
+                                  'user': userMap,
+                                  'userChat': {'uid': uidUser, 'lastMessage': userData['lastMessage'], 'timeLastMessage': userData['date']},
+                                };
+
+                                // Add the Map to the list
+                                userAndChatList.add(userAndChatInfo);
+                                // TODO: Use the user and user chat data as needed
+                              } else {
+                                // The user document does not exist
+                                print("User document for UID $uidUser does not exist.");
+                              }
+                            });
+                          });
+                          print(userAndChatList.toString());
 
                           // Trả về widget hiển thị dữ liệu
-                          return Text(data.toString());
+                          return Column(
+                            children: [
+                              Text("User and Chat List: ${userAndChatList.toString()}"),
+                            ],
+                          );
                         } else {
                           // Nếu danh sách rỗng, hiển thị một widget thông báo
                           return Text('No documents found.');
@@ -245,6 +277,8 @@ class _TestPageState extends State<TestPage> {
                     },
                   ),
                 )
+
+
 
               ]
             )

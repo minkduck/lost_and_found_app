@@ -12,6 +12,7 @@ import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
+import 'edit_post.dart';
 
 class PostDetail extends StatefulWidget {
   final int pageId;
@@ -101,23 +102,57 @@ class _PostDetailState extends State<PostDetail> {
                   children: [
                     Gap(AppLayout.getHeight(50)),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.grey,
-                            size: 30,
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Icon(
+                                Icons.arrow_back_ios,
+                                color: Colors.grey,
+                                size: 30,
+                              ),
+                            ),
+                            BigText(
+                              text: "Post",
+                              size: 20,
+                              color: AppColors.secondPrimaryColor,
+                              fontW: FontWeight.w500,
+                            ),
+                          ],
+                        ),
+                        postList['user']['id'] == uid ? Row(children: [
+                          GestureDetector(
+                            onTap: () async {
+                                Map<String, dynamic> postData = {
+                                  'postId': postList['id'],
+                                  'title': postList['title'],
+                                  'description': postList['postContent'],
+                                  "postLocationId": postList['locationName'],
+                                  "postCategoryId": postList['categoryName'],
+                                };
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditPost(postData: postData),
+                                  ),
+                                );
+                            },
+                            child: Text("Edit", style: TextStyle(color: AppColors.primaryColor, fontSize: 20),),
                           ),
-                        ),
-                        BigText(
-                          text: "Post",
-                          size: 20,
-                          color: AppColors.secondPrimaryColor,
-                          fontW: FontWeight.w500,
-                        ),
+                          Gap(AppLayout.getWidth(15)),
+                          GestureDetector(
+                            onTap: () async {
+                              await postController.deleteItemById(postList['id']);
+                            },
+                            child: Text("Delete", style: TextStyle(color: Colors.redAccent, fontSize: 20),),
+                          ),
+
+                        ],) : Container()
                       ],
                     ),
                     Gap(AppLayout.getHeight(30)),

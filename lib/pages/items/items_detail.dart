@@ -346,7 +346,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                         textButton: "List Claim",
                         onTap: () {
                           Navigator.push(
-                              context, MaterialPageRoute(builder: (context) => ClaimItems(pageId: widget.pageId, page: "Claim user",)));
+                              context, MaterialPageRoute(builder: (context) => ClaimItems(pageId: widget.pageId, page: "Claim user",itemUserId: itemlist['user']['id'],)));
                         }))
                 : Center(
                     child: AppButton(

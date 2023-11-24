@@ -399,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Gap(AppLayout.getHeight(25)),
                 GetBuilder<ItemController>(builder: (item) {
                   return itemsSelected
-                      ? itemlist.isNotEmpty
+                      ? itemlist.isNotEmpty & categoryGroupList.isNotEmpty
                           ? Center(
                               child: GridView.builder(
                                 padding: EdgeInsets.all(15),
@@ -534,7 +534,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: CircularProgressIndicator(),
                     ),
                   ) :
-                              myItemlist.isNotEmpty // Render myItemList grid view when My Items button is selected
+                              myItemlist.isNotEmpty & categoryGroupList.isNotEmpty
                               ? Center(
                     child: GridView.builder(
                       padding: EdgeInsets.all(15),
@@ -653,7 +653,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
-                  ) : SizedBox(
+                  )
+                                  : SizedBox(
                                 width: AppLayout.getScreenWidth(),
                                 height: AppLayout.getScreenHeight()-400,
                                 child: Center(
