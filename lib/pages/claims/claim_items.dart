@@ -15,8 +15,9 @@ import 'scan_qrcode.dart';
 
 class ClaimItems extends StatefulWidget {
   final int pageId;
+  final String itemUserId;
   final String page;
-  const ClaimItems({Key? key, required this.pageId, required this.page}) : super(key: key);
+  const ClaimItems({Key? key, required this.pageId, required this.page, required this.itemUserId}) : super(key: key);
 
   @override
   _ClaimItemsState createState() => _ClaimItemsState();
@@ -158,7 +159,10 @@ class _ClaimItemsState extends State<ClaimItems> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ScanQrCode(userId: claim['userId'],),
+                                builder: (context) => ScanQrCode(
+                                  userClaimId: claim['userId'],
+                                  itemUserId: widget.itemUserId,
+                                  itemId: widget.pageId,),
                               ),
                             );
                           });

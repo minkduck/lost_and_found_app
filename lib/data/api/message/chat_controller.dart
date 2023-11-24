@@ -30,4 +30,31 @@ class ChatController {
   getGroupChats(groupId) async {
     return chatsCollection.doc(groupId).snapshots();
   }
+
+  getMyChats(myUid) async {
+    return FirebaseFirestore.instance
+        .collection("userChats")
+        .doc(myUid)
+        .get();
+  }
+
+  getUserUid(uid) async {
+    return FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid)
+        .get();
+  }
+
+/*  Stream<DocumentSnapshot<Map<String, dynamic>>> getChatDataStream(String chatId) {
+    return chatsCollection
+        .doc(chatId)
+        .snapshots()
+        .map((snapshot) => snapshot as DocumentSnapshot<Map<String, dynamic>>);
+  }*/
+
+    getChatData(chatId) async {
+    return chatsCollection
+        .doc(chatId)
+        .get();
+  }
 }

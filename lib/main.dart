@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
 
         // initialRoute: RouteHelper.initial,
         // getPages: RouteHelper.routes,
-        home: HomeLoginPage(initialIndex: 0),
+        home: HomeLoginPage(initialIndex: 0,),
         getPages: RouteHelper.routes,
       ),
     );
