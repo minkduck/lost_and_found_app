@@ -17,12 +17,16 @@ class MyQrCode extends StatefulWidget {
 
 class _MyQrCodeState extends State<MyQrCode> {
   late String uid = "";
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 0), () async {
+    Future.delayed(Duration(seconds: 1), () async {
       uid = await AppConstrants.getUid();
+      setState(() {
+        isLoading = true;
+      });
     });
   }
 
@@ -49,9 +53,9 @@ class _MyQrCodeState extends State<MyQrCode> {
           ),
           Gap(AppLayout.getHeight(150)),
 
-          Center(
+          isLoading ? Center(
             child: GeneratorQrCode(data: uid),
-          )
+          ) : Center(child: CircularProgressIndicator(),)
         ],
       ),
     );

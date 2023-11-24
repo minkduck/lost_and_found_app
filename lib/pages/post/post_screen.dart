@@ -35,6 +35,8 @@ class _PostScreenState extends State<PostScreen> {
 
   List<dynamic> postList = [];
   List<dynamic> mypostList = [];
+  bool myPostLoading = false;
+
   final PostController postController = Get.put(PostController());
   String filterText = '';
   bool postsSelected = true;
@@ -183,11 +185,16 @@ class _PostScreenState extends State<PostScreen> {
   void initState() {
     super.initState();
     _isMounted = true;
+    myPostLoading = true;
     Future.delayed(Duration(seconds: 1), () async {
       await postController.getPostList().then((result) {
         if (_isMounted) {
           setState(() {
             postList = result;
+            postList.removeWhere((post) => post['postStatus'] == 'DELETED');
+            setState(() {
+              postList = result;
+            });
           });
         }
       });
@@ -195,6 +202,11 @@ class _PostScreenState extends State<PostScreen> {
         if (_isMounted) {
           setState(() {
             mypostList = result;
+            myPostLoading = false;
+            mypostList.removeWhere((post) => post['postStatus'] == 'DELETED');
+            setState(() {
+              mypostList = result;
+            });
           });
         }
       });
@@ -392,7 +404,7 @@ class _PostScreenState extends State<PostScreen> {
 
                 GetBuilder<PostController>(builder: (posts) {
                   return postsSelected ?
-                    postList.isNotEmpty
+                    postList.isNotEmpty & categoryGroupList.isNotEmpty
                       ? RefreshIndicator(
                     onRefresh: _refreshData,
                         child: ListView.builder(
@@ -538,7 +550,14 @@ class _PostScreenState extends State<PostScreen> {
                             child: CircularProgressIndicator(),
                           ),
                         )
-                      : myPostsSelected ? mypostList.isNotEmpty
+                      : myPostsSelected ? myPostLoading ? SizedBox(
+                    width: AppLayout.getWidth(100),
+                    height: AppLayout.getHeight(300),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ) :
+                       mypostList.isNotEmpty & categoryGroupList.isNotEmpty
                       ? RefreshIndicator(
                     onRefresh: _refreshData,
                     child: ListView.builder(
@@ -678,12 +697,12 @@ class _PostScreenState extends State<PostScreen> {
                     ),
                   )
                       : SizedBox(
-                    width: AppLayout.getWidth(100),
-                    height: AppLayout.getHeight(300),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
+                         width: AppLayout.getScreenWidth(),
+                         height: AppLayout.getScreenHeight()-400,
+                         child: Center(
+                           child: Text("You haven't created any post yet"),
+                         ),
+                       )
                       : Container();
                 }),
               ],

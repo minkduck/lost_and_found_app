@@ -207,4 +207,62 @@ class PostController extends GetxController{
       isLoading.value = false;
     }
   }
+
+  Future<void> updatePostById(
+      int postId,
+      String title,
+      String description,
+      String categoryId,
+      String locationId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('PUT', Uri.parse("${AppConstrants.GETPOSTBYID_URL}$postId"));
+
+    request.body = json.encode({
+      "title": title,
+      "postContent": description,
+      "postLocationId": locationId,
+      "postCategoryId": categoryId,
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      SnackbarUtils().showSuccess(title: "Success", message: "Edit post successfully");
+      Get.toNamed(RouteHelper.getInitial(1));
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to delete getItemList');
+    }
+  }
+
+  Future<void> deleteItemById(int postId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('DELETE', Uri.parse("${AppConstrants.GETPOSTBYID_URL}/$postId"));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 204) {
+      print(await response.stream.bytesToString());
+      SnackbarUtils().showSuccess(title: "Success", message: "Delete post successfully");
+      Get.toNamed(RouteHelper.getInitial(1));
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to delete post');
+    }
+  }
+
 }
