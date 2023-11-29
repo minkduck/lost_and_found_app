@@ -1,5 +1,6 @@
 
 
+import 'package:lost_and_find_app/data/api/item/receipt_controller.dart';
 import 'package:lost_and_find_app/data/api/user/user_controller.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/api/comment/comment_controller.dart';
@@ -43,4 +44,6 @@ Future<void> init() async {
   //claim
   Get.lazyPut(() => ClaimController());
 
+  //receipt
+  Get.lazyPut(() => ReceiptController());
 }

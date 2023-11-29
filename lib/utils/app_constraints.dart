@@ -69,5 +69,6 @@ class AppConstrants{
 
   //receipt
   static const String POSTRECEIPT_URL = "$BASE_URL/api/receipts";
+  static const String GETRECEIPTBYITEMID_URL = "$BASE_URL/api/receipts?ItemId=";
 
 }

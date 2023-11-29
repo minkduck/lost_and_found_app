@@ -104,9 +104,20 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
                   backgroundImage: NetworkImage(userList['avatar'] ?? 'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg'),
                 ),
                 Gap(AppLayout.getWidth(10)),
-                Text(
-                  userList['fullName'] ?? '-',
-                  style: Theme.of(context).textTheme.titleMedium,
+                Column(
+                  children: [
+                    Text(
+                      userList['fullName'] ?? '-',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Gap(AppLayout.getHeight(5)),
+
+                    Text(
+                      userList['email'] ?? '-',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+
+                  ],
                 ),
 
 
@@ -123,9 +134,19 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
                   backgroundImage: NetworkImage(userItemList['avatar'] ?? 'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg'),
                 ),
                 Gap(AppLayout.getWidth(10)),
-                Text(
-                  userItemList['fullName'] ?? '-',
-                  style: Theme.of(context).textTheme.titleMedium,
+                Column(
+                  children: [
+                    Text(
+                      userItemList['fullName'] ?? '-',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Gap(AppLayout.getHeight(5)),
+                    Text(
+                      userItemList['email'] ?? '-',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+
+                  ],
                 ),
 
 
