@@ -18,6 +18,7 @@ import 'package:anim_search_bar/anim_search_bar.dart';
 import 'package:lost_and_find_app/widgets/generator_qrcode.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../data/api/item/receipt_controller.dart';
 import '../data/api/message/chat_controller.dart';
 import '../utils/app_assets.dart';
 import '../utils/snackbar_utils.dart';
@@ -90,7 +91,8 @@ class _TestPageState extends State<TestPage> {
                 // Get.find<CategoryController>().getCategoryGroupList();
                 // Get.find<PostController>().getPostByUidList();
                 // Get.find<LocationController>().getAllLocationPages();
-                // Get.find<CommentController>().getCommentByPostId(1);
+                Get.find<ReceiptController>().getReceiptByItemId(7);
+
                 fetchAndPrintUserChats();
 
               },

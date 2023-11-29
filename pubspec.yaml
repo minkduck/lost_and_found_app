@@ -64,6 +64,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_image_compress: ^2.1.0
   image:
+  uuid: ^4.2.1
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
