@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatController {
   final String? uid;
@@ -56,5 +57,36 @@ class ChatController {
     return chatsCollection
         .doc(chatId)
         .get();
+  }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getChatDataStream(String chatId) {
+    return FirebaseFirestore.instance
+        .collection("chats")
+        .doc(chatId)
+        .snapshots()
+        .map((snapshot) => snapshot as DocumentSnapshot<Map<String, dynamic>>);
+  }
+
+  Future<void> sendMessage(String chatId, String text, String senderId) async {
+    try {
+      // Get a reference to the messages collection under the specific chatId
+      CollectionReference messagesCollection = FirebaseFirestore.instance.collection("chats/$chatId/messages");
+      print('messagesCollection' + messagesCollection.toString());
+      // Add a new document to the messages collection with the message data
+      await messagesCollection.add({
+        'id': Uuid().v4(), // Generating a unique ID using the uuid package
+        'text': text,
+        'senderId': senderId,
+        'date': FieldValue.serverTimestamp(), // Using server timestamp for date
+      });
+
+      // Update the last message timestamp in the chat metadata for sorting chats
+      await FirebaseFirestore.instance.collection("chats").doc(chatId).update({
+        'lastMessageTime': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error sending message: $e');
+      throw e; // Re-throw the exception to handle it in the UI if needed
+    }
   }
 }

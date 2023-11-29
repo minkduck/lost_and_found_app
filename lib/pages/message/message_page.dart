@@ -119,7 +119,7 @@ class _MessagePageState extends State<MessagePage> {
       }
 
       // Sort the chatsList based on UID
-      chatsList.sort((a, b) => a.formattedDate.compareTo(b.formattedDate));
+      chatsList.sort((a, b) => b.formattedDate.compareTo(a.formattedDate));
     }
 
     // Return the list of chats
@@ -164,9 +164,7 @@ class _MessagePageState extends State<MessagePage> {
                     ),
                   ),
                 )
-              : Center(
-                  child: CircularProgressIndicator(),
-                ),
+              : Container(),
         ],
       ),
     );
