@@ -146,7 +146,7 @@ class ClaimController extends GetxController{
     };
     var request = http.MultipartRequest('POST', Uri.parse('${AppConstrants.POSTACCPECTCLAIMBYITEMIDANDUSERID_URL}'));
     request.fields.addAll({
-      'UserId': userId,
+      'ReceiverId': userId,
       'ItemId': itemId.toString(),
     });
     request.headers.addAll(headers);
