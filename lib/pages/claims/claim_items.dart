@@ -7,6 +7,9 @@ import 'package:lost_and_find_app/data/api/user/user_controller.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 
 import '../../data/api/item/claim_controller.dart';
+import '../../data/api/message/chat_controller.dart';
+import '../../routes/route_helper.dart';
+import '../../utils/app_constraints.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/app_button.dart';
@@ -29,12 +32,14 @@ class _ClaimItemsState extends State<ClaimItems> {
   final ClaimController claimController = Get.put(ClaimController());
   final Map<String, dynamic> userMap = {};
   final UserController userController = Get.put(UserController());
+  late String uid = "";
 
   @override
   void initState() {
     super.initState();
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
+      uid = await AppConstrants.getUid();
       await claimController.getListClaimByItemId(widget.pageId).then((result) async {
         if (_isMounted) {
           final userClaims = result as List<dynamic>;
@@ -98,33 +103,40 @@ class _ClaimItemsState extends State<ClaimItems> {
                 margin: EdgeInsets.only(
                     bottom: AppLayout.getHeight(20)),
                 padding: const EdgeInsets.all(11.0),
-                child: Row(
+                child: Column(
                   children: [
-                    Container(
-                      child: CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(user['avatar']),
-                        // backgroundImage: AssetImage(AppAssets.avatarDefault!),
-                      ),
-                    ),
-                    Gap(AppLayout.getWidth(15)),
-                    Column(
+                    Row(
                       children: [
-                        Text(user['fullName'] ?? "No Name"),
-                        // const Text("Name"),
-                        Gap(AppLayout.getHeight(10)),
-                        Text(user['email'] ?? "No Email"),
-                        // const Text("Email"),
+                        Container(
+                          child: CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(user['avatar']),
+                            // backgroundImage: AssetImage(AppAssets.avatarDefault!),
+                          ),
+                        ),
+                        Gap(AppLayout.getWidth(15)),
+                        Column(
+                          children: [
+                            Text(user['fullName'] ?? "No Name"),
+                            // const Text("Name"),
+                            Gap(AppLayout.getHeight(10)),
+                            Text(user['email'] ?? "No Email"),
+                            // const Text("Email"),
 
+                          ],
+                        ),
                       ],
                     ),
-                    Spacer(),
+                    Gap(AppLayout.getHeight(10)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         GestureDetector(
-                          onTap: () {
-                            // Handle the tap event
+                          onTap: () async {
+                            String otherUserId = user['id'];
+
+                            await ChatController().createUserChats(uid, otherUserId);
+                            Get.toNamed(RouteHelper.getInitial(2));
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -156,16 +168,16 @@ class _ClaimItemsState extends State<ClaimItems> {
                               userClaimList = updatedUserClaimList;
                             });
                             Future.delayed(Duration(seconds: 2), () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ScanQrCode(
-                                  userClaimId: claim['userId'],
-                                  itemUserId: widget.itemUserId,
-                                  itemId: widget.pageId,),
-                              ),
-                            );
-                          });
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ScanQrCode(
+                                    userClaimId: claim['userId'],
+                                    itemUserId: widget.itemUserId,
+                                    itemId: widget.pageId,),
+                                ),
+                              );
+                            });
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -214,6 +226,7 @@ class _ClaimItemsState extends State<ClaimItems> {
                         )
                       ],
                     )
+
                   ],
                 ),
               ) : Container();

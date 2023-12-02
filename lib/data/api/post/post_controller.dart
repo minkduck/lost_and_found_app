@@ -190,9 +190,9 @@ class PostController extends GetxController{
 
       if (response.statusCode == 201) {
         print('create post success');
+        Get.toNamed(RouteHelper.getInitial(1));
         print(await response.stream.bytesToString());
         SnackbarUtils().showSuccess(title: "Success", message: "Create new post successfully");
-        Get.toNamed(RouteHelper.getInitial(1));
       }
       else {
         print(response.reasonPhrase);
@@ -262,6 +262,84 @@ class PostController extends GetxController{
       print(response.statusCode);
       print(response.reasonPhrase);
       throw Exception('Failed to delete post');
+    }
+  }
+
+  Future<void> postBookmarkPostByPostId(int postId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('POST', Uri.parse("${AppConstrants.POSTBOOKMARKBYPOSTID}/$postId"));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 201) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to postBookmarkPostByPostId');
+    }
+  }
+
+  Future<Map<String, dynamic>> getBookmarkedPost(int postId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request =
+    http.Request('GET', Uri.parse(AppConstrants.GETBOOKMARKBYPOSTID + postId.toString()));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      update();
+      return resultList;
+    } else if (response.statusCode == 404) {
+      return {'postId': postId, 'isActive': false};
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getBookmarkedItems');
+    }
+  }
+
+  Future<List<dynamic>> getPostBookmark() async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse(AppConstrants.GETPOSTBYBOOKMARK));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getPostBookmark " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getPostBookmark');
     }
   }
 

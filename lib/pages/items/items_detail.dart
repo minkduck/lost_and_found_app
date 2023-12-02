@@ -6,6 +6,7 @@ import 'package:lost_and_find_app/data/api/item/receipt_controller.dart';
 import 'package:lost_and_find_app/pages/account/another_profile_user.dart';
 import 'package:lost_and_find_app/pages/claims/claim_items.dart';
 import 'package:lost_and_find_app/pages/items/edit_item.dart';
+import 'package:lost_and_find_app/pages/message/chat_page.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
@@ -16,6 +17,7 @@ import 'package:get/get.dart';
 
 import '../../data/api/item/claim_controller.dart';
 import '../../data/api/item/item_controller.dart';
+import '../../data/api/message/chat_controller.dart';
 import '../../data/api/user/user_controller.dart';
 import '../../routes/route_helper.dart';
 import '../../test/time/time_widget.dart';
@@ -49,6 +51,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
   late String uid = "";
   bool isItemClaimed = false;
   int itemId = 0;
+  bool isBookmarked = false;
 
   Map<String, dynamic> itemlist = {};
   final ItemController itemController = Get.put(ItemController());
@@ -80,6 +83,40 @@ class _ItemsDetailsState extends State<ItemsDetails> {
       print('Error unclaiming item: $e');
     }
   }
+
+  Future<void> bookmarkItem(int itemId) async {
+    try {
+      await itemController.postBookmarkItemByItemId(itemId);
+
+      // Manually update the bookmark status based on the isActive field
+      setState(() {
+        itemlist['isActive'] = !(itemlist['isActive'] ?? false);
+      });    } catch (e) {
+      print('Error bookmarking item: $e');
+    }
+  }
+
+  Future<void> loadBookmarkedItems(int itemId) async {
+    try {
+      // Call the API to get bookmarked items for the given itemId
+      final bookmarkedItems = await itemController.getBookmarkedItems(itemId);
+
+      if (_isMounted) {
+        setState(() {
+          // Update the isActive field for the specific item
+          if (itemlist.containsKey('id') && itemlist['id'] == itemId) {
+            itemlist['isActive'] =
+                bookmarkedItems['itemId'] == itemId && bookmarkedItems['isActive'];
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading bookmarked items for item $itemId: $e');
+      // Handle the error gracefully, e.g., set isActive to false or log the error.
+    }
+  }
+
+
   Future<void> _refreshData() async {
     await itemController.getItemListById(widget.pageId).then((result) {
       if (_isMounted) {
@@ -149,6 +186,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
           });
         }
       });
+      await loadBookmarkedItems(widget.pageId);
+
       await receiptController.getReceiptByItemId(widget.pageId).then((result) async {
         if (_isMounted) {
             recepitList = result;
@@ -284,6 +323,17 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 // Container(
                 //     padding: EdgeInsets.only(left: AppLayout.getWidth(20)),
                 //     child: StatusWidget(text: "Found", color: Colors.grey)),
+                IconButton(
+                  icon: itemlist['isActive'] ?? false
+                      ? Icon(Icons.bookmark,
+                      color: AppColors.secondPrimaryColor, size: 35,)
+                      : Icon(Icons.bookmark_outline,
+                      color: AppColors.secondPrimaryColor, size: 35,),
+                  onPressed: () {
+                    bookmarkItem(itemlist['id']);
+                  },
+                ),
+
                 Padding(
                   padding: EdgeInsets.only(
                       left: AppLayout.getWidth(16), top: AppLayout.getHeight(16)),
@@ -361,7 +411,32 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 ),
                 Gap(AppLayout.getHeight(40)),
                 Center(
-                    child: AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Send Message", onTap: () {})),
+                    child: AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Send Message", onTap: () async {
+                      String otherUserId = itemlist['user']['id'];
+
+                      await ChatController().createUserChats(uid, otherUserId);
+                      Get.toNamed(RouteHelper.getInitial(2));
+
+/*                      BuildContext contextReference = context;
+
+                      // Find the chatId based on user IDs
+                      String myUid = await AppConstrants.getUid(); // Get current user ID
+                      String chatId = myUid.compareTo(otherUserId) > 0 ? myUid + otherUserId : otherUserId + myUid;
+
+                      // Navigate to ChatPage with the relevant chat information
+                      Navigator.push(
+                        contextReference, // Use the context reference
+                        MaterialPageRoute(
+                          builder: (context) => ChatPage(
+                            chat: Chat(
+                              chatId: chatId,
+                              uid: myUid,
+                              otherId: otherUserId,
+                            ),
+                          ),
+                        ),
+                      );*/
+                    })),
                 Gap(AppLayout.getHeight(20)),
 
                 itemlist['itemStatus'] != 'RETURNED' ? itemlist['user']['id'] == uid ? Center(

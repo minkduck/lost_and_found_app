@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:lost_and_find_app/pages/account/my_item_bookmark.dart';
+import 'package:lost_and_find_app/pages/account/my_post_bookmark.dart';
+import 'package:lost_and_find_app/pages/account/my_receipt_page.dart';
 import 'package:lost_and_find_app/pages/account/profile_page.dart';
 import 'package:provider/provider.dart';
 
@@ -45,25 +48,29 @@ class _AccountPageState extends State<AccountPage> {
     return Scaffold(
       body: Column(
         children: [
-          userList.isNotEmpty ? Column(
-            children: [
+          // userList.isNotEmpty ? Column(
+          //   children: [
+          //     Gap(AppLayout.getHeight(50)),
+          //     Gap(AppLayout.getHeight(30)),
+          //     Center(
+          //       child: CircleAvatar(
+          //         radius: 80,
+          //         backgroundImage:
+          //         NetworkImage(userList['avatar']),
+          //       ),
+          //     ),
+          //   ],
+          // ) :const Center(child: CircularProgressIndicator(),),
               Gap(AppLayout.getHeight(50)),
               Gap(AppLayout.getHeight(30)),
-              Center(
-                child: CircleAvatar(
-                  radius: 80,
-                  backgroundImage:
-                  NetworkImage(userList['avatar']),
-                ),
-              ),
-            ],
-          ) :const Center(child: CircularProgressIndicator(),),
           Gap(AppLayout.getHeight(50)),
-          AppButton(boxColor: AppColors.primaryColor, textButton: "Profile", onTap: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => ProfilePage()));
+          Center(
+            child: AppButton(boxColor: AppColors.primaryColor, textButton: "Profile", onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => ProfilePage()));
 
-          }),
+            }),
+          ),
           Gap(AppLayout.getHeight(50)),
           AppButton(boxColor: AppColors.primaryColor, textButton: "My QR Code", onTap: () {
             Navigator.push(
@@ -74,6 +81,24 @@ class _AccountPageState extends State<AccountPage> {
           AppButton(boxColor: AppColors.primaryColor, textButton: "My List Claim Item", onTap: () {
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => ItemClaimByUser()));
+
+          }),
+          Gap(AppLayout.getHeight(50)),
+          AppButton(boxColor: AppColors.primaryColor, textButton: "My List Bookmark Item", onTap: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => MyItemBookmark()));
+
+          }),
+          Gap(AppLayout.getHeight(50)),
+          AppButton(boxColor: AppColors.primaryColor, textButton: "My List Bookmark Post", onTap: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => MyPostBookmark()));
+
+          }),
+          Gap(AppLayout.getHeight(50)),
+          AppButton(boxColor: AppColors.primaryColor, textButton: "My Receipt", onTap: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => MyReceipt()));
 
           }),
           Gap(AppLayout.getHeight(80)),

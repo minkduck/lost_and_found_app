@@ -198,6 +198,8 @@ import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/data/api/message/Chat.dart';
+import 'package:uuid/uuid.dart';
+import '../../utils/app_constraints.dart';
 import 'message_tile.dart'; // Import your updated MessageTile widget
 
 class ChatPage extends StatefulWidget {
@@ -214,6 +216,46 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   TextEditingController messageController = TextEditingController();
+  List<dynamic> messagesData = [];
+  bool _isMounted = false;
+  late String myUid;
+
+  Future<dynamic> listChatData() async {
+    try {
+      var chatData = await ChatController().getChatData(widget.chat.chatId);
+
+      print('Chat Data: $chatData');
+
+      if (chatData.exists) {
+        var chatMetadata = chatData.data();
+        return chatMetadata?['messages'];
+      } else {
+        print('Chat not found.');
+        return null;  // Return null or an empty list based on your use case
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+      return null;  // Return null or an empty list based on your use case
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _isMounted = true;
+    print('chatId: ' + widget.chat.chatId);
+    AppConstrants.getUid().then((value) {
+      myUid = value;
+    });
+    listChatData().then((result) {
+      if (_isMounted) {
+        setState(() {
+          messagesData = result ?? [];
+          print(messagesData);
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -240,19 +282,21 @@ class _ChatPageState extends State<ChatPage> {
           ],
         ),
       ),
-      body: StreamBuilder(
+      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: ChatController().getChatDataStream(widget.chat.chatId),
-        builder: (context, snapshot) {
+        builder: (context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // You can replace this with a loading indicator
+            return CircularProgressIndicator();
           }
 
-          if (!snapshot.hasData || snapshot.data == null) {
+          if (!snapshot.hasData || !snapshot.data!.exists) {
             return Center(
               child: Text("No messages yet."),
             );
           }
-
           var messagesData = snapshot.data!['messages'];
 
           return Stack(
@@ -282,7 +326,7 @@ class _ChatPageState extends State<ChatPage> {
                           var messageData = messagesData[index];
 
                           return MessageTile(
-                            message: messageData['text'],
+                            message: messageData['text'] ?? "",
                             sender: messageData['senderId'],
                             sentByMe: messageData['senderId'] == widget.chat.uid,
                             imageUrl: messageData['img'],
@@ -321,28 +365,18 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                             ),
                           ),
-                          Gap(AppLayout.getWidth(20)),
+                          Gap(AppLayout.getWidth(10)), // Adjust the gap as needed
                           GestureDetector(
                             onTap: () async {
                               String messageText = messageController.text;
                               print(messageText);
-                              try {
-                                await ChatController().sendMessage(widget.chat.chatId, messageText, widget.chat.uid);
 
-                                // Update the local messagesData list immediately
-                                setState(() {
-                                  messagesData.add({
-                                    'text': messageText,
-                                    'senderId': widget.chat.uid,
-                                    // You may want to add 'id' and 'date' here based on your UI requirements
-                                  });
-                                });
-print(messagesData);
-                                // Clear the text field after sending the message
+                              if (messageText.isNotEmpty) {
+                                // Call the sendMessage method to send the message to Firestore
+                                await sendMessage(messageText);
+
+                                // Clear the message input field after sending
                                 messageController.clear();
-                              } catch (e) {
-                                // Handle the error, show a snackbar, or log it
-                                print('Error sending message: $e');
                               }
                             },
                             child: Container(
@@ -359,7 +393,28 @@ print(messagesData);
                                 ),
                               ),
                             ),
-                          )
+                          ),
+                          Gap(AppLayout.getWidth(10)), // Adjust the gap as needed
+                          GestureDetector(
+                            onTap: () {
+                              // Add your logic to handle sending images
+                              // This can include opening an image picker, etc.
+                            },
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.image, // Change this to the appropriate image icon
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -374,7 +429,21 @@ print(messagesData);
   }
 
   // Add the method to send a message
-  void sendMessage() async {
+  Future<void> sendMessage(String messageText) async {
+    try {
+      // Create a new message map
+      Map<String, dynamic> newMessage = {
+        'date': DateTime.now().millisecondsSinceEpoch,
+        'id': Uuid().v4(),
+        'senderId': myUid, // Replace with the actual sender ID
+        'text': messageText,
+      };
 
+      // Add the new message to the Firestore collection
+      await ChatController().addMessage(widget.chat.chatId, newMessage, myUid, widget.chat.otherId);
+    } catch (e) {
+      print('Error sending message: $e');
+    }
   }
 }
+

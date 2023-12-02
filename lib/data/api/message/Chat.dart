@@ -6,8 +6,10 @@ class Chat {
   final String image;
   final String lastMessage;
   final String time;
+  final DateTime date;
   final String chatId;
-  final String formattedDate; // Add this property
+  final String formattedDate;
+  final String otherId;// Add this property
 
   Chat({
     required this.uid,
@@ -16,7 +18,11 @@ class Chat {
     required this.lastMessage,
     required this.time,
     required this.chatId,
-    required this.formattedDate, // Initialize this property
+    required this.formattedDate,
+    required this.otherId,
+    required this.date,
+
+
   });
 }
 

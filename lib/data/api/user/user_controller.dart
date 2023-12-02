@@ -40,7 +40,7 @@ class UserController extends GetxController {
       throw Exception('Failed to load getUserByUid');
     }
   }
-  Future<void> putUserByPostId(String firstName,String lastName ,String male, String phone) async {
+  Future<void> putUserByUserId(String firstName,String lastName ,String male, String phone) async {
     accessToken = await AppConstrants.getToken();
     var headers = {
       'Content-Type': 'application/json',
