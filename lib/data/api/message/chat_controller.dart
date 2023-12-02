@@ -1,17 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+
+import 'Chat.dart';
 
 class ChatController {
   final String? uid;
+
   ChatController({this.uid});
 
   // reference for our collections
   final CollectionReference chatsCollection =
-      FirebaseFirestore.instance.collection("chats");
+  FirebaseFirestore.instance.collection("chats");
   final CollectionReference userChatsCollection =
-      FirebaseFirestore.instance.collection("userChats");
+  FirebaseFirestore.instance.collection("userChats");
   final CollectionReference usersCollection =
-      FirebaseFirestore.instance.collection("users");
+  FirebaseFirestore.instance.collection("users");
 
   Future gettingUserData(String email) async {
     QuerySnapshot snapshot =
@@ -20,8 +24,10 @@ class ChatController {
   }
 
   gettingUserChats() async {
-    DocumentReference userDocumentReference = usersCollection.doc("FLtIEJvuMgfg58u4sXhzxPn9qr73");
-    DocumentReference userChatsDocumentReference = userChatsCollection.doc("FLtIEJvuMgfg58u4sXhzxPn9qr73");
+    DocumentReference userDocumentReference = usersCollection.doc(
+        "FLtIEJvuMgfg58u4sXhzxPn9qr73");
+    DocumentReference userChatsDocumentReference = userChatsCollection.doc(
+        "FLtIEJvuMgfg58u4sXhzxPn9qr73");
 
     DocumentSnapshot documentSnapshot = await userChatsDocumentReference.get();
     List<dynamic> groups = await documentSnapshot['userChats'];
@@ -53,7 +59,79 @@ class ChatController {
         .map((snapshot) => snapshot as DocumentSnapshot<Map<String, dynamic>>);
   }*/
 
-    getChatData(chatId) async {
+  Stream<List<Chat>> getMyChatsStream(String uid) {
+    return userChatsCollection.doc(uid).snapshots().asyncMap((docSnapshot) async {
+      var userChatsData = docSnapshot.data() as Map<String, dynamic>?;
+
+      if (userChatsData != null) {
+        var chatsList = <Chat>[];
+
+        for (var entry in userChatsData.entries) {
+          var chatId = entry.key;
+          var chatData = entry.value as Map<String, dynamic>;
+
+          var otherUid = chatData['uid'];
+
+          var otherUserSnapshot = await ChatController().getUserUid(otherUid);
+          var otherUserData = otherUserSnapshot.data();
+
+          if (otherUserData != null) {
+            var now = DateTime.now();
+            var timeDifference = now.difference(chatData['date'].toDate());
+            var formattedDate = '';
+
+            if (timeDifference.inMinutes < 1) {
+              formattedDate = 'just now';
+            } else if (timeDifference.inHours < 1) {
+              var minutesAgo = timeDifference.inMinutes;
+              formattedDate = (minutesAgo == 1) ? '1 minute ago' : '$minutesAgo minutes ago';
+            } else if (timeDifference.inHours < 24) {
+              var hoursAgo = timeDifference.inHours;
+              formattedDate = (hoursAgo == 1) ? '1 hour ago' : '$hoursAgo hours ago';
+            } else if (timeDifference.inDays <= 7) {
+              var daysAgo = timeDifference.inDays;
+              formattedDate = (daysAgo == 1) ? '1 day ago' : '$daysAgo days ago';
+            } else if (timeDifference.inDays <= 365) {
+              formattedDate = DateFormat('dd-MM').format(chatData['date'].toDate());
+            } else {
+              formattedDate = DateFormat('dd-MM-yyyy').format(chatData['date'].toDate());
+            }
+
+            String chatId;
+
+            if (otherUid.compareTo(uid) > 0) {
+              chatId = otherUid + uid;
+            } else {
+              chatId = uid + otherUid;
+            }
+
+            var chat = Chat(
+              uid: otherUid,
+              name: otherUserData['displayName'],
+              image: otherUserData['photoUrl'],
+              lastMessage: chatData['lastMessage']['text'],
+              chatId: chatId,
+              formattedDate: formattedDate,
+              time: formattedDate,
+              date: chatData['date'].toDate(),
+              otherId: otherUid
+              // Add other fields accordingly
+            );
+
+            chatsList.add(chat);
+          }
+        }
+        chatsList.sort((a, b) => b.date.compareTo(a.date));
+
+        return chatsList;
+
+      } else {
+        return [];
+      }
+    });
+  }
+
+  getChatData(chatId) async {
     return chatsCollection
         .doc(chatId)
         .get();
@@ -67,26 +145,60 @@ class ChatController {
         .map((snapshot) => snapshot as DocumentSnapshot<Map<String, dynamic>>);
   }
 
-  Future<void> sendMessage(String chatId, String text, String senderId) async {
+  Future<void> addMessage(String chatId, Map<String, dynamic> messageData, String userId, String otherId) async {
     try {
-      // Get a reference to the messages collection under the specific chatId
-      CollectionReference messagesCollection = FirebaseFirestore.instance.collection("chats/$chatId/messages");
-      print('messagesCollection' + messagesCollection.toString());
-      // Add a new document to the messages collection with the message data
-      await messagesCollection.add({
-        'id': Uuid().v4(), // Generating a unique ID using the uuid package
-        'text': text,
-        'senderId': senderId,
-        'date': FieldValue.serverTimestamp(), // Using server timestamp for date
-      });
+      // Create a reference to the specific chat document
+      DocumentReference chatDocRef = chatsCollection.doc(chatId);
 
-      // Update the last message timestamp in the chat metadata for sorting chats
-      await FirebaseFirestore.instance.collection("chats").doc(chatId).update({
-        'lastMessageTime': FieldValue.serverTimestamp(),
+      // Add the new message to the messages array using FieldValue.arrayUnion()
+      await chatDocRef.update({
+        'messages': FieldValue.arrayUnion([messageData]),
+      });
+      DocumentReference userChatDocRef = userChatsCollection.doc(userId);
+      await userChatDocRef.update({
+        chatId : {
+          // 'date': messageData['date'],
+          'date': DateTime.now(),
+          'lastMessage': {
+            'text': messageData['text'],
+          },
+          'uid': otherId,
+        }
       });
     } catch (e) {
-      print('Error sending message: $e');
-      throw e; // Re-throw the exception to handle it in the UI if needed
+      print('Error adding message: $e');
+      throw e;
+    }
+  }
+
+  Future<void> createUserChats(String myUid, String otherUid) async {
+    // Check whether the group chats in Firestore exist, if not create
+    String chatId =
+    myUid.compareTo(otherUid) > 0 ? myUid + otherUid : otherUid + myUid;
+
+    try {
+      DocumentSnapshot chatDocSnapshot =
+      await chatsCollection.doc(chatId).get();
+
+      if (!chatDocSnapshot.exists) {
+        // Create a chat in chats collection
+        await chatsCollection.doc(chatId).set({'messages': []});
+
+        // Create user chats
+        await userChatsCollection.doc(myUid).update({
+          '$chatId.uid': otherUid,
+          '$chatId.date': FieldValue.serverTimestamp(),
+          '$chatId.lastMessage.text': '',
+        });
+
+        await userChatsCollection.doc(otherUid).update({
+          '$chatId.uid': myUid,
+          '$chatId.date': FieldValue.serverTimestamp(),
+          '$chatId.lastMessage.text': '',
+        });
+      }
+    } catch (error) {
+      print('Error handling chat: $error');
     }
   }
 }

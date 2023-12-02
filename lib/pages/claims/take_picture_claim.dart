@@ -117,7 +117,7 @@ class _TakePictureClaimState extends State<TakePictureClaim> {
               child: Center(
                 child: AppButton(
                   boxColor: AppColors.primaryColor,
-                  textButton: "Done",
+                  textButton: "Continue",
                   onTap: () async {
                     Navigator.push(
                       context,

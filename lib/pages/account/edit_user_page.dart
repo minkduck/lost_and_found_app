@@ -219,12 +219,12 @@ class _UserEditPageState extends State<EditUserPage> {
                       decoration: InputDecoration(hintText: userList['phone']),
                     ),
                     Gap(AppLayout.getHeight(100)),
-                    AppButton(boxColor: AppColors.primaryColor, textButton: "Update", onTap: (){
-                      userController.putUserByPostId(
-                          firstNameController.text.isNotEmpty ? firstNameController.text : userList['firstName'],
-                          lastNameController.text.isNotEmpty ? lastNameController.text : userList['lastName'],
-                          genderController.text.isNotEmpty ? genderController.text : userList['gender'],
-                          phoneController.text.isNotEmpty ? phoneController.text : userList['phone']
+                    AppButton(boxColor: AppColors.primaryColor, textButton: "Update", onTap: () {
+                      userController.putUserByUserId(
+                          firstNameController.text.isNotEmpty ? firstNameController.text : userList['firstName']?? '',
+                          lastNameController.text.isNotEmpty ? lastNameController.text : userList['lastName']?? '',
+                          genderController.text.isNotEmpty ? genderController.text : userList['gender']?? 'Male',
+                          phoneController.text.isNotEmpty ? phoneController.text : userList['phone'] ?? ''
                       );
                       Navigator.pop(context);
                       })

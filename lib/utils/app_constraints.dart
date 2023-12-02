@@ -56,7 +56,7 @@ class AppConstrants{
 
   //user
   static const String GETUSERBYUID_URL = "$BASE_URL/api/users/";
-  static const String PUTUSERBYUID_URL = "$BASE_URL/api/users/";
+  static const String PUTUSERBYUID_URL = "$BASE_URL/api/users";
   static const String POSTAVATARUSER_URL = "$BASE_URL/api/users/media";
 
   //claim
@@ -70,5 +70,15 @@ class AppConstrants{
   //receipt
   static const String POSTRECEIPT_URL = "$BASE_URL/api/receipts";
   static const String GETRECEIPTBYITEMID_URL = "$BASE_URL/api/receipts?ItemId=";
+  static const String GETRECEIPTBYRECEIVERID_URL = "$BASE_URL/api/receipts?ReceiverId=";
+  static const String GETRECEIPTBYSENDERID_URL = "$BASE_URL/api/receipts?SenderId=";
+
+  //bookmark
+  static const String POSTBOOKMARKBYITEMID = "$BASE_URL/api/items/bookmark-an-item/";
+  static const String GETBOOKMARKBYITEMID = "$BASE_URL/api/items/get-item-bookmark?itemId=";
+  static const String POSTBOOKMARKBYPOSTID = "$BASE_URL/api/posts/bookmark-a-post/";
+  static const String GETBOOKMARKBYPOSTID = "$BASE_URL/api/posts/get-post-bookmark?postId=";
+  static const String GETITEMBYBOOKMARK = "$BASE_URL/api/items/get-own-item-bookmark";
+  static const String GETPOSTBYBOOKMARK = "$BASE_URL/api/posts/get-own-post-bookmark";
 
 }

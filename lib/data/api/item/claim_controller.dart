@@ -120,7 +120,7 @@ class ClaimController extends GetxController{
     };
     var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTDENYCLAIMBYITEMIDANDUSERID_URL));
     request.fields.addAll({
-      'UserId': userId,
+      'ReceiverId': userId,
       'ItemId': itemId.toString(),
     });
 
@@ -144,9 +144,9 @@ class ClaimController extends GetxController{
     var headers = {
       'Authorization': 'Bearer $accessToken'
     };
-    var request = http.MultipartRequest('POST', Uri.parse('${AppConstrants.POSTACCPECTCLAIMBYITEMIDANDUSERID_URL}'));
+    var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTACCPECTCLAIMBYITEMIDANDUSERID_URL));
     request.fields.addAll({
-      'ReceiverId': userId,
+      'UserId': userId,
       'ItemId': itemId.toString(),
     });
     request.headers.addAll(headers);

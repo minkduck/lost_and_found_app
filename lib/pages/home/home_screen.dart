@@ -39,6 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> itemlist = [];
   List<dynamic> myItemlist = [];
   bool myItemsLoading = false;
+  bool itemsLoading = false;
+  bool isBookmarked = false;
+
   final ItemController itemController = Get.put(ItemController());
   String filterText = '';
   bool itemsSelected = true;
@@ -67,11 +70,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     firstLogin = prefs.getString('firstLogin');
   }
+
   void onFilterTextChanged(String text) {
     setState(() {
       filterText = text;
     });
   }
+
   void onSubmitted() {
     // Handle search submission here
     print('Search submitted with text: $filterText');
@@ -90,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
   }
+
   List<dynamic> filterItemsByCategories() {
     // Apply category filtering first
     final List<dynamic> filteredByCategories = selectedCategoryGroup == null
@@ -138,12 +144,68 @@ class _HomeScreenState extends State<HomeScreen> {
     return filteredByText;
   }
 
+  Future<void> bookmarkItem(int itemId) async {
+    try {
+      await itemController.postBookmarkItemByItemId(itemId);
+
+      // Manually update the bookmark status based on the isActive field
+      setState(() {
+        itemlist.forEach((item) {
+          if (item['id'] == itemId) {
+            item['isActive'] = !(item['isActive'] ?? false);
+          }
+        });
+        myItemlist.forEach((item) {
+          if (item['id'] == itemId) {
+            item['isActive'] = !(item['isActive'] ?? false);
+          }
+        });
+      });
+    } catch (e) {
+      print('Error bookmarking item: $e');
+    }
+  }
+
+  Future<void> loadBookmarkedItems(int itemId) async {
+    try {
+      final bookmarkedItems = await itemController.getBookmarkedItems(itemId);
+      if (_isMounted) {
+        setState(() {
+          // Update the isActive field for the specific item
+          final itemToUpdate = itemlist.firstWhere((item) => item['id'] == itemId, orElse: () => null);
+          if (itemToUpdate != null) {
+            itemToUpdate['isActive'] = bookmarkedItems['itemId'] == itemId && bookmarkedItems['isActive'];
+          }
+
+          final myItemToUpdate = myItemlist.firstWhere((item) => item['id'] == itemId, orElse: () => null);
+          if (myItemToUpdate != null) {
+            myItemToUpdate['isActive'] = bookmarkedItems['itemId'] == itemId && bookmarkedItems['isActive'];
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading bookmarked items for item $itemId: $e');
+      // Handle the error gracefully, e.g., set isActive to false or log the error.
+    }
+  }
+
   Future<void> _refreshData() async {
     _isMounted = true;
-    await itemController.getItemList().then((result) {
+    await itemController.getItemList().then((result) async {
       if (_isMounted) {
         setState(() {
           itemlist = result;
+          itemsLoading = false;
+
+          Future<void> loadBookmarkedItemsForAllItems() async {
+            for (final item in itemlist) {
+              final itemIdForBookmark = item['id'];
+              print(itemIdForBookmark);
+              await loadBookmarkedItems(itemIdForBookmark);
+            }
+          }
+
+          loadBookmarkedItemsForAllItems();
         });
       }
     });
@@ -175,69 +237,54 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _isMounted = true;
     myItemsLoading = true;
+    itemsLoading = true;
+
     setState(() {
       firstLoged();
     });
-    if (firstLogin == 'firstLogin') {
-      Future.delayed(Duration(seconds: 3), () {
-        itemController.getItemList().then((result) {
-          if (_isMounted) {
-            setState(() {
-              itemlist = result;
+    Future.delayed(Duration(seconds: 2), () async {
+      await itemController.getItemList().then((result) {
+        if (_isMounted) {
+          setState(() {
+            itemlist = result;
+            itemsLoading = false;
+
+            Future.forEach(itemlist, (item) async {
+              final itemIdForBookmark = item['id'];
+              await loadBookmarkedItems(itemIdForBookmark);
             });
-          }
-        });
-        categoryController.getCategoryList().then((result) {
-          if (_isMounted) {
-            setState(() {
-              categoryList = result;
-            });
-          }
-        });
-        categoryController.getCategoryGroupList().then((result) {
-          if (_isMounted) {
-            setState(() {
-              categoryGroupList = result;
-            });
-          }
-        });
+          });
+        }
       });
-      setState(() {
-        firstLogin = 'h';
+      await categoryController.getCategoryList().then((result) {
+        if (_isMounted) {
+          setState(() {
+            categoryList = result;
+          });
+        }
       });
-    } else {
-      Future.delayed(Duration(seconds: 1), () async {
-        await itemController.getItemList().then((result) {
-          if (_isMounted) {
-            setState(() {
-              itemlist = result;
+      await itemController.getItemByUidList().then((result) {
+        if (_isMounted) {
+          setState(() {
+            myItemlist = result;
+            myItemsLoading = false;
+
+            Future.forEach(myItemlist, (item) async {
+              final itemIdForBookmark = item['id'];
+              await loadBookmarkedItems(itemIdForBookmark);
             });
-          }
-        });
-        await categoryController.getCategoryList().then((result) {
-          if (_isMounted) {
-            setState(() {
-              categoryList = result;
-            });
-          }
-        });
-        await itemController.getItemByUidList().then((result) {
-          if (_isMounted) {
-            setState(() {
-              myItemlist = result;
-              myItemsLoading = false;
-            });
-          }
-        });
-        await categoryController.getCategoryGroupList().then((result) {
-          if (_isMounted) {
-            setState(() {
-              categoryGroupList = result;
-            });
-          }
-        });
+
+          });
+        }
       });
-    }
+      await categoryController.getCategoryGroupList().then((result) {
+        if (_isMounted) {
+          setState(() {
+            categoryGroupList = result;
+          });
+        }
+      });
+    });
   }
 
   @override
@@ -398,7 +445,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Gap(AppLayout.getHeight(25)),
                 GetBuilder<ItemController>(builder: (item) {
-                  return itemsSelected
+                  return itemsLoading ? SizedBox(
+                    width: AppLayout.getWidth(100),
+                    height: AppLayout.getHeight(300),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ) :
+                    itemsSelected
                       ? itemlist.isNotEmpty & categoryGroupList.isNotEmpty
                           ? Center(
                               child: GridView.builder(
@@ -428,7 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Container(
-                                          height: AppLayout.getHeight(135),
+                                          height: AppLayout.getHeight(132),
                                           width: AppLayout.getWidth(180),
                                           child: Image.network(
                                             mediaUrl,
@@ -454,12 +508,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Gap(AppLayout.getHeight(8)),
-                                              Text(
-                                                item['name'] ?? 'No Name',
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      item['name'] ?? 'No Name',
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: item['isActive'] ?? false
+                                                        ? Icon(Icons.bookmark,
+                                                        color: AppColors.secondPrimaryColor)
+                                                        : Icon(Icons.bookmark_outline,
+                                                        color: AppColors.secondPrimaryColor),
+                                                    onPressed: () {
+                                                      bookmarkItem(item['id']);
+                                                    },
+                                                  ),
+                                                ],
                                               ),
-                                              Gap(AppLayout.getHeight(15)),
                                               IconAndTextWidget(
                                                 icon: Icons.location_on,
                                                 text: item['locationName'] ??
@@ -519,13 +589,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 },
                               ),
                             )
-                          : SizedBox(
-                              width: AppLayout.getWidth(100),
-                              height: AppLayout.getHeight(300),
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
+                         : SizedBox(
+                      width: AppLayout.getScreenWidth(),
+                      height: AppLayout.getScreenHeight() - 400,
+                      child: Center(
+                        child: Text(""),
+                      ),
+                    )
                       : myItemsSelected // Check if the "My Items" button is selected
                       ? myItemsLoading ? SizedBox(
                     width: AppLayout.getWidth(100),
@@ -563,7 +633,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             CrossAxisAlignment.start,
                             children: [
                               Container(
-                                height: AppLayout.getHeight(135),
+                                height: AppLayout.getHeight(132),
                                 width: AppLayout.getWidth(180),
                                 child: Image.network(
                                   mediaUrl,
@@ -589,12 +659,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                   CrossAxisAlignment.start,
                                   children: [
                                     Gap(AppLayout.getHeight(8)),
-                                    Text(
-                                      item['name'] ?? 'No Name',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            item['name'] ?? 'No Name',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: item['isActive'] ?? false
+                                              ? Icon(Icons.bookmark,
+                                              color: AppColors.secondPrimaryColor)
+                                              : Icon(Icons.bookmark_outline,
+                                              color: AppColors.secondPrimaryColor),
+                                          onPressed: () {
+                                            bookmarkItem(item['id']);
+                                          },
+                                        ),
+                                      ],
                                     ),
-                                    Gap(AppLayout.getHeight(15)),
                                     IconAndTextWidget(
                                       icon: Icons.location_on,
                                       text: item['locationName'] ??

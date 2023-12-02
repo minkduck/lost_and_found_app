@@ -52,9 +52,7 @@ class _MessageTileState extends State<MessageTile> {
             topRight: Radius.circular(20),
             bottomLeft: Radius.circular(20),
           ),
-          color: widget.sentByMe
-              ? Colors.grey[850]
-              : Colors.grey[700],
+          color: widget.sentByMe ? Colors.grey[850] : Colors.grey[700],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,12 +65,12 @@ class _MessageTileState extends State<MessageTile> {
                 widget.message,
                 textAlign: TextAlign.start,
                 style: const TextStyle(fontSize: 16, color: Colors.white),
-              )
-            else if (widget.imageUrl != null)
+              ),
+            if (widget.imageUrl != null)
               Image.network(
                 widget.imageUrl!,
-                width: 200, // Set the width as per your requirement
-                height: 150, // Set the height as per your requirement
+                width: 100,
+                height: 100,
                 fit: BoxFit.cover,
               ),
           ],
@@ -81,3 +79,4 @@ class _MessageTileState extends State<MessageTile> {
     );
   }
 }
+
