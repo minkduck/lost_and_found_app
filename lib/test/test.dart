@@ -91,7 +91,7 @@ class _TestPageState extends State<TestPage> {
                 // Get.find<CategoryController>().getCategoryGroupList();
                 // Get.find<PostController>().getPostByUidList();
                 // Get.find<LocationController>().getAllLocationPages();
-                Get.find<ReceiptController>().getReceiptByItemId(7);
+                Get.find<ReceiptController>().getReceiptBySenderId("cojOWpt3L7Y1ihQUN2tHysh8wVu1");
 
                 fetchAndPrintUserChats();
 

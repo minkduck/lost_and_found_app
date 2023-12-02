@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lost_and_find_app/data/api/item/item_controller.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 
 import '../../data/api/item/receipt_controller.dart';
@@ -37,8 +38,11 @@ class GetAccepctClaimDetail extends StatefulWidget {
 class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
   Map<String, dynamic> userList = {};
   Map<String, dynamic> userItemList = {};
+  Map<String, dynamic> itemList = {};
+
   final UserController userController= Get.put(UserController());
   bool _isMounted = false;
+  final ItemController itemController = Get.put(ItemController());
 
   @override
   void initState() {
@@ -59,6 +63,14 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
           });
         }
       });
+      await itemController.getItemListById(widget.itemId).then((result) {
+        if (_isMounted) {
+          setState(() {
+            itemList = result;
+          });
+        }
+      });
+
     });
 
   }
@@ -151,6 +163,10 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
 
 
               ],),
+              Gap(AppLayout.getHeight(40)),
+              Text("Item: " + itemList['name'],
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
               Gap(AppLayout.getHeight(40)),
 
               Padding(

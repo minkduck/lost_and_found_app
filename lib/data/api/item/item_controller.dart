@@ -166,7 +166,7 @@ class ItemController extends GetxController{
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
-      SnackbarUtils().showSuccess(title: "Success", message: "Update item successfully");
+      SnackbarUtils().showSuccess(title: "Success", message: "Create item successfully");
       Get.toNamed(RouteHelper.getInitial(0));
     }
     else {
@@ -176,6 +176,7 @@ class ItemController extends GetxController{
     }
 
   }
+
   Future<void> updateItemById(
       int itemId,
       String title,
@@ -236,5 +237,84 @@ class ItemController extends GetxController{
     }
   }
 
+  Future<void> postBookmarkItemByItemId(int itemId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('POST', Uri.parse("${AppConstrants.POSTBOOKMARKBYITEMID}/$itemId"));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 201) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to postBookmarkItemByItemId');
+    }
+  }
+
+  Future<Map<String, dynamic>> getBookmarkedItems(int itemId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request =
+    http.Request('GET', Uri.parse(AppConstrants.GETBOOKMARKBYITEMID + itemId.toString()));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("itemlistByid " + _itemList.toString());
+      return resultList;
+    } else if (response.statusCode == 404) {
+        return {'itemId': itemId, 'isActive': false};
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getBookmarkedItems');
+    }
+  }
+
+  Future<List<dynamic>> getItemBookmark() async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse(AppConstrants.GETITEMBYBOOKMARK));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getItemBookmark " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getItemBookmark');
+    }
+  }
 
 }

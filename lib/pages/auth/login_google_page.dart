@@ -75,7 +75,7 @@ class _LoginGooglePageState extends State<LoginGooglePage> {
                       ),
                       SizedBox(width: 16),
                       Text(
-                        'Sign in with Google',
+                        'Sign in with Google Account',
                         style: TextStyle(fontSize: 16),
                       ),
                     ],
