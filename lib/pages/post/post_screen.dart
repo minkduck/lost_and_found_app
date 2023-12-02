@@ -134,6 +134,12 @@ class _PostScreenState extends State<PostScreen> {
       if (_isMounted) {
         setState(() {
           postList = result;
+          Future.forEach(postList, (post) async {
+            final postIdForBookmark = post['id'];
+            print(postIdForBookmark);
+            await loadBookmarkedPosts(postIdForBookmark);
+          });
+
         });
       }
     });
@@ -179,8 +185,54 @@ class _PostScreenState extends State<PostScreen> {
         });
       }
     });
-
   }
+
+  Future<void> bookmarkPost(int postId) async {
+    try {
+      await postController.postBookmarkPostByPostId(postId);
+
+      // Manually update the bookmark status based on the isActive field
+      setState(() {
+        postList.forEach((item) {
+          if (item['id'] == postId) {
+            item['isActive'] = !(item['isActive'] ?? false);
+          }
+        });
+        mypostList.forEach((item) {
+          if (item['id'] == postId) {
+            item['isActive'] = !(item['isActive'] ?? false);
+          }
+        });
+      });
+    } catch (e) {
+      print('Error bookmarking item: $e');
+    }
+  }
+
+  Future<void> loadBookmarkedPosts(int postId) async {
+    try {
+      final bookmarkedPosts = await postController.getBookmarkedPost(postId);
+      print('Bookmarked Posts Response: $bookmarkedPosts');
+
+      if (_isMounted) {
+        setState(() {
+          final postToUpdate = postList.firstWhere((post) => post['id'] == postId, orElse: () => null);
+          if (postToUpdate != null) {
+            postToUpdate['isActive'] = bookmarkedPosts['postId'] == postId && bookmarkedPosts['isActive'];
+          }
+          print(postToUpdate['isActive']);
+
+          final myPostToUpdate = mypostList.firstWhere((post) => post['id'] == postId, orElse: () => null);
+          if (myPostToUpdate != null) {
+            myPostToUpdate['isActive'] = bookmarkedPosts['postId'] == postId && bookmarkedPosts['isActive'];
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading bookmarked post for post $postId: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -194,6 +246,12 @@ class _PostScreenState extends State<PostScreen> {
             postList.removeWhere((post) => post['postStatus'] == 'DELETED');
             setState(() {
               postList = result;
+              Future.forEach(postList, (post) async {
+                final postIdForBookmark = post['id'];
+                print(postIdForBookmark);
+                await loadBookmarkedPosts(postIdForBookmark);
+              });
+
             });
           });
         }
@@ -523,10 +581,17 @@ class _PostScreenState extends State<PostScreen> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            IconAndTextWidget(
-                                                icon: Icons.bookmark,
-                                                text: "100",
-                                                iconColor: Colors.grey),
+                                            IconButton(
+                                              icon: post['isActive'] ?? false
+                                                  ? Icon(Icons.bookmark,
+                                                  color: Colors.white, size: 30,)
+                                                  : Icon(Icons.bookmark_outline,
+                                                  color: Colors.white, size: 30,),
+                                              onPressed: () {
+                                                bookmarkPost(post['id']);
+                                              },
+                                            ),
+
                                             IconAndTextWidget(
                                                 icon: Icons.comment,
                                                 text: getCommentCountForPost(post['id']).toString(),
@@ -676,10 +741,17 @@ class _PostScreenState extends State<PostScreen> {
                                     mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                     children: [
-                                      IconAndTextWidget(
-                                          icon: Icons.bookmark,
-                                          text: "100",
-                                          iconColor: Colors.grey),
+                                      IconButton(
+                                        icon: post['isActive'] ?? false
+                                            ? Icon(Icons.bookmark,
+                                          color: Colors.white, size: 30,)
+                                            : Icon(Icons.bookmark_outline,
+                                          color: Colors.white, size: 30,),
+                                        onPressed: () {
+                                          bookmarkPost(post['id']);
+                                        },
+                                      ),
+
                                       IconAndTextWidget(
                                           icon: Icons.comment,
                                           text: getCommentCountForMyPost(post['id']).toString(),

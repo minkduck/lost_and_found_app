@@ -72,4 +72,60 @@ class ReceiptController extends GetxController{
     }
   }
 
+  Future<List<dynamic>> getReceiptByReceiverId(String receiverId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse("${AppConstrants.GETRECEIPTBYRECEIVERID_URL}$receiverId&ReceiptType=ALL"));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+
+      update();
+      print("getReceiptByReceiverId " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getReceiptByReceiverId');
+    }
+  }
+
+  Future<List<dynamic>> getReceiptBySenderId(String senderId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse("${AppConstrants.GETRECEIPTBYSENDERID_URL}$senderId&ReceiptType=ALL"));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+
+      update();
+      print("getReceiptBySenderId " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getReceiptBySenderId');
+    }
+  }
+
 }

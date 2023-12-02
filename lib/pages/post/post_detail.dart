@@ -46,6 +46,7 @@ class _PostDetailState extends State<PostDetail> {
       });
     }
   }
+
   Future<void> _refreshData() async {
     await postController.getPostListById(widget.pageId).then((result) {
       if (_isMounted) {
@@ -62,6 +63,36 @@ class _PostDetailState extends State<PostDetail> {
       }
     });
   }
+
+  Future<void> bookmarkPost(int postId) async {
+    try {
+      await postController.postBookmarkPostByPostId(postId);
+
+      // Manually update the bookmark status based on the isActive field
+      setState(() {
+        postList['isActive'] = !(postList['isActive'] ?? false);
+      });    } catch (e) {
+      print('Error bookmarking post: $e');
+    }
+  }
+
+  Future<void> loadBookmarkedPost(int postId) async {
+    try {
+      final bookmarkedPosts = await postController.getBookmarkedPost(postId);
+
+      if (_isMounted) {
+        setState(() {
+          if (postList.containsKey('id') && postList['id'] == postId) {
+            postList['isActive'] =
+                bookmarkedPosts['postId'] == postId && bookmarkedPosts['isActive'];
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading bookmarked post for post $postId: $e');
+      // Handle the error gracefully, e.g., set isActive to false or log the error.
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -74,6 +105,8 @@ class _PostDetailState extends State<PostDetail> {
           });
         }
       });
+      await loadBookmarkedPost(widget.pageId);
+
       await commentController.getCommentByPostId(widget.pageId).then((result) {
         if (_isMounted) {
           setState(() {
@@ -247,10 +280,16 @@ class _PostDetailState extends State<PostDetail> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              IconAndTextWidget(
-                                  icon: Icons.bookmark,
-                                  text: "100",
-                                  iconColor: Colors.grey),
+                              IconButton(
+                                icon: postList['isActive'] ?? false
+                                    ? Icon(Icons.bookmark,
+                                  color: Colors.white, size: 30,)
+                                    : Icon(Icons.bookmark_outline,
+                                  color: Colors.white, size: 30,),
+                                onPressed: () {
+                                  bookmarkPost(postList['id']);
+                                },
+                              ),
                               IconAndTextWidget(
                                   icon: Icons.comment,
                                   text: commentList.length.toString(),
