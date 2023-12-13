@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:lost_and_find_app/pages/account/my_item_bookmark.dart';
+import 'package:lost_and_find_app/pages/account/my_list_bookmark.dart';
 import 'package:lost_and_find_app/pages/account/my_post_bookmark.dart';
 import 'package:lost_and_find_app/pages/account/my_receipt_page.dart';
 import 'package:lost_and_find_app/pages/account/profile_page.dart';
@@ -84,15 +84,9 @@ class _AccountPageState extends State<AccountPage> {
 
           }),
           Gap(AppLayout.getHeight(50)),
-          AppButton(boxColor: AppColors.primaryColor, textButton: "My List Bookmark Item", onTap: () {
+          AppButton(boxColor: AppColors.primaryColor, textButton: "My List Bookmark", onTap: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => MyItemBookmark()));
-
-          }),
-          Gap(AppLayout.getHeight(50)),
-          AppButton(boxColor: AppColors.primaryColor, textButton: "My List Bookmark Post", onTap: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => MyPostBookmark()));
+                context, MaterialPageRoute(builder: (context) => MyListBookmark()));
 
           }),
           Gap(AppLayout.getHeight(50)),

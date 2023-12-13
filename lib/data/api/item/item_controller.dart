@@ -143,8 +143,9 @@ class ItemController extends GetxController{
   Future<void> createItem(
       String name,
       String description,
-      String CategoryId,
-      String LocationId,
+      String categoryId,
+      String locationId,
+      String foundDate,
       List<String> medias ) async {
     accessToken = await AppConstrants.getToken();
     var headers = {
@@ -154,8 +155,10 @@ class ItemController extends GetxController{
     request.fields.addAll({
       'Name': name,
       'Description': description,
-      'CategoryId': CategoryId,
-      'LocationId': LocationId,
+      'CategoryId': categoryId,
+      'LocationId': locationId,
+      'FoundDate': foundDate,
+
     });
     for (var media in medias) {
       request.files.add(await http.MultipartFile.fromPath('Medias', media));
@@ -314,6 +317,63 @@ class ItemController extends GetxController{
       print(response.statusCode);
       print(response.reasonPhrase);
       throw Exception('Failed to load getItemBookmark');
+    }
+  }
+
+  Future<void> postFlagItemByItemId(int itemId, String reason) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse("${AppConstrants.POSTFLAGBYITEMID}/$itemId"));
+
+    request.fields.addAll({
+      'reason': reason
+    });
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 201) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to postFlagItemByItemId');
+    }
+  }
+
+  Future<Map<String, dynamic>> getFlagItems(int itemId) async {
+    uid = await AppConstrants.getUid();
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request =
+    http.Request('GET', Uri.parse('${AppConstrants.GETFLAGBYITEMID}$uid&itemId=$itemId'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("itemlistByid " + _itemList.toString());
+      return resultList;
+    } else if (response.statusCode == 404) {
+      return {'itemId': itemId, 'isActive': false};
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getFlagItems');
     }
   }
 

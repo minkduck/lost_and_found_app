@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
 import 'package:lost_and_find_app/data/api/post/post_controller.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
 
 import '../../data/api/category/category_controller.dart';
 import '../../data/api/location/location_controller.dart';
@@ -16,6 +17,7 @@ import '../../utils/snackbar_utils.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_button_upload_image.dart';
 import '../../widgets/app_drop_menu_filed_title.dart';
+import '../../widgets/app_drop_multi_select_filed_title.dart';
 import '../../widgets/big_text.dart';
 
 class CreatePost extends StatefulWidget {
@@ -37,9 +39,31 @@ class _CreatePostState extends State<CreatePost> {
 
   List<dynamic> categoryList = [];
   final CategoryController categoryController = Get.put(CategoryController());
+  List<String> selectedCategories = [];
+  String? selectedCategoriesString;
 
   List<dynamic> locationList = [];
   final LocationController locationController = Get.put(LocationController());
+  List<String> selectedLocations = [];
+  String? selectedLocationsString;
+
+  List<MultiSelectItem<String>> getMultiSelectLocations() {
+    return locationList
+        .map((location) => MultiSelectItem<String>(
+      location['id']?.toString() ?? '',
+      location['locationName']?.toString() ?? '',
+    ))
+        .toList();
+  }
+
+  List<MultiSelectItem<String>> getMultiSelectCategories() {
+    return categoryList
+        .map((location) => MultiSelectItem<String>(
+      location['id']?.toString() ?? '',
+      location['name']?.toString() ?? '',
+    ))
+        .toList();
+  }
 
   @override
   void initState() {
@@ -176,29 +200,39 @@ class _CreatePostState extends State<CreatePost> {
                 Gap(AppLayout.getHeight(20)),
 
                 //category
-                AppDropdownFieldTitle(
-                  hintText: "Select a category",
-                  validator: "Please choose category",
-                  selectedValue: selectedCategoryValue,
-                  // selectedValue: categoryList.isNotEmpty ? selectedCategoryValue ?? categoryList.first['id']?.toString() ?? '': '',
-                  items: categoryList.map((category) {
-                    return DropdownMenuItem<String>(
-                      value: category['id']?.toString() ?? '',
-                      // Ensure a valid value
-                      child: Text(category['name']?.toString() ?? ''),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
+                AppDropdownMultiSelectFieldTitle(
+                  hintText: "Select categories",
+                  validator: "Please choose at least one category",
+                  selectedValues: selectedCategories,
+                  items: getMultiSelectCategories(),
+                  onChanged: (values) {
                     setState(() {
-                      selectedCategoryValue = val;
+                      selectedCategories = values;
+                      // Update selectedCategoriesString with the correct format
+                      selectedCategoriesString = '|${values.join(",")}|';
                     });
                   },
-                  titleText: "Category",
+                  titleText: "Categories",
                 ),
                 Gap(AppLayout.getHeight(20)),
+                AppDropdownMultiSelectFieldTitle(
+                  hintText: "Select locations",
+                  validator: "Please choose at least one location",
+                  selectedValues: selectedLocations,
+                  items: getMultiSelectLocations(),
+                  onChanged: (values) {
+                    setState(() {
+                      selectedLocations = values;
+                      // Update selectedLocationsString with the correct format
+                      selectedLocationsString = '|${values.join(",")}|';
+                    });
+                  },
+                  titleText: "Locations",
+                ),
+
 
                 //location
-                AppDropdownFieldTitle(
+/*                AppDropdownFieldTitle(
                   hintText: "Select a location",
                   validator: "Please choose location",
                   selectedValue: selectedLocationValue,
@@ -215,7 +249,7 @@ class _CreatePostState extends State<CreatePost> {
                     });
                   },
                   titleText: "Location",
-                ),
+                ),*/
                 Gap(AppLayout.getHeight(20)),
                 //image
                 ElevatedButton(
@@ -307,14 +341,15 @@ class _CreatePostState extends State<CreatePost> {
                           try {
                             if (_formKey.currentState!.validate()) {
                               if (imageFileList != null && imageFileList!.isNotEmpty) {
+                                // code here
                                 List<String> imagePaths = imageFileList!.map((image) => image.path).toList();
                                 print(titleController.text + '-' + postContentController.text +
-                                    '-' + selectedLocationValue! + '-' + selectedCategoryValue! + '-' + imagePaths.toString());
+                                    '-' + selectedCategoriesString! + '-' + selectedLocationsString! + '-' + imagePaths.toString());
                                 await PostController().createPost(
                                   titleController.text,
                                   postContentController.text,
-                                  selectedLocationValue!,
-                                  selectedCategoryValue!,
+                                  selectedCategoriesString!,
+                                  selectedLocationsString!,
                                   imagePaths,
                                 );
                               } else {

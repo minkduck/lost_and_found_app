@@ -24,6 +24,7 @@ import '../../test/time/time_widget.dart';
 import '../../utils/app_constraints.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
+import '../../utils/snackbar_utils.dart';
 import '../../widgets/big_text.dart';
 
 class ItemsDetails extends StatefulWidget {
@@ -51,7 +52,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
   late String uid = "";
   bool isItemClaimed = false;
   int itemId = 0;
-  bool isBookmarked = false;
+  bool loadingAll = false;
 
   Map<String, dynamic> itemlist = {};
   final ItemController itemController = Get.put(ItemController());
@@ -88,10 +89,11 @@ class _ItemsDetailsState extends State<ItemsDetails> {
     try {
       await itemController.postBookmarkItemByItemId(itemId);
 
-      // Manually update the bookmark status based on the isActive field
+      // Manually update the bookmark status based on the isBookMarkActive field
       setState(() {
-        itemlist['isActive'] = !(itemlist['isActive'] ?? false);
-      });    } catch (e) {
+        itemlist['isBookMarkActive'] = !(itemlist['isBookMarkActive'] ?? false);
+      });
+    } catch (e) {
       print('Error bookmarking item: $e');
     }
   }
@@ -103,16 +105,45 @@ class _ItemsDetailsState extends State<ItemsDetails> {
 
       if (_isMounted) {
         setState(() {
-          // Update the isActive field for the specific item
+          // Update the isBookMarkActive field for the specific item
           if (itemlist.containsKey('id') && itemlist['id'] == itemId) {
-            itemlist['isActive'] =
+            itemlist['isBookMarkActive'] =
                 bookmarkedItems['itemId'] == itemId && bookmarkedItems['isActive'];
           }
         });
       }
     } catch (e) {
       print('Error loading bookmarked items for item $itemId: $e');
-      // Handle the error gracefully, e.g., set isActive to false or log the error.
+      // Handle the error gracefully, e.g., set isBookMarkActive to false or log the error.
+    }
+  }
+
+  Future<void> toggleItemStatus(int itemId, Future<void> Function(int) action) async {
+    try {
+      await action(itemId);
+
+      // Manually update the item status based on the isFlagActive field
+      setState(() {
+        itemlist['isFlagActive'] = !(itemlist['isFlagActive'] ?? false);
+      });
+    } catch (e) {
+      print('Error toggling item status: $e');
+    }
+  }
+
+  Future<void> flagItem(int itemId, String reason) async {
+    await toggleItemStatus(itemId, (int id) => itemController.postFlagItemByItemId(id, reason));
+  }
+
+  Future<void> loadFlagItems(int itemId) async {
+    final flagItems = await itemController.getFlagItems(itemId);
+    if (_isMounted) {
+      setState(() {
+        final itemToUpdate = itemlist;
+        if (itemToUpdate != null) {
+          itemToUpdate['isFlagActive'] = flagItems['itemId'] == itemId && flagItems['isActive'];
+        }
+      });
     }
   }
 
@@ -187,7 +218,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
         }
       });
       await loadBookmarkedItems(widget.pageId);
-
+      await loadFlagItems(widget.pageId);
       await receiptController.getReceiptByItemId(widget.pageId).then((result) async {
         if (_isMounted) {
             recepitList = result;
@@ -205,6 +236,9 @@ class _ItemsDetailsState extends State<ItemsDetails> {
             }
         }
 
+      });
+      setState(() {
+        loadingAll = true;
       });
     });
 
@@ -225,7 +259,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(12.0),
-            child: itemlist.isNotEmpty ? Column(
+            child: loadingAll ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               // Align children to the left
               children: [
@@ -323,17 +357,88 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 // Container(
                 //     padding: EdgeInsets.only(left: AppLayout.getWidth(20)),
                 //     child: StatusWidget(text: "Found", color: Colors.grey)),
-                IconButton(
-                  icon: itemlist['isActive'] ?? false
-                      ? Icon(Icons.bookmark,
-                      color: AppColors.secondPrimaryColor, size: 35,)
-                      : Icon(Icons.bookmark_outline,
-                      color: AppColors.secondPrimaryColor, size: 35,),
-                  onPressed: () {
-                    bookmarkItem(itemlist['id']);
-                  },
-                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: itemlist['isBookMarkActive'] ?? false
+                          ? Icon(Icons.bookmark, color: AppColors.secondPrimaryColor, size: 35)
+                          : Icon(Icons.bookmark_outline, color: AppColors.secondPrimaryColor, size: 35),
+                      onPressed: () {
+                        bookmarkItem(itemlist['id']);
+                      },
+                    ),
+                    itemlist['user']['id'] == uid ? Container() : IconButton(
+                      icon: itemlist['isFlagActive'] ?? false
+                          ? Icon(Icons.flag, color: Colors.redAccent, size: 35,)
+                          : Icon(Icons.flag_outlined, color: Colors.redAccent, size: 35),
+                      onPressed: () {
+                        String? selectedReason;
 
+                        if (itemlist['isFlagActive'] ?? false) {
+                          flagItem(itemlist['id'], "Wrong");
+                          return;
+                        }
+
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Why are you flagging this item?"),
+                              content: StatefulBuilder(
+                                builder: (BuildContext context, StateSetter setState) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      DropdownButton<String>(
+                                        value: selectedReason,
+                                        items: ["BLURRY", "WRONG", "INAPPROPRIATE"].map((String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        }).toList(),
+                                        onChanged: (String? newValue) {
+                                          setState(() {
+                                            selectedReason = newValue;
+                                          });
+                                        },
+                                        hint: Text("Select Reason"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // Cancel button pressed
+                                  },
+                                  child: Text("Cancel"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    if (selectedReason != null) {
+                                      Navigator.pop(context); // Close the dialog
+                                      print('selectedReason: '+ selectedReason.toString());
+                                      // Provide the selected reason to the flagItem function
+                                      flagItem(itemlist['id'], selectedReason!);
+                                    } else {
+                                      // Show a message if no reason is selected
+                                      // You can replace this with a Snackbar or any other UI feedback
+                                      SnackbarUtils().showError(title: "", message: "You must select a reason");
+                                    }
+                                  },
+                                  child: Text("Flag"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
                 Padding(
                   padding: EdgeInsets.only(
                       left: AppLayout.getWidth(16), top: AppLayout.getHeight(16)),
@@ -410,7 +515,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                   ],
                 ),
                 Gap(AppLayout.getHeight(40)),
-                Center(
+                itemlist['user']['id'] == uid ? Container() : Center(
                     child: AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Send Message", onTap: () async {
                       String otherUserId = itemlist['user']['id'];
 

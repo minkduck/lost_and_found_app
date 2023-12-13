@@ -16,6 +16,7 @@ import '../../test/other/cagory.dart';
 import '../../test/time/time_widget.dart';
 import '../../utils/app_assets.dart';
 import '../../utils/colors.dart';
+import '../../utils/snackbar_utils.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/custom_search_bar.dart';
 import '../../widgets/icon_and_text_widget.dart';
@@ -40,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> myItemlist = [];
   bool myItemsLoading = false;
   bool itemsLoading = false;
-  bool isBookmarked = false;
+  late String uid = "";
 
   final ItemController itemController = Get.put(ItemController());
   String filterText = '';
@@ -144,53 +145,95 @@ class _HomeScreenState extends State<HomeScreen> {
     return filteredByText;
   }
 
-  Future<void> bookmarkItem(int itemId) async {
+  Future<void> toggleItemBookmarkStatus(int itemId, Future<void> Function(int) action) async {
     try {
-      await itemController.postBookmarkItemByItemId(itemId);
+      await action(itemId);
 
-      // Manually update the bookmark status based on the isActive field
+      // Manually update the item status based on the isBookMarkActive field
       setState(() {
         itemlist.forEach((item) {
           if (item['id'] == itemId) {
-            item['isActive'] = !(item['isActive'] ?? false);
+            item['isBookMarkActive'] = !(item['isBookMarkActive'] ?? false);
           }
         });
         myItemlist.forEach((item) {
           if (item['id'] == itemId) {
-            item['isActive'] = !(item['isActive'] ?? false);
+            item['isBookMarkActive'] = !(item['isBookMarkActive'] ?? false);
           }
         });
       });
     } catch (e) {
-      print('Error bookmarking item: $e');
+      print('Error toggling item status: $e');
     }
   }
 
-  Future<void> loadBookmarkedItems(int itemId) async {
-    try {
-      final bookmarkedItems = await itemController.getBookmarkedItems(itemId);
-      if (_isMounted) {
-        setState(() {
-          // Update the isActive field for the specific item
-          final itemToUpdate = itemlist.firstWhere((item) => item['id'] == itemId, orElse: () => null);
-          if (itemToUpdate != null) {
-            itemToUpdate['isActive'] = bookmarkedItems['itemId'] == itemId && bookmarkedItems['isActive'];
-          }
+  Future<void> bookmarkItem(int itemId) async {
+    await toggleItemBookmarkStatus(itemId, itemController.postBookmarkItemByItemId);
+  }
 
-          final myItemToUpdate = myItemlist.firstWhere((item) => item['id'] == itemId, orElse: () => null);
-          if (myItemToUpdate != null) {
-            myItemToUpdate['isActive'] = bookmarkedItems['itemId'] == itemId && bookmarkedItems['isActive'];
+  Future<void> loadBookmarkedItems(int itemId) async {
+    final bookmarkedItems = await itemController.getBookmarkedItems(itemId);
+    if (_isMounted) {
+      setState(() {
+        final itemToUpdate = itemlist.firstWhere((item) => item['id'] == itemId, orElse: () => null);
+        if (itemToUpdate != null) {
+          itemToUpdate['isBookMarkActive'] = bookmarkedItems['itemId'] == itemId && bookmarkedItems['isActive'];
+        }
+
+        final myItemToUpdate = myItemlist.firstWhere((item) => item['id'] == itemId, orElse: () => null);
+        if (myItemToUpdate != null) {
+          myItemToUpdate['isBookMarkActive'] = bookmarkedItems['itemId'] == itemId && bookmarkedItems['isActive'];
+        }
+      });
+    }
+  }
+
+  Future<void> toggleItemFlagStatus(int itemId, Future<void> Function(int, String) action, String reason) async {
+    try {
+      await action(itemId, reason);
+
+      // Manually update the item status based on the isFlagActive field
+      setState(() {
+        itemlist.forEach((item) {
+          if (item['id'] == itemId) {
+            item['isFlagActive'] = !(item['isFlagActive'] ?? false);
           }
         });
-      }
+        myItemlist.forEach((item) {
+          if (item['id'] == itemId) {
+            item['isFlagActive'] = !(item['isFlagActive'] ?? false);
+          }
+        });
+      });
     } catch (e) {
-      print('Error loading bookmarked items for item $itemId: $e');
-      // Handle the error gracefully, e.g., set isActive to false or log the error.
+      print('Error toggling item status: $e');
+    }
+  }
+
+  Future<void> flagItem(int itemId, String reason) async {
+    await toggleItemFlagStatus(itemId, itemController.postFlagItemByItemId, reason);
+  }
+
+  Future<void> loadFlagItems(int itemId) async {
+    final flagItems = await itemController.getFlagItems(itemId);
+    if (_isMounted) {
+      setState(() {
+        final itemToUpdate = itemlist.firstWhere((item) => item['id'] == itemId, orElse: () => null);
+        if (itemToUpdate != null) {
+          itemToUpdate['isFlagActive'] = flagItems['itemId'] == itemId && flagItems['isActive'];
+        }
+
+        final myItemToUpdate = myItemlist.firstWhere((item) => item['id'] == itemId, orElse: () => null);
+        if (myItemToUpdate != null) {
+          myItemToUpdate['isFlagActive'] = flagItems['itemId'] == itemId && flagItems['isActive'];
+        }
+      });
     }
   }
 
   Future<void> _refreshData() async {
     _isMounted = true;
+    uid = await AppConstrants.getUid();
     await itemController.getItemList().then((result) async {
       if (_isMounted) {
         setState(() {
@@ -206,6 +249,14 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           loadBookmarkedItemsForAllItems();
+          Future<void> loadFlagItemsForAllItems() async {
+            for (final item in itemlist) {
+              final itemIdForFlag = item['id'];
+              await loadFlagItems(itemIdForFlag);
+            }
+          }
+
+          loadFlagItemsForAllItems();
         });
       }
     });
@@ -243,6 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
       firstLoged();
     });
     Future.delayed(Duration(seconds: 2), () async {
+      uid = await AppConstrants.getUid();
       await itemController.getItemList().then((result) {
         if (_isMounted) {
           setState(() {
@@ -253,6 +305,11 @@ class _HomeScreenState extends State<HomeScreen> {
               final itemIdForBookmark = item['id'];
               await loadBookmarkedItems(itemIdForBookmark);
             });
+            Future.forEach(itemlist, (item) async {
+              final itemIdForFlag = item['id'];
+              await loadFlagItems(itemIdForFlag);
+            });
+
           });
         }
       });
@@ -273,7 +330,10 @@ class _HomeScreenState extends State<HomeScreen> {
               final itemIdForBookmark = item['id'];
               await loadBookmarkedItems(itemIdForBookmark);
             });
-
+            Future.forEach(myItemlist, (item) async {
+              final itemIdForFlag = item['id'];
+              await loadFlagItems(itemIdForFlag);
+            });
           });
         }
       });
@@ -482,7 +542,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Container(
-                                          height: AppLayout.getHeight(132),
+                                          height: AppLayout.getHeight(112),
                                           width: AppLayout.getWidth(180),
                                           child: Image.network(
                                             mediaUrl,
@@ -507,7 +567,91 @@ class _HomeScreenState extends State<HomeScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Gap(AppLayout.getHeight(8)),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  IconButton(
+                                                    icon: item['isBookMarkActive'] ?? false
+                                                        ? Icon(Icons.bookmark, color: AppColors.secondPrimaryColor)
+                                                        : Icon(Icons.bookmark_outline, color: AppColors.secondPrimaryColor),
+                                                    onPressed: () {
+                                                      bookmarkItem(item['id']);
+                                                    },
+                                                  ),
+                                                  item['user']['id'] == uid ? Container()  : IconButton(
+                                                    icon: item['isFlagActive'] ?? false
+                                                        ? Icon(Icons.flag, color: Colors.redAccent)
+                                                        : Icon(Icons.flag_outlined, color: Colors.redAccent),
+                                                    onPressed: () {
+                                                      String? selectedReason;
+
+                                                      if (item['isFlagActive'] ?? false) {
+                                                        flagItem(item['id'], "Wrong");
+                                                        return;
+                                                      }
+
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return AlertDialog(
+                                                            title: Text("Why are you flagging this item?"),
+                                                            content: StatefulBuilder(
+                                                              builder: (BuildContext context, StateSetter setState) {
+                                                                return Column(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  children: [
+                                                                    DropdownButton<String>(
+                                                                      value: selectedReason,
+                                                                      items: ["BLURRY", "WRONG", "INAPPROPRIATE"].map((String value) {
+                                                                        return DropdownMenuItem<String>(
+                                                                          value: value,
+                                                                          child: Text(value),
+                                                                        );
+                                                                      }).toList(),
+                                                                      onChanged: (String? newValue) {
+                                                                        setState(() {
+                                                                          selectedReason = newValue;
+                                                                        });
+                                                                      },
+                                                                      hint: Text("Select Reason"),
+                                                                    ),
+                                                                  ],
+                                                                );
+                                                              },
+                                                            ),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  Navigator.pop(context); // Cancel button pressed
+                                                                },
+                                                                child: Text("Cancel"),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  if (selectedReason != null) {
+                                                                    Navigator.pop(context); // Close the dialog
+                                                                    print('selectedReason: '+ selectedReason.toString());
+
+                                                                    // Provide the selected reason to the flagItem function
+                                                                    flagItem(item['id'], selectedReason!);
+                                                                  } else {
+                                                                    // Show a message if no reason is selected
+                                                                    // You can replace this with a Snackbar or any other UI feedback
+                                                                    SnackbarUtils().showError(title: "", message: "You must select a reason");
+                                                                  }
+                                                                },
+                                                                child: Text("Flag"),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+
+
                                               Row(
                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                 children: [
@@ -518,18 +662,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       overflow: TextOverflow.ellipsis,
                                                     ),
                                                   ),
-                                                  IconButton(
-                                                    icon: item['isActive'] ?? false
-                                                        ? Icon(Icons.bookmark,
-                                                        color: AppColors.secondPrimaryColor)
-                                                        : Icon(Icons.bookmark_outline,
-                                                        color: AppColors.secondPrimaryColor),
-                                                    onPressed: () {
-                                                      bookmarkItem(item['id']);
-                                                    },
-                                                  ),
                                                 ],
                                               ),
+                                              Gap(AppLayout.getHeight(10)),
                                               IconAndTextWidget(
                                                 icon: Icons.location_on,
                                                 text: item['locationName'] ??
@@ -537,7 +672,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 size: 15,
                                                 iconColor: Colors.black,
                                               ),
-                                              Gap(AppLayout.getWidth(15)),
+                                              Gap(AppLayout.getHeight(15)),
                                               Container(
                                                 padding: EdgeInsets.symmetric(
                                                     horizontal: 8.0),
@@ -670,7 +805,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                         IconButton(
-                                          icon: item['isActive'] ?? false
+                                          icon: item['isBookMarkActive'] ?? false
                                               ? Icon(Icons.bookmark,
                                               color: AppColors.secondPrimaryColor)
                                               : Icon(Icons.bookmark_outline,

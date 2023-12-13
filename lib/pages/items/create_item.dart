@@ -31,12 +31,50 @@ class _CreateItemState extends State<CreateItem> {
 
   String? selectedCategoryValue;
   String? selectedLocationValue;
+  String? selectedSlot;
+  DateTime? selectedDate;
 
   List<dynamic> categoryList = [];
   final CategoryController categoryController = Get.put(CategoryController());
 
   List<dynamic> locationList = [];
   final LocationController locationController = Get.put(LocationController());
+
+  List<DropdownMenuItem<String>> getSlotItems() {
+    return [
+      'Before class',
+      'Slot 1',
+      'Slot 2',
+      'Slot 3',
+      'Slot 4',
+      'Slot 5',
+      'Slot 6',
+      'After class',
+      'All day',
+    ].map((String slot) {
+      return DropdownMenuItem<String>(
+        value: slot,
+        child: Text(slot),
+      );
+    }).toList();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime currentDate = DateTime.now();
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? currentDate,
+      firstDate: DateTime(2022),
+      lastDate: currentDate,
+    );
+
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -102,28 +140,6 @@ class _CreateItemState extends State<CreateItem> {
                 ),
                 Gap(AppLayout.getHeight(20)),
 
-                //category
-                AppDropdownFieldTitle(
-                  hintText: "Select a category",
-                  validator: "Please choose category",
-                  selectedValue: selectedCategoryValue,
-                  // selectedValue: categoryList.isNotEmpty ? selectedCategoryValue ?? categoryList.first['id']?.toString() ?? '': '',
-                  items: categoryList.map((category) {
-                    return DropdownMenuItem<String>(
-                      value: category['id']?.toString() ?? '',
-                      // Ensure a valid value
-                      child: Text(category['name']?.toString() ?? ''),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      selectedCategoryValue = val;
-                    });
-                  },
-                  titleText: "Category",
-                ),
-                Gap(AppLayout.getHeight(45)),
-
                 //title
                 AppTextFieldTitle(
                   textController: titleController,
@@ -146,6 +162,86 @@ class _CreateItemState extends State<CreateItem> {
                 ),
                 Gap(AppLayout.getHeight(45)),
 
+                //foundDate
+                Container(
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.only(left: 20),
+                  child: Text(
+                    "Found Date",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Gap(AppLayout.getHeight(15)),
+                GestureDetector(
+                  onTap: () => _selectDate(context),
+                  child: Container(
+                    height: AppLayout.getHeight(55),
+                    margin: EdgeInsets.only(
+                      left: AppLayout.getHeight(20),
+                      right: AppLayout.getHeight(20),
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(AppLayout.getHeight(20)),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 4,
+                          spreadRadius: 4,
+                          offset: Offset(0, 4),
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        selectedDate != null
+                            ? "${selectedDate!.toLocal()}".split(' ')[0]
+                            : "Tap to select date",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ),
+                Gap(AppLayout.getHeight(45)),
+
+                //slot
+                AppDropdownFieldTitle(
+                  hintText: "Select a slot",
+                  validator: "Please choose slot",
+                  selectedValue: selectedSlot,
+                  items: getSlotItems(),
+                  onChanged: (val) {
+                    setState(() {
+                      selectedSlot = val;
+                    });
+                  },
+                  titleText: "Slot",
+                ),
+
+                Gap(AppLayout.getHeight(45)),
+
+                //category
+                AppDropdownFieldTitle(
+                  hintText: "Select a category",
+                  validator: "Please choose category",
+                  selectedValue: selectedCategoryValue,
+                  // selectedValue: categoryList.isNotEmpty ? selectedCategoryValue ?? categoryList.first['id']?.toString() ?? '': '',
+                  items: categoryList.map((category) {
+                    return DropdownMenuItem<String>(
+                      value: category['id']?.toString() ?? '',
+                      // Ensure a valid value
+                      child: Text(category['name']?.toString() ?? ''),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      selectedCategoryValue = val;
+                    });
+                  },
+                  titleText: "Category",
+                ),
+
+                Gap(AppLayout.getHeight(45)),
                 //Location
                 AppDropdownFieldTitle(
                   hintText: "Select a location",
@@ -163,7 +259,7 @@ class _CreateItemState extends State<CreateItem> {
                       selectedLocationValue = val?.toString();
                     });
                   },
-                  titleText: "Location",
+                  titleText: "Found Location",
                 ),
 
                 Gap(AppLayout.getHeight(100)),
@@ -174,6 +270,7 @@ class _CreateItemState extends State<CreateItem> {
                       textButton: "Continue",
                       onTap: () {
                         if (_formKey.currentState!.validate()) {
+                          String foundDate = "$selectedDate|${selectedSlot!}";
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -182,6 +279,7 @@ class _CreateItemState extends State<CreateItem> {
                                         description: descriptionController.text,
                                         category: selectedCategoryValue!,
                                         location: selectedLocationValue!,
+                                        foundDate: foundDate,
                                       )));
                         }
                       }),
