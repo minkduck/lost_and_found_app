@@ -8,6 +8,7 @@ class TAppTheme {
 
   static ThemeData lightTheme = ThemeData(
     primarySwatch: Colors.teal,
+    highlightColor: Colors.black,
     brightness: Brightness.light,
     textTheme: TTextTheme.lightTextTheme,
     cardColor: AppColors.cardLightColor,
@@ -26,6 +27,7 @@ class TAppTheme {
 
   static ThemeData darkTheme = ThemeData(
     scaffoldBackgroundColor: AppColors.backgroundDarkTheme,
+    highlightColor: Colors.white,
     primarySwatch: Colors.teal,
     brightness: Brightness.dark,
     textTheme: TTextTheme.darkTextTheme,

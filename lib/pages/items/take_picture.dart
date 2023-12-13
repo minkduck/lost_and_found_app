@@ -20,13 +20,14 @@ class TakePictureScreen extends StatefulWidget {
   final String title;
   final String description;
   final String location;
-
+  final String foundDate;
   const TakePictureScreen({
     Key? key,
     required this.title,
     required this.description,
     required this.category,
     required this.location,
+    required this.foundDate,
   }) : super(key: key);
 
   @override
@@ -89,6 +90,7 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
       widget.description,
       widget.category,
       widget.location,
+      widget.foundDate,
       compressedImagePaths,
     );
   }
