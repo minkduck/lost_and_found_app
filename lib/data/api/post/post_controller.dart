@@ -343,4 +343,58 @@ class PostController extends GetxController{
     }
   }
 
+  Future<void> postFlagPostByPostId(int postId, String reason) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse("${AppConstrants.POSTFLAGBYPOSTID}/$postId"));
+    request.fields.addAll({
+      'reason': reason
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 201) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to postFlagPostByPostId');
+    }
+  }
+
+  Future<Map<String, dynamic>> getFlagPost(int postId) async {
+    uid = await AppConstrants.getUid();
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request =
+    http.Request('GET', Uri.parse('${AppConstrants.GETFLAGBYPOSTID}$uid&postId=$postId'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+      print(responseBody);
+      print('200');
+      final resultList = jsonResponse['result'];
+      update();
+      return resultList;
+    } else if (response.statusCode == 404) {
+      return {'postId': postId, 'isActive': false};
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getBookmarkedItems');
+    }
+  }
+
 }

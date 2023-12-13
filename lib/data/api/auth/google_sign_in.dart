@@ -77,7 +77,7 @@ class GoogleSignInProvider extends ChangeNotifier {
   }
 
 
-  Future googleLogin() async {
+  Future googleLogin(String campusId) async {
     await Firebase.initializeApp();
 
     try {
@@ -125,6 +125,7 @@ class GoogleSignInProvider extends ChangeNotifier {
         "name": name,
         "avatar": avatar,
         "phone": "string",
+        "campusId": campusId
       });
       request.headers.addAll(headers);
 

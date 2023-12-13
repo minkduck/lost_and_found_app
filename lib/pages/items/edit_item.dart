@@ -146,26 +146,6 @@ class _EditItemState extends State<EditItem> {
                 ),
                 Gap(AppLayout.getHeight(20)),
 
-                // Category
-                AppDropdownFieldTitle(
-                  hintText: "Select a category",
-                  validator: "Please choose category",
-                  selectedValue: selectedCategoryValue,
-                  items: categoryList.map((category) {
-                    return DropdownMenuItem<String>(
-                      value: category['id']?.toString() ?? '',
-                      child: Text(category['name']?.toString() ?? ''),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      selectedCategoryValue = val?.toString();
-                    });
-                  },
-                  titleText: "Category",
-                ),
-                Gap(AppLayout.getHeight(45)),
-
                 // Title
                 AppTextFieldTitle(
                   textController: titleController,
