@@ -32,6 +32,8 @@ class _MyReceiptState extends State<MyReceipt> {
   final ReceiptController receiptController = Get.put(ReceiptController());
   final UserController userController= Get.put(UserController());
   final ItemController itemController= Get.put(ItemController());
+  late List<String> imageUrls = [];
+
   bool _isMounted = false;
   bool receiverSelected = true;
   bool senderSelected = false;
@@ -83,12 +85,25 @@ class _MyReceiptState extends State<MyReceipt> {
       final receiver = await userController.getUserByUserId(receiverId);
       final sender = await userController.getUserByUserId(senderId);
       final item = await itemController.getItemListById(itemId);
+      if (item != null) {
+        var itemMedias = item['itemMedias'];
+
+        if (itemMedias != null && itemMedias is List) {
+          List mediaList = itemMedias;
+
+          for (var media in mediaList) {
+            String imageUrl = media['media']['url'];
+            imageUrls.add(imageUrl);
+          }
+        }
+      }
 
       final Map<String, dynamic> receiptInfo = {
         'receipt': receipt,
         'receiver': receiver != null ? receiver : null,
         'sender': sender != null ? sender : null,
         'item': item != null ? item : null,
+
       };
 
       print(isSender ? "receiptSenderInfo:" : "receiptReceiverInfo:" + receiptInfo.toString());
@@ -298,10 +313,34 @@ class _MyReceiptState extends State<MyReceipt> {
                                   .textTheme
                                   .titleSmall,
                             ),
-
                           ],
                         ),
-                        Gap(AppLayout.getHeight(10)),
+                        Container(
+                          height:
+                          MediaQuery.of(context).size.height *
+                              0.3,
+                          // Set a fixed height or use any other value
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero, // Add this line to set zero padding
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: item['itemMedias']
+                                .length,
+                            itemBuilder: (context, indexs) {
+                              return Container(
+                                alignment: Alignment.centerLeft,
+                                margin: EdgeInsets.only(
+                                    left: AppLayout.getWidth(20)),
+                                height: AppLayout.getHeight(151),
+                                width: AppLayout.getWidth(180),
+                                child: Image.network(
+                                    item['itemMedias']
+                                    [indexs]['media']['url'] ?? 'https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png',
+                                    fit: BoxFit.fill),
+                              );
+                            },
+                          ),
+                        ),
                         Row(
                           children: [
                             Text(
@@ -493,7 +532,32 @@ class _MyReceiptState extends State<MyReceipt> {
 
                           ],
                         ),
-                        Gap(AppLayout.getHeight(10)),
+                        Container(
+                          height:
+                          MediaQuery.of(context).size.height *
+                              0.3,
+                          // Set a fixed height or use any other value
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero, // Add this line to set zero padding
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: item['itemMedias']
+                                .length,
+                            itemBuilder: (context, indexs) {
+                              return Container(
+                                alignment: Alignment.centerLeft,
+                                margin: EdgeInsets.only(
+                                    left: AppLayout.getWidth(20)),
+                                height: AppLayout.getHeight(151),
+                                width: AppLayout.getWidth(180),
+                                child: Image.network(
+                                    item['itemMedias']
+                                    [indexs]['media']['url'] ?? 'https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png',
+                                    fit: BoxFit.fill),
+                              );
+                            },
+                          ),
+                        ),
                         Row(
                           children: [
                             Text(

@@ -13,7 +13,9 @@ import 'package:lost_and_find_app/widgets/icon_and_text_widget.dart';
 import '../../data/api/category/category_controller.dart';
 import '../../data/api/comment/comment_controller.dart';
 import '../../test/time/time_widget.dart';
+import '../../utils/app_constraints.dart';
 import '../../utils/colors.dart';
+import '../../utils/snackbar_utils.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/custom_search_bar.dart';
@@ -36,6 +38,7 @@ class _PostScreenState extends State<PostScreen> {
   List<dynamic> postList = [];
   List<dynamic> mypostList = [];
   bool myPostLoading = false;
+  late String uid = "";
 
   final PostController postController = Get.put(PostController());
   String filterText = '';
@@ -130,6 +133,7 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   Future<void> _refreshData() async {
+    uid = await AppConstrants.getUid();
     await postController.getPostList().then((result) {
       if (_isMounted) {
         setState(() {
@@ -138,6 +142,10 @@ class _PostScreenState extends State<PostScreen> {
             final postIdForBookmark = post['id'];
             print(postIdForBookmark);
             await loadBookmarkedPosts(postIdForBookmark);
+          });
+          Future.forEach(postList, (post) async {
+            final postIdForFlag = post['id'];
+            await loadFlagPosts(postIdForFlag);
           });
 
         });
@@ -187,51 +195,97 @@ class _PostScreenState extends State<PostScreen> {
     });
   }
 
-  Future<void> bookmarkPost(int postId) async {
+  Future<void> togglePostBookmarkStatus(int postId, Future<void> Function(int) action) async {
     try {
-      await postController.postBookmarkPostByPostId(postId);
+      await action(postId);
 
-      // Manually update the bookmark status based on the isActive field
+      // Manually update the item status based on the isBookMarkActive field
       setState(() {
-        postList.forEach((item) {
-          if (item['id'] == postId) {
-            item['isActive'] = !(item['isActive'] ?? false);
+        postList.forEach((post) {
+          if (post['id'] == postId) {
+            post['isBookMarkActive'] = !(post['isBookMarkActive'] ?? false);
           }
         });
-        mypostList.forEach((item) {
-          if (item['id'] == postId) {
-            item['isActive'] = !(item['isActive'] ?? false);
+        mypostList.forEach((post) {
+          if (post['id'] == postId) {
+            post['isBookMarkActive'] = !(post['isBookMarkActive'] ?? false);
           }
         });
       });
     } catch (e) {
-      print('Error bookmarking item: $e');
+      print('Error toggling post status: $e');
     }
   }
 
-  Future<void> loadBookmarkedPosts(int postId) async {
-    try {
-      final bookmarkedPosts = await postController.getBookmarkedPost(postId);
-      print('Bookmarked Posts Response: $bookmarkedPosts');
+  Future<void> bookmarkPost(int postId) async {
+    await togglePostBookmarkStatus(postId, postController.postBookmarkPostByPostId);
+  }
 
+  Future<void> loadBookmarkedPosts(int postId) async {
+    final bookmarkedPosts = await postController.getBookmarkedPost(postId);
+    if (_isMounted) {
+      setState(() {
+        final postToUpdate = postList.firstWhere((post) => post['id'] == postId, orElse: () => null);
+        if (postToUpdate != null) {
+          postToUpdate['isBookMarkActive'] = bookmarkedPosts['postId'] == postId && bookmarkedPosts['isActive'];
+        }
+
+        final myPostToUpdate = mypostList.firstWhere((post) => post['id'] == postId, orElse: () => null);
+        if (myPostToUpdate != null) {
+          myPostToUpdate['isBookMarkActive'] = bookmarkedPosts['postId'] == postId && bookmarkedPosts['isActive'];
+        }
+      });
+    }
+  }
+
+  Future<void> togglePostFlagStatus(int postId, Future<void> Function(int, String) action, String reason) async {
+    try {
+      await action(postId, reason);
+
+      // Manually update the item status based on the isFlagActive field
+      setState(() {
+        postList.forEach((post) {
+          if (post['id'] == postId) {
+            post['isFlagActive'] = !(post['isFlagActive'] ?? false);
+          }
+        });
+        mypostList.forEach((post) {
+          if (post['id'] == postId) {
+            post['isFlagActive'] = !(post['isFlagActive'] ?? false);
+          }
+        });
+      });
+    } catch (e) {
+      print('Error toggling post status: $e');
+    }
+  }
+
+  Future<void> flagPost(int postId, String reason) async {
+    await togglePostFlagStatus(postId, postController.postFlagPostByPostId, reason);
+  }
+
+  Future<void> loadFlagPosts(int postId) async {
+    try {
+      final flagPosts = await postController.getFlagPost(postId);
+      print("flagPosts: " + flagPosts.toString());
       if (_isMounted) {
         setState(() {
           final postToUpdate = postList.firstWhere((post) => post['id'] == postId, orElse: () => null);
           if (postToUpdate != null) {
-            postToUpdate['isActive'] = bookmarkedPosts['postId'] == postId && bookmarkedPosts['isActive'];
+            postToUpdate['isFlagActive'] = flagPosts['postId'] == postId && flagPosts['isActive'];
           }
-          print(postToUpdate['isActive']);
 
-          final myPostToUpdate = mypostList.firstWhere((post) => post['id'] == postId, orElse: () => null);
+          final myPostToUpdate = postList.firstWhere((post) => post['id'] == postId, orElse: () => null);
           if (myPostToUpdate != null) {
-            myPostToUpdate['isActive'] = bookmarkedPosts['postId'] == postId && bookmarkedPosts['isActive'];
+            myPostToUpdate['isFlagActive'] = flagPosts['postId'] == postId && flagPosts['isActive'];
           }
         });
       }
     } catch (e) {
-      print('Error loading bookmarked post for post $postId: $e');
+      print('Error loading flag posts: $e');
     }
   }
+
 
   @override
   void initState() {
@@ -239,6 +293,7 @@ class _PostScreenState extends State<PostScreen> {
     _isMounted = true;
     myPostLoading = true;
     Future.delayed(Duration(seconds: 1), () async {
+      uid = await AppConstrants.getUid();
       await postController.getPostList().then((result) {
         if (_isMounted) {
           setState(() {
@@ -250,6 +305,10 @@ class _PostScreenState extends State<PostScreen> {
                 final postIdForBookmark = post['id'];
                 print(postIdForBookmark);
                 await loadBookmarkedPosts(postIdForBookmark);
+              });
+              Future.forEach(postList, (post) async {
+                final postIdForFlag = post['id'];
+                await loadFlagPosts(postIdForFlag);
               });
 
             });
@@ -582,11 +641,11 @@ class _PostScreenState extends State<PostScreen> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             IconButton(
-                                              icon: post['isActive'] ?? false
+                                              icon: post['isBookMarkActive'] ?? false
                                                   ? Icon(Icons.bookmark,
-                                                  color: Colors.white, size: 30,)
+                                                  color: Theme.of(context).iconTheme.color, size: 30,)
                                                   : Icon(Icons.bookmark_outline,
-                                                  color: Colors.white, size: 30,),
+                                                  color: Theme.of(context).iconTheme.color, size: 30,),
                                               onPressed: () {
                                                 bookmarkPost(post['id']);
                                               },
@@ -596,10 +655,75 @@ class _PostScreenState extends State<PostScreen> {
                                                 icon: Icons.comment,
                                                 text: getCommentCountForPost(post['id']).toString(),
                                                 iconColor: Colors.grey),
-                                            IconAndTextWidget(
-                                                icon: Icons.flag,
-                                                text: "100",
-                                                iconColor: Colors.grey),
+                                            post['user']['id'] == uid ? Container()  : IconButton(
+                                              icon: post['isFlagActive'] ?? false
+                                                  ? Icon(Icons.flag, color: Theme.of(context).iconTheme.color, size: 30,)
+                                                  : Icon(Icons.flag_outlined, color: Theme.of(context).iconTheme.color, size: 30,),
+                                              onPressed: () {
+                                                String? selectedReason;
+
+                                                if (post['isFlagActive'] ?? false) {
+                                                  flagPost(post['id'], "WrongInformation");
+                                                  return;
+                                                }
+
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: Text("Why are you flagging this item?"),
+                                                      content: StatefulBuilder(
+                                                        builder: (BuildContext context, StateSetter setState) {
+                                                          return Column(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              DropdownButton<String>(
+                                                                value: selectedReason,
+                                                                items: ["WrongInformation", "ViolatedUser", "Spam", "Others"].map((String value) {
+                                                                  return DropdownMenuItem<String>(
+                                                                    value: value,
+                                                                    child: Text(value),
+                                                                  );
+                                                                }).toList(),
+                                                                onChanged: (String? newValue) {
+                                                                  setState(() {
+                                                                    selectedReason = newValue;
+                                                                  });
+                                                                },
+                                                                hint: Text("Select Reason"),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(context); // Cancel button pressed
+                                                          },
+                                                          child: Text("Cancel"),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            if (selectedReason != null) {
+                                                              Navigator.pop(context); // Close the dialog
+
+                                                              // Provide the selected reason to the flagItem function
+                                                              flagPost(post['id'], selectedReason!);
+                                                            } else {
+                                                              // Show a message if no reason is selected
+                                                              // You can replace this with a Snackbar or any other UI feedback
+                                                              SnackbarUtils().showError(title: "", message: "You must select a reason");
+                                                            }
+                                                          },
+                                                          child: Text("Flag"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                            ),
                                           ],
                                         )
                                       ],
@@ -742,7 +866,7 @@ class _PostScreenState extends State<PostScreen> {
                                     MainAxisAlignment.spaceBetween,
                                     children: [
                                       IconButton(
-                                        icon: post['isActive'] ?? false
+                                        icon: post['isBookMarkActive'] ?? false
                                             ? Icon(Icons.bookmark,
                                           color: Colors.white, size: 30,)
                                             : Icon(Icons.bookmark_outline,

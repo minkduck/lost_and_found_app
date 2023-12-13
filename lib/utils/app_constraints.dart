@@ -81,4 +81,10 @@ class AppConstrants{
   static const String GETITEMBYBOOKMARK = "$BASE_URL/api/items/get-own-item-bookmark";
   static const String GETPOSTBYBOOKMARK = "$BASE_URL/api/posts/get-own-post-bookmark";
 
+  //flag
+  static const String POSTFLAGBYITEMID = "$BASE_URL/api/items/flag-an-item/";
+  static const String GETFLAGBYITEMID = "$BASE_URL/api/items/get-item-flag?userId=";
+  static const String POSTFLAGBYPOSTID = "$BASE_URL/api/posts/flag-a-post/";
+  static const String GETFLAGBYPOSTID = "$BASE_URL/api/posts/get-post-flag?userId=";
+
 }
