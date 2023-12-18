@@ -23,7 +23,7 @@ class _LoginGooglePageState extends State<LoginGooglePage> {
     DropdownMenuItem(value: 1.toString(), child: Text('Ho Chi Minh Campus')),
     DropdownMenuItem(value: 3.toString(), child: Text('Hanoi Campus')),
     DropdownMenuItem(value: 2.toString(), child: Text('Da Nang Campus')),
-    // DropdownMenuItem(value: 'Can Tho Campus', child: Text('Can Tho Campus')),
+    DropdownMenuItem(value: 4.toString(), child: Text('Can Tho Campus')),
   ];
   late ValueChanged<String?> onChanged;
 
@@ -104,11 +104,6 @@ class _LoginGooglePageState extends State<LoginGooglePage> {
                   final SharedPreferences prefs =
                   await SharedPreferences.getInstance();
                   prefs.setString('firstLogin', 'firstLogin');
-                } else {
-                  // Show an error message or perform any other action
-                  // when the user has not selected a campus
-                  SnackbarUtils().showError(title: "Campus", message: 'Please choose a campus to log in with Google.');
-
                 }
               },
               child: Ink(

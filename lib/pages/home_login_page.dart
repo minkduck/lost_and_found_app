@@ -18,7 +18,7 @@ class HomeLoginPage extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Something Went Wrong!'),);
-          } else if (snapshot.hasData) {
+          } else if (snapshot.hasData && snapshot.data != null) {
 
             return HomePage(initialIndex: initialIndex,);
           } else {

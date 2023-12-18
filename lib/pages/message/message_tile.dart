@@ -35,7 +35,7 @@ class _MessageTileState extends State<MessageTile> {
             ? const EdgeInsets.only(left: 30)
             : const EdgeInsets.only(right: 30),
         padding: const EdgeInsets.only(
-          top: 17,
+          top: 12,
           bottom: 17,
           left: 20,
           right: 20,
@@ -69,8 +69,8 @@ class _MessageTileState extends State<MessageTile> {
             if (widget.imageUrl != null)
               Image.network(
                 widget.imageUrl!,
-                width: 100,
-                height: 100,
+                width: 180,
+                height: 180,
                 fit: BoxFit.cover,
               ),
           ],
