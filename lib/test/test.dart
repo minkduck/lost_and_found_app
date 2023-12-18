@@ -8,6 +8,7 @@ import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/api/comment/comment_controller.dart';
 import 'package:lost_and_find_app/data/api/item/item_controller.dart';
 import 'package:lost_and_find_app/data/api/location/location_controller.dart';
+import 'package:lost_and_find_app/data/api/notifications/notification_controller.dart';
 import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
@@ -25,136 +26,88 @@ import '../utils/snackbar_utils.dart';
 import '../widgets/app_button.dart';
 
 class TestPage extends StatefulWidget {
-  const TestPage({Key? key}) : super(key: key);
+  const TestPage({super.key});
 
   @override
-  State<TestPage> createState() => _HomePageState();
+  State<TestPage> createState() => _TestPageState();
 }
 
-class _HomePageState extends State<TestPage> {
-  List<String> _selectedItems = [];
+class _TestPageState extends State<TestPage> {
+  Stream? member;
+  final _productSizeList = ["Small", "Medium", "Large", "XLarge"];
+  String? _selectedValue = "";
+  late String fcmToken = "";
+  late String accessToken = "";
+  TextEditingController textController = TextEditingController();
+  List<Map<String, dynamic>> userAndChatList = [];
 
-  void _showMultiSelect() async {
-    // a list of selectable items
-    // these items can be hard-coded or dynamically fetched from a database/API
-    final List<String> items = [
-      'Flutter',
-      'Node.js',
-      'React Native',
-      'Java',
-      'Docker',
-      'MySQL'
-    ];
-
-    final List<String>? results = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 300,
-            child: MultiSelect(items: items));
-      },
-    );
-
-    // Update UI
-    if (results != null) {
+  Future<void> fetchAndPrintUserChats() async {
+    ChatController(uid: FirebaseAuth.instance.currentUser!.uid)
+        .getGroupChats("FzEZGbNisxb96Y8IaFC0nQ2S7Zr1FLtIEJvuMgfg58u4sXhzxPn9qr73")
+        .then((val) {
       setState(() {
-        _selectedItems = results;
+        member = val;
       });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('dbestech'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // use this button to open the multi-select dialog
-            ElevatedButton(
-              onPressed: _showMultiSelect,
-              child: const Text('Select Your Favorite Topics'),
-            ),
-            const Divider(
-              height: 30,
-            ),
-            // display selected items
-            Wrap(
-              children: _selectedItems
-                  .map((e) => Chip(
-                label: Text(e),
-              ))
-                  .toList(),
-            )          ],
-        ),
-      ),
-    );
-  }
-}
-
-class MultiSelect extends StatefulWidget {
-  final List<String> items;
-  const MultiSelect({Key? key, required this.items}) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _MultiSelectState();
-}
-
-class _MultiSelectState extends State<MultiSelect> {
-  // this variable holds the selected items
-  final List<String> _selectedItems = [];
-
-// This function is triggered when a checkbox is checked or unchecked
-  void _itemChange(String itemValue, bool isSelected) {
-    setState(() {
-      if (isSelected) {
-        _selectedItems.add(itemValue);
-      } else {
-        _selectedItems.remove(itemValue);
-      }
+      print("chats:" + member.toString());
     });
   }
 
-  // this function is called when the Cancel button is pressed
-  void _cancel() {
-    Navigator.pop(context);
-  }
 
-// this function is called when the Submit button is tapped
-  void _submit() {
-    Navigator.pop(context, _selectedItems);
+  @override
+  void initState() {
+    super.initState();
+    _selectedValue = _productSizeList[0];
+
+    // Future<void> fetchAndPrintUserChats() async {
+    ChatController(uid: FirebaseAuth.instance.currentUser!.uid)
+        .getGroupChats("FzEZGbNisxb96Y8IaFC0nQ2S7Zr1FLtIEJvuMgfg58u4sXhzxPn9qr73")
+        .then((val) {
+      setState(() {
+        member = val;
+      });
+      print("chats:" + member.toString());
+    });
+    // }
+
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select Topics'),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: widget.items
-              .map((item) => CheckboxListTile(
-            value: _selectedItems.contains(item),
-            title: Text(item),
-            controlAffinity: ListTileControlAffinity.leading,
-            onChanged: (isChecked) => _itemChange(item, isChecked!),
-          ))
-              .toList(),
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('hello'),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                // fcmToken = await AppConstrants.getFcmToken();
+                // accessToken = await AppConstrants.getToken();
+                // SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
+                // SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
+                // SnackbarUtils().showInfo(title: "Info", message: "Info");
+                // SnackbarUtils().showLoading(message: "loading");
+                // Get.find<ItemController>().getItemByUidList();
+                // Get.find<CategoryController>().getCategoryGroupList();
+                // Get.find<PostController>().getPostByUidList();
+                // Get.find<LocationController>().getAllLocationPages();
+                // Get.find<NotificationController>().getNotificationListByUserId();
+                // fcmToken = await AppConstrants.getFcmToken();
+                // print("fcmToken" + fcmToken);
+              },
+              child: Text('button'),
+            ),
+            Gap(AppLayout.getHeight(20)),
+            Column(
+                children:[
+
+                ]
+            )
+          ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: _cancel,
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _submit,
-          child: const Text('Submit'),
-        ),
-      ],
     );
   }
 }

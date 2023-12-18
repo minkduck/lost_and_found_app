@@ -58,6 +58,7 @@ class AppConstrants{
   static const String GETUSERBYUID_URL = "$BASE_URL/api/users/";
   static const String PUTUSERBYUID_URL = "$BASE_URL/api/users";
   static const String POSTAVATARUSER_URL = "$BASE_URL/api/users/media";
+  static const String GETUSERBYEMAIL_URL = "$BASE_URL/api/users/email/";
 
   //claim
   static const String POSTCLAIMITEM_URL = "$BASE_URL/api/items/claim/";
@@ -86,5 +87,8 @@ class AppConstrants{
   static const String GETFLAGBYITEMID = "$BASE_URL/api/items/get-item-flag?userId=";
   static const String POSTFLAGBYPOSTID = "$BASE_URL/api/posts/flag-a-post/";
   static const String GETFLAGBYPOSTID = "$BASE_URL/api/posts/get-post-flag?userId=";
+
+  //notification
+  static const String GETALLNOTIBYUSERID = "$BASE_URL/api/notifications/get-all-notification/";
 
 }

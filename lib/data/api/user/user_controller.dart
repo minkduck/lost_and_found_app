@@ -126,4 +126,59 @@ class UserController extends GetxController {
     }
   }
 
+  Future<Map<String, dynamic>> getUserByEmail(String email) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETUSERBYEMAIL_URL}$email'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getUserByEmail " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getUserByEmail');
+    }
+  }
+
+  Future<Map<String, dynamic>> getUserLoginByUserId(String id, String accessToken1) async {
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken1'
+    };
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETUSERBYUID_URL}$id'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getUserByUserId " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getUserByUserId');
+    }
+  }
+
 }
