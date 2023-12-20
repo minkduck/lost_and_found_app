@@ -568,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                mainAxisAlignment: MainAxisAlignment.end,
                                                 children: [
                                                   IconButton(
                                                     icon: item['isBookMarkActive'] ?? false

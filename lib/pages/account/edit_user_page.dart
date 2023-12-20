@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
+import 'package:provider/provider.dart';
 
+import '../../data/api/auth/google_sign_in.dart';
 import '../../data/api/user/user_controller.dart';
+import '../../utils/snackbar_utils.dart';
 import '../../widgets/app_button_upload_image.dart';
 
 class EditUserPage extends StatefulWidget {
@@ -29,7 +33,19 @@ class _UserEditPageState extends State<EditUserPage> {
   final ImagePicker imagePicker = ImagePicker();
   XFile? selectedImage;
 
-  List<String> genderOptions = ['Male', 'Female'];
+  List<String>
+  genderOptions = ['Male', 'Female'];
+
+  int? userCampusId = 0;
+
+  List<DropdownMenuItem<int>> campus = [
+    DropdownMenuItem(value: 1, child: Text('Ho Chi Minh Campus')),
+    DropdownMenuItem(value: 3, child: Text('Hanoi Campus')),
+    DropdownMenuItem(value: 2, child: Text('Da Nang Campus')),
+    DropdownMenuItem(value: 4, child: Text('Can Tho Campus')),
+  ];
+
+
 
   Future<void> selectImageFromGallery() async {
     final XFile? image = await imagePicker.pickImage(source: ImageSource.gallery);
@@ -68,6 +84,9 @@ class _UserEditPageState extends State<EditUserPage> {
           print("API Response: $result");
           setState(() {
             userList = result;
+            userCampusId = userList['campus'] != null
+                ? userList['campus']['id'] ?? 0
+                : 0;
           });
         }
       });
@@ -76,11 +95,14 @@ class _UserEditPageState extends State<EditUserPage> {
     lastNameController.text = userList['lastName']?? '';
     genderController.text = userList['gender']?? '';
     phoneController.text = userList['phone']?? '';
+    userCampusId = userList['campus'] != null ? userList['campus']['id'] ?? 0 : 0;
   }
 
   @override
   Widget build(BuildContext context) {
     String userGender = userList['gender'] ?? '';
+    String userCampus = userList['campus'] != null ? userList['campus']['name'] ?? '' : '';
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Edit Profile"),
@@ -206,6 +228,7 @@ class _UserEditPageState extends State<EditUserPage> {
                         hintText: userGender, // Display the user's gender as the hint text
                       ),),
                     Gap(AppLayout.getHeight(20)),
+
                     Container(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -213,21 +236,64 @@ class _UserEditPageState extends State<EditUserPage> {
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         )),
-
                     TextField(
                       controller: phoneController,
                       decoration: InputDecoration(hintText: userList['phone']),
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                    ),
+
+                    Gap(AppLayout.getHeight(20)),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Campus",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DropdownButtonFormField<int>(
+                      value: userCampusId,
+                      items: campus,
+                      onChanged: (int? selectedCampusId) {
+                        setState(() {
+                          userCampusId = selectedCampusId;
+                          print("userCampusId:"+ userCampusId.toString());
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: userCampus,
+                      ),
                     ),
                     Gap(AppLayout.getHeight(100)),
-                    AppButton(boxColor: AppColors.primaryColor, textButton: "Update", onTap: () {
-                      userController.putUserByUserId(
-                          firstNameController.text.isNotEmpty ? firstNameController.text : userList['firstName']?? '',
-                          lastNameController.text.isNotEmpty ? lastNameController.text : userList['lastName']?? '',
-                          genderController.text.isNotEmpty ? genderController.text : userList['gender']?? 'Male',
-                          phoneController.text.isNotEmpty ? phoneController.text : userList['phone'] ?? ''
-                      );
-                      Navigator.pop(context);
-                      })
+                    AppButton(
+                      boxColor: AppColors.primaryColor,
+                      textButton: "Update",
+                      onTap: () async {
+                        String phoneNumber = phoneController.text;
+                        if (phoneNumber.isNotEmpty && phoneNumber.length != 10) {
+                          SnackbarUtils().showError(
+                            title: "Error",
+                            message: "Number phone must be 10 digits",
+                          );
+                        } else {
+                          print("userCampusId" + userCampusId.toString());
+                          await userController.putUserByUserId(
+                            firstNameController.text.isNotEmpty ? firstNameController.text : userList['firstName']?? '',
+                            lastNameController.text.isNotEmpty ? lastNameController.text : userList['lastName']?? '',
+                            genderController.text.isNotEmpty ? genderController.text : userList['gender']?? 'Male',
+                            phoneController.text.isNotEmpty ? phoneController.text : userList['phone'] ?? '',
+                            userCampusId!,
+                          );
+                          if (userCampusId != userList['campus']['id']) {
+                            final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
+                            await provider.logout();
+                          }
+                        }
+                      },
+                    )
                   ],
                 ),
               ),
