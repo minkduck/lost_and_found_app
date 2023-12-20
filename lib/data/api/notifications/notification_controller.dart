@@ -41,4 +41,36 @@ class NotificationController extends GetxController {
     }
   }
 
+  Future<void> pushNotifications(
+      String userId,
+      String title,
+      String content,
+      String notificationType
+      ) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('POST', Uri.parse(AppConstrants.PUSHNOTIFICATIONS));
+    request.body = json.encode({
+      "userId": userId,
+      "title": title,
+      "content": content,
+      "notificationType": notificationType
+    });
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    }
+    else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to pushNotifications');
+    }
+  }
 }

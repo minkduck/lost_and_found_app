@@ -90,5 +90,6 @@ class AppConstrants{
 
   //notification
   static const String GETALLNOTIBYUSERID = "$BASE_URL/api/notifications/get-all-notification/";
+  static const String PUSHNOTIFICATIONS = "$BASE_URL/api/notifications/push";
 
 }

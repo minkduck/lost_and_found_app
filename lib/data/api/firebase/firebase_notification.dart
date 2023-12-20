@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,21 +15,23 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
 }
 
 final navigatorKey = GlobalKey<NavigatorState>();
+final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin  = FlutterLocalNotificationsPlugin();
 
-class FirebaseNotification{
+class FirebaseNotification {
   final _firebaseMessaging = FirebaseMessaging.instance;
 
   Future initPushNotifications() async {
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true
+    print('initPushNotifications called');
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true
     );
 
     LocalNotificationService.initilize();
 
-    FirebaseMessaging.instance.getInitialMessage().then((event) {
-    });
+    FirebaseMessaging.instance.getInitialMessage().then((event) {});
 
     //Forground State
     FirebaseMessaging.onMessage.listen((event) {
@@ -49,5 +52,6 @@ class FirebaseNotification{
     await prefs.setString('fcmToken', fCMToken.toString());
     // print("fcmToken: " + fCMToken.toString());
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+    initPushNotifications();
   }
 }

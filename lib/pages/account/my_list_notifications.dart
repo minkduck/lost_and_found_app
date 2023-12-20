@@ -78,6 +78,7 @@ class _MyListNotificationsState extends State<MyListNotifications> {
               if (notificationList.isNotEmpty)
                 ListView.builder(
                   shrinkWrap: true,
+                  reverse: true,
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: notificationList.length,
                   itemBuilder: (BuildContext context, int index) {
@@ -99,7 +100,7 @@ class _MyListNotificationsState extends State<MyListNotifications> {
                               notiList['title'],
                               style: Theme.of(context)
                                   .textTheme
-                                  .titleSmall,
+                                  .labelMedium,
                             ),
                           ),
                           Gap(AppLayout.getHeight(20)),

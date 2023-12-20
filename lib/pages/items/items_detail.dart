@@ -17,6 +17,7 @@ import 'package:get/get.dart';
 
 import '../../data/api/item/claim_controller.dart';
 import '../../data/api/item/item_controller.dart';
+import '../../data/api/message/Chat.dart';
 import '../../data/api/message/chat_controller.dart';
 import '../../data/api/user/user_controller.dart';
 import '../../routes/route_helper.dart';
@@ -520,8 +521,26 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       String otherUserId = itemlist['user']['id'];
 
                       await ChatController().createUserChats(uid, otherUserId);
-                      Get.toNamed(RouteHelper.getInitial(2));
-
+                      // Get.toNamed(RouteHelper.getInitial(2));
+                      String chatId = uid.compareTo(otherUserId) > 0 ? uid + otherUserId : otherUserId + uid;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatPage(
+                            chat: Chat(
+                              uid: otherUserId,
+                              name: itemlist['user']['fullName'] ?? 'No Name',
+                              image: itemlist['user']['avatar'] ?? '',
+                              lastMessage: '', // You may want to pass initial message if needed
+                              time: '',
+                              chatId:chatId, // You may want to pass the chatId if needed
+                              formattedDate: '',
+                              otherId: otherUserId,
+                              date: DateTime.now(),
+                            ),
+                          ),
+                        ),
+                      );
 /*                      BuildContext contextReference = context;
 
                       // Find the chatId based on user IDs
