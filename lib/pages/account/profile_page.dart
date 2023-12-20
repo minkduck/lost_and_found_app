@@ -139,6 +139,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
                           child: IconAndTextWidget(icon: Icons.phone, text: userList['phone']?? '-', iconColor: AppColors.secondPrimaryColor),
                         ),
+                        Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
+                        Gap(AppLayout.getHeight(10)),
+
+                        Padding(
+                          padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                          child: IconAndTextWidget(icon: Icons.house, text: userList['campus']['name']?? '-', iconColor: AppColors.secondPrimaryColor),
+                        ),
 
                       ],
                     ),
