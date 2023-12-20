@@ -5,14 +5,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lost_and_find_app/data/api/message/chat_controller.dart';
+import 'package:lost_and_find_app/data/api/notifications/notification_controller.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/data/api/message/Chat.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../data/api/user/user_controller.dart';
 import '../../utils/app_constraints.dart';
 import '../../widgets/app_button_upload_image.dart';
 import 'message_tile.dart';
@@ -37,6 +41,9 @@ class _ChatPageState extends State<ChatPage> {
 
   final ImagePicker _imagePicker = ImagePicker();
   XFile? imageFile;
+
+  Map<String, dynamic> userList = {};
+  final UserController userController= Get.put(UserController());
 
   Future<void> _pickImage() async {
     final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
@@ -100,6 +107,14 @@ class _ChatPageState extends State<ChatPage> {
         });
       }
     });
+    userController.getUserByUid().then((result) {
+      if (_isMounted) {
+        setState(() {
+          userList = result;
+        });
+      }
+    });
+
   }
 
   @override
@@ -253,14 +268,34 @@ class _ChatPageState extends State<ChatPage> {
                                     });
                                     await sendMessage(messageText);
                                     messageController.clear();
+                                    await NotificationController().pushNotifications(
+                                        widget.chat.otherId,
+                                        '${userList['fullName']} sends you a new message!',
+                                        messageText,
+                                        "Chat");
+                                    print(widget.chat.otherId + widget.chat.name + messageText);
                                   } else if (messageText.isNotEmpty) {
                                     await sendMessage(messageText);
                                     messageController.clear();
+                                    await NotificationController().pushNotifications(
+                                        widget.chat.otherId,
+                                        '${userList['fullName']} sends you a new message!',
+                                        messageText,
+                                        "Chat");
+                                    print(widget.chat.otherId + widget.chat.name + messageText);
+
                                   } else if (imageFile != null) {
                                     await _sendImageMessage(imageFile!.path);
                                     setState(() {
                                       imageFile = null;
                                     });
+                                    await NotificationController().pushNotifications(
+                                        widget.chat.otherId,
+                                        '${userList['fullName']} sends you a new message!',
+                                        'New Attachment!',
+                                        "Chat");
+                                    print(widget.chat.otherId + widget.chat.name + messageText);
+
                                   }
                                 },
                                 child: Container(
