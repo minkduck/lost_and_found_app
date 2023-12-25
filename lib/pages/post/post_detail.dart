@@ -3,8 +3,11 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:lost_and_find_app/data/api/comment/comment_controller.dart';
+import 'package:lost_and_find_app/data/api/location/location_controller.dart';
 import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 
+import '../../data/api/message/Chat.dart';
+import '../../data/api/message/chat_controller.dart';
 import '../../test/time/time_widget.dart';
 import '../../utils/app_assets.dart';
 import '../../utils/app_constraints.dart';
@@ -12,6 +15,7 @@ import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
+import '../message/chat_page.dart';
 import 'edit_post.dart';
 
 class PostDetail extends StatefulWidget {
@@ -30,11 +34,14 @@ class _PostDetailState extends State<PostDetail> {
 
   Map<String, dynamic> postList = {};
   final PostController postController = Get.put(PostController());
+  final LocationController locationController = Get.put(LocationController());
+
   List<dynamic> commentList = [];
   final CommentController commentController = Get.put(CommentController());
   var commentTextController = TextEditingController();
   var editCommentTextController = TextEditingController();
   late String uid = "";
+  String? postLocationNames;
 
   Future<void> postCommentAndReloadComments(String comment) async {
     await CommentController().postCommentByPostId(widget.pageId, comment);
@@ -93,6 +100,36 @@ class _PostDetailState extends State<PostDetail> {
       // Handle the error gracefully, e.g., set isActive to false or log the error.
     }
   }
+
+  Future<List<String>> getLocationNames(List<int> locationIds) async {
+    List<String> locationNames = [];
+
+    for (int id in locationIds) {
+      final result = await locationController.getLocationById(id);
+      if (result.isNotEmpty) {
+        final locationName = result[0]['locationName'];
+        locationNames.add(locationName);
+      }
+    }
+
+    return locationNames;
+  }
+
+  Future<void> loadAndDisplayLocationNames() async {
+    if (postList['postLocationIdList'] != null) {
+      List<int> locationIds = List<int>.from(postList['postLocationIdList']);
+
+      final locationNames = await getLocationNames(locationIds);
+      print("locationNames: " + locationNames.toString());
+      if (_isMounted) {
+        setState(() {
+          postLocationNames = locationNames.join(', ');
+        });
+      }
+      print("postLocationNames: " + postLocationNames.toString());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -115,8 +152,9 @@ class _PostDetailState extends State<PostDetail> {
         }
       });
       uid = await AppConstrants.getUid();
-    });
+      loadAndDisplayLocationNames();
 
+    });
   }
 
 
@@ -200,32 +238,67 @@ class _PostDetailState extends State<PostDetail> {
                       child: Column(
                         children: [
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              CircleAvatar(
-                                radius: 25,
-                                backgroundImage:
-                                    NetworkImage(postList['user']['avatar']!),
-                              ),
-                              Gap(AppLayout.getHeight(15)),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              Row(
                                 children: [
-                                  Text(
-                                    postList['user']['fullName'] ?? 'No Name',
-                                    style: Theme.of(context).textTheme.titleSmall,
+                                  CircleAvatar(
+                                    radius: 25,
+                                    backgroundImage:
+                                        NetworkImage(postList['user']['avatar']!),
                                   ),
-                                  Gap(AppLayout.getHeight(5)),
-                                  Text(
-                                    postList['createdDate'] != null
-                                        ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(postList['createdDate']))}  --  '
-                                        '${DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['createdDate']))}'
-                                        : 'No Date',
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey),
+                                  Gap(AppLayout.getHeight(15)),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        postList['user']['fullName'] ?? 'No Name',
+                                        style: Theme.of(context).textTheme.titleSmall,
+                                      ),
+                                      Gap(AppLayout.getHeight(5)),
+                                      Text(
+                                        postList['createdDate'] != null
+                                            ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(postList['createdDate']))}  --  '
+                                            '${DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['createdDate']))}'
+                                            : 'No Date',
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey),
+                                      )
+                                    ],
                                   )
                                 ],
+                              ),
+/*
+                              GestureDetector(
+                                onTap: () async {
+                                  String otherUserId = postList['user']['id'];
+
+                                  await ChatController().createUserChats(uid, otherUserId);
+                                  // Get.toNamed(RouteHelper.getInitial(2));
+                                  String chatId = uid.compareTo(otherUserId) > 0 ? uid + otherUserId : otherUserId + uid;
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatPage(
+                                        chat: Chat(
+                                          uid: otherUserId,
+                                          name: postList['user']['fullName'] ?? 'No Name',
+                                          image: postList['user']['avatar'] ?? '',
+                                          lastMessage: '', // You may want to pass initial message if needed
+                                          time: '',
+                                          chatId:chatId, // You may want to pass the chatId if needed
+                                          formattedDate: '',
+                                          otherId: otherUserId,
+                                          date: DateTime.now(),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Text("Message", style: TextStyle(color: AppColors.primaryColor, fontSize: 20),),
                               )
+*/
                             ],
                           ),
                           Gap(AppLayout.getHeight(30)),
@@ -271,7 +344,7 @@ class _PostDetailState extends State<PostDetail> {
                           Gap(AppLayout.getHeight(30)),
                           IconAndTextWidget(
                             icon: Icons.location_on,
-                            text: postList['locationName'] ?? 'No Location',
+                            text: postLocationNames ?? 'No Location',
                             size: 15,
                             iconColor: Colors.black,
                           ),

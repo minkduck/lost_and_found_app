@@ -105,12 +105,12 @@ class ClaimController extends GetxController{
       final resultList = jsonResponse['result']['itemClaims'];
       _isLoaded = true;
       update();
-      print("itemlistByid " + resultList.toString());
+      print("ListClaimByItemId " + resultList.toString());
       return resultList;
     } else {
       print(response.statusCode);
       print(response.reasonPhrase);
-      throw Exception('Failed to load getItemListById');
+      throw Exception('Failed to load getListClaimByItemId');
     }
   }
   Future<void> denyClaimByItemIdAndUserId(int itemId, String userId) async {
@@ -155,7 +155,7 @@ class ClaimController extends GetxController{
 
     if (response.statusCode == 204) {
       print(await response.stream.bytesToString());
-      SnackbarUtils().showSuccess(title: "Success", message: "Accept claim successfully");
+      // SnackbarUtils().showSuccess(title: "Success", message: "Accept claim successfully");
     }
     else {
       print(response.reasonPhrase);

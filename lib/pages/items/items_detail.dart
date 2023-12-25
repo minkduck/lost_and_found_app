@@ -211,7 +211,26 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 );
 
                 if (matchingClaim != null) {
-                  isItemClaimed = matchingClaim['claimStatus'] == true ? true : false;
+                  isItemClaimed = matchingClaim['isActive'] == true ? true : false;
+                }
+              }
+              if (itemlist['foundDate'] != null) {
+                String foundDate = itemlist['foundDate'];
+                if (foundDate.contains('|')) {
+                  List<String> dateParts = foundDate.split('|');
+                  if (dateParts.length == 2) {
+                    String date = dateParts[0].trim();
+                    String slot = dateParts[1].trim();
+
+                    // Check if the date format needs to be modified
+                    if (date.contains(' ')) {
+                      // If it contains time, remove the time part
+                      date = date.split(' ')[0];
+                    }
+
+                    // Update the foundDate in the itemlist
+                    itemlist['foundDate'] = '$date $slot';
+                  }
                 }
               }
             }
@@ -302,6 +321,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                                   initialDescription: itemlist['description'], // Pass the initial data
                                   initialLocation: itemlist['locationName'],
                                   status: itemlist['itemStatus'],
+                                  foundDate: itemlist['foundDate'],
                                 ),
                               ),
                             );
@@ -458,9 +478,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                         top: AppLayout.getHeight(8)),
                     child: IconAndTextWidget(
                         icon: Icons.timer_sharp,
-                        text: itemlist['createdDate'] != null
-                            ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(itemlist['createdDate']))}  --  ${DateFormat('dd-MM-yyyy').format(DateTime.parse(itemlist['createdDate']))}'
-                            : 'No Date',
+                        text: itemlist['foundDate'],
                         iconColor: Colors.grey)),
                 //location
                 Container(
@@ -598,7 +616,6 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                                           backgroundImage: NetworkImage(user['avatar']),
                                         ),
                                       ),
-                                      Gap(AppLayout.getWidth(10)),
                                       Column(
                                         children: [
                                           Text(

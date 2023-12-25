@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:lost_and_find_app/data/api/location/location_controller.dart';
 import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 import 'package:lost_and_find_app/pages/post/create_post.dart';
 import 'package:lost_and_find_app/pages/post/post_detail.dart';
@@ -34,6 +35,7 @@ class _PostScreenState extends State<PostScreen> {
   dynamic selectedCategoryGroup;
   dynamic previouslySelectedCategoryGroup;
   final CategoryController categoryController = Get.put(CategoryController());
+  final LocationController locationController = Get.put(LocationController());
 
   List<dynamic> postList = [];
   List<dynamic> mypostList = [];
@@ -286,6 +288,35 @@ class _PostScreenState extends State<PostScreen> {
     }
   }
 
+  Future<List<String>> getLocationNames(List<int> locationIds) async {
+    List<String> locationNames = [];
+
+    for (int locationId in locationIds) {
+      final locations = await locationController.getLocationById(locationId);
+
+      if (locations.isNotEmpty) {
+        final locationName = locations[0]['locationName'];
+        locationNames.add(locationName);
+      }
+    }
+
+    return locationNames;
+  }
+
+  Future<void> loadAndDisplayLocationNames(dynamic post) async {
+    if (post['postLocationIdList'] != null) {
+      List<int> locationIds = List<int>.from(post['postLocationIdList']);
+
+      final locationNames = await getLocationNames(locationIds);
+      print("locationNames: "+locationNames.toString());
+      print("locationNames:"+locationNames.toString());
+      if (_isMounted) {
+        setState(() {
+          post['postLocationNames'] = locationNames.join(', ');
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -364,7 +395,6 @@ class _PostScreenState extends State<PostScreen> {
     });
 
   }
-
 
 
   @override
@@ -531,6 +561,8 @@ class _PostScreenState extends State<PostScreen> {
                             itemBuilder: (BuildContext context, int index) {
 
                               final post = filteredPost[index];
+                              final locationList = loadAndDisplayLocationNames(post);
+                              print("locationList: " + locationList.toString());
                               return GestureDetector(
                                   onTap: () {
                                     Navigator.of(context).push(
@@ -630,8 +662,7 @@ class _PostScreenState extends State<PostScreen> {
                                         Gap(AppLayout.getHeight(30)),
                                         IconAndTextWidget(
                                           icon: Icons.location_on,
-                                          text: post['locationName'] ??
-                                              'No Location',
+                                          text: (post['postLocationNames'] as String?) ?? 'No Location',
                                           size: 15,
                                           iconColor: Colors.black,
                                         ),
