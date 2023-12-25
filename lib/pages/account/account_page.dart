@@ -68,6 +68,19 @@ class _AccountPageState extends State<AccountPage> {
           children: [
             loadingFinished ? Column(
               children: [
+                // userList.isNotEmpty ? Column(
+                //   children: [
+                //     Gap(AppLayout.getHeight(50)),
+                //     Gap(AppLayout.getHeight(30)),
+                //     Center(
+                //       child: CircleAvatar(
+                //         radius: 80,
+                //         backgroundImage:
+                //         NetworkImage(userList['avatar']),
+                //       ),
+                //     ),
+                //   ],
+                // ) :const Center(child: CircularProgressIndicator(),),
                 Gap(AppLayout.getHeight(50)),
                 Gap(AppLayout.getHeight(30)),
                 Gap(AppLayout.getHeight(50)),
@@ -117,19 +130,7 @@ class _AccountPageState extends State<AccountPage> {
                 verifyStatus == 'VERIFIED'? Container() : Gap(AppLayout.getHeight(80)),
               ],
             ) : Center(child: CircularProgressIndicator(),),
-            // userList.isNotEmpty ? Column(
-            //   children: [
-            //     Gap(AppLayout.getHeight(50)),
-            //     Gap(AppLayout.getHeight(30)),
-            //     Center(
-            //       child: CircleAvatar(
-            //         radius: 80,
-            //         backgroundImage:
-            //         NetworkImage(userList['avatar']),
-            //       ),
-            //     ),
-            //   ],
-            // ) :const Center(child: CircularProgressIndicator(),),
+
             loadingFinished ? Container() : Gap(AppLayout.getHeight(300)),
             Padding(
               padding: EdgeInsets.only(bottom: 40.0),
