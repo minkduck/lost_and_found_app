@@ -7,6 +7,7 @@ import 'package:lost_and_find_app/data/api/user/user_controller.dart';
 import 'package:lost_and_find_app/utils/app_assets.dart';
 
 import '../../data/api/item/claim_controller.dart';
+import '../../data/api/message/Chat.dart';
 import '../../data/api/message/chat_controller.dart';
 import '../../routes/route_helper.dart';
 import '../../utils/app_constraints.dart';
@@ -14,6 +15,7 @@ import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/big_text.dart';
+import '../message/chat_page.dart';
 import 'scan_qrcode.dart';
 
 class ClaimItems extends StatefulWidget {
@@ -48,7 +50,7 @@ class _ClaimItemsState extends State<ClaimItems> {
             final userMap = await userController.getUserByUserId(userId);
             final Map<String, dynamic> claimInfo = {
               'claim': claim,
-              'user': userMap != null ? userMap : null, // Check if user is null
+              'user': userMap != null ? userMap : null,
             };
             print("claimInfo:" + claimInfo.toString());
             setState(() {
@@ -95,7 +97,7 @@ class _ClaimItemsState extends State<ClaimItems> {
               final claim = userClaimInfo['claim'];
               final user = userClaimInfo['user'];
               // print("user:" + user);
-              return claim['claimStatus'] ? Container(
+              return claim['isActive'] ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: Theme.of(context).cardColor,
@@ -136,7 +138,25 @@ class _ClaimItemsState extends State<ClaimItems> {
                             String otherUserId = user['id'];
 
                             await ChatController().createUserChats(uid, otherUserId);
-                            Get.toNamed(RouteHelper.getInitial(2));
+                            String chatId = uid.compareTo(otherUserId) > 0 ? uid + otherUserId : otherUserId + uid;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatPage(
+                                  chat: Chat(
+                                    uid: otherUserId,
+                                    name: user['fullName'] ?? 'No Name',
+                                    image: user['avatar'] ?? '',
+                                    lastMessage: '', // You may want to pass initial message if needed
+                                    time: '',
+                                    chatId:chatId, // You may want to pass the chatId if needed
+                                    formattedDate: '',
+                                    otherId: otherUserId,
+                                    date: DateTime.now(),
+                                  ),
+                                ),
+                              ),
+                            );
                           },
                           child: Container(
                             decoration: BoxDecoration(

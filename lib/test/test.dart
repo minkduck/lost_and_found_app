@@ -92,10 +92,11 @@ class _TestPageState extends State<TestPage> {
                 // Get.find<ItemController>().getItemByUidList();
                 // Get.find<CategoryController>().getCategoryGroupList();
                 // Get.find<PostController>().getPostByUidList();
-                // Get.find<LocationController>().getAllLocationPages();
+                Get.find<LocationController>().getLocationById(1);
                 // Get.find<NotificationController>().getNotificationListByUserId();
                 // fcmToken = await AppConstrants.getFcmToken();
                 // print("fcmToken" + fcmToken);
+
               },
               child: Text('button'),
             ),

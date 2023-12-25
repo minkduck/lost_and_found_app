@@ -81,7 +81,7 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: userList.isNotEmpty & userItemList.isNotEmpty ? Column(
+          child: userList.isNotEmpty & userItemList.isNotEmpty & itemList.isNotEmpty ? Column(
             children: [
               Gap(AppLayout.getHeight(50)),
               Row(

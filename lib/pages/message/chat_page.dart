@@ -381,14 +381,19 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> sendMessage(String messageText) async {
     try {
-      Map<String, dynamic> newMessage = {
-        'date': DateTime.now().millisecondsSinceEpoch,
-        'id': Uuid().v4(),
-        'senderId': myUid,
-        'text': messageText,
-      };
+      messageText = messageText.trim();
+      if (messageText.isNotEmpty) {
+        Map<String, dynamic> newMessage = {
+          'date': DateTime.now().millisecondsSinceEpoch,
+          'id': Uuid().v4(),
+          'senderId': myUid,
+          'text': messageText,
+        };
+        await ChatController().addMessage(widget.chat.chatId, newMessage, myUid, widget.chat.otherId);
+      } else {
+        print('Message contains only spaces and will not be sent.');
+      }
 
-      await ChatController().addMessage(widget.chat.chatId, newMessage, myUid, widget.chat.otherId);
     } catch (e) {
       print('Error sending message: $e');
     }
