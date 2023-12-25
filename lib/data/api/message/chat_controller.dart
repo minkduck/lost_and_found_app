@@ -154,8 +154,8 @@ class ChatController {
       await chatDocRef.update({
         'messages': FieldValue.arrayUnion([messageData]),
       });
-      DocumentReference userChatDocRef = userChatsCollection.doc(userId);
-      await userChatDocRef.update({
+      DocumentReference userChatUserId = userChatsCollection.doc(userId);
+      await userChatUserId.update({
         chatId : {
           // 'date': messageData['date'],
           'date': DateTime.now(),
@@ -163,6 +163,17 @@ class ChatController {
             'text': messageData['text'],
           },
           'uid': otherId,
+        }
+      });
+      DocumentReference userChatOtherId = userChatsCollection.doc(otherId);
+      await userChatOtherId.update({
+        chatId : {
+          // 'date': messageData['date'],
+          'date': DateTime.now(),
+          'lastMessage': {
+            'text': messageData['text'],
+          },
+          'uid': userId,
         }
       });
     } catch (e) {

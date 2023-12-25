@@ -15,6 +15,11 @@ class AppConstrants{
     return prefs.getString('uid') ?? '';
   }
 
+  static Future<String> getVerifyStatus() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('verifyStatus') ?? '';
+  }
+
   static const String APP_NAME = "Lost&Find";
   static const int APP_VERSION = 1;
 
@@ -33,6 +38,7 @@ class AppConstrants{
   //location
   static const String GETLOCATIONWITHPAGINATION_URL = "$BASE_URL/api/locations";
   static const String GETALLLOCATION_URL = "$BASE_URL/api/locations/all";
+  static const String GETLOCATIONBYID_URL = "$BASE_URL/api/locations?LocationId=";
 
 
   //item
@@ -59,6 +65,7 @@ class AppConstrants{
   static const String PUTUSERBYUID_URL = "$BASE_URL/api/users";
   static const String POSTAVATARUSER_URL = "$BASE_URL/api/users/media";
   static const String GETUSERBYEMAIL_URL = "$BASE_URL/api/users/email/";
+  static const String VERIFYACCOUNT_URL = "$BASE_URL/api/users/media-credentials";
 
   //claim
   static const String POSTCLAIMITEM_URL = "$BASE_URL/api/items/claim/";
@@ -69,7 +76,7 @@ class AppConstrants{
   static const String POSTACCPECTCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/accept";
 
   //receipt
-  static const String POSTRECEIPT_URL = "$BASE_URL/api/receipts";
+  static const String POSTRECEIPT_URL = "$BASE_URL/api/items/accept-with-receipt";
   static const String GETRECEIPTBYITEMID_URL = "$BASE_URL/api/receipts?ItemId=";
   static const String GETRECEIPTBYRECEIVERID_URL = "$BASE_URL/api/receipts?ReceiverId=";
   static const String GETRECEIPTBYSENDERID_URL = "$BASE_URL/api/receipts?SenderId=";

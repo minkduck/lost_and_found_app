@@ -186,7 +186,9 @@ class ItemController extends GetxController{
       String description,
       String categoryId,
       String locationId,
-      String status) async {
+      String foundDate,
+      // String status
+      ) async {
     accessToken = await AppConstrants.getToken();
     var headers = {
       'Content-Type': 'application/json',
@@ -200,8 +202,10 @@ class ItemController extends GetxController{
       "locationId": locationId,
       "categoryId": categoryId,
       "cabinetId": null,
-      "itemStatus": status
+      // "itemStatus": status,
+      "foundDate": foundDate
     });
+    print(request.body);
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
