@@ -531,6 +531,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                   final item = filteredItems[index];
                                   final mediaUrl = getUrlFromItem(item) ??
                                       "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png";
+                                  if (item['foundDate'] != null) {
+                                    String foundDate = item['foundDate'];
+                                    if (foundDate.contains('|')) {
+                                      List<String> dateParts = foundDate.split('|');
+                                      if (dateParts.length == 2) {
+                                        String date = dateParts[0].trim();
+                                        String slot = dateParts[1].trim();
+
+                                        // Check if the date format needs to be modified
+                                        if (date.contains(' ')) {
+                                          // If it contains time, remove the time part
+                                          date = date.split(' ')[0];
+                                        }
+
+                                        // Update the foundDate in the itemlist
+                                        item['foundDate'] = '$date';
+                                      }
+                                    }
+                                  }
 
                                   return Container(
                                     decoration: const BoxDecoration(
@@ -680,9 +699,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   alignment:
                                                       Alignment.centerLeft,
                                                   child: Text(
-                                                    item['createdDate'] != null
-                                                        ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(item['createdDate']))}'
-                                                        : 'No Date',
+                                                    item['foundDate'] ?? '',
                                                     maxLines: 1,
                                                     overflow:
                                                         TextOverflow.ellipsis,

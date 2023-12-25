@@ -163,10 +163,9 @@ class GoogleSignInProvider extends ChangeNotifier {
           return;
         }
 
-// Add this log message
         print("Continuing with login process...");
-
-        // If campusId is equal, proceed with login.
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('verifyStatus', userList['verifyStatus'].toString());
 
         var headers = {
           'Content-Type': 'application/json'

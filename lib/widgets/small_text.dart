@@ -17,7 +17,7 @@ class SmallText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: Theme.of(context).textTheme.titleSmall,
+      style: color == const Color(0xFF2A2D64) ? Theme.of(context).textTheme.titleSmall : Theme.of(context).textTheme.titleSmall?.copyWith(color: color),
     );
   }
 }

@@ -61,8 +61,8 @@ class UserController extends GetxController {
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
-      SnackbarUtils().showSuccess(title: "Success", message: "Update user information sucessful");
-      Get.toNamed(RouteHelper.getInitial(3));
+      SnackbarUtils().showSuccess(title: "Success", message: "Update user information successful");
+      Get.toNamed(RouteHelper.getInitial(4));
     }
     else {
       print(response.reasonPhrase);
@@ -178,6 +178,41 @@ class UserController extends GetxController {
       print(response.statusCode);
       print(response.reasonPhrase);
       throw Exception('Failed to load getUserByUserId');
+    }
+  }
+
+  Future<void> verifyAccount(
+      String schoolId,
+      String CCIDFront,
+      String CCIDBack,
+      String StudentCard,
+      ) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.VERIFYACCOUNT_URL));
+    request.fields.addAll({
+      'SchoolId': schoolId
+    });
+    request.files.add(await http.MultipartFile.fromPath('CCIDFront', CCIDFront));
+    request.files.add(await http.MultipartFile.fromPath('CCIDBack', CCIDBack));
+    request.files.add(await http.MultipartFile.fromPath('StudentCard', StudentCard));
+    request.headers.addAll(headers);
+    print("request: " + request.fields.toString());
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      SnackbarUtils().showSuccess(title: "Success", message: "Verify account successful");
+      Get.toNamed(RouteHelper.getInitial(4));
+
+    }
+    else {
+      print(response.reasonPhrase);
+      print(response.statusCode);
+      throw Exception('Failed to put User');
     }
   }
 

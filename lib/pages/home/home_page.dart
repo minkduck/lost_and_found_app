@@ -7,6 +7,7 @@ import 'package:lost_and_find_app/pages/message/message_page.dart';
 import 'package:lost_and_find_app/pages/post/post_screen.dart';
 
 import '../../utils/colors.dart';
+import '../giveaway/giveaway_screen.dart';
 
 class HomePage extends StatefulWidget {
   final int initialIndex;
@@ -25,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   List pages =[
     HomeScreen(),
     PostScreen(),
+    GiveawayScreen(),
     MessagePage(),
     AccountPage(),
   ];
@@ -62,6 +64,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
               icon: Icon(FontAwesomeIcons.receipt, size: 20,),
               label: "Post"
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.card_giftcard,),
+              label: "Giveaway"
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.message_outlined,),

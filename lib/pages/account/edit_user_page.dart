@@ -34,7 +34,7 @@ class _UserEditPageState extends State<EditUserPage> {
   XFile? selectedImage;
 
   List<String>
-  genderOptions = ['Male', 'Female'];
+  genderOptions = ['Male', 'Female', "Others"];
 
   int? userCampusId = 0;
 

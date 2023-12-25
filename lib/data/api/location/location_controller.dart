@@ -64,6 +64,34 @@ class LocationController extends GetxController{
         throw Exception('Failed to load Location');
       }
     }
+  Future<List<dynamic>> getLocationById(int id) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse("${AppConstrants.GETLOCATIONBYID_URL}$id&Status=All"));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("locationByid " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load Location');
+    }
+  }
+
   }
 
 
