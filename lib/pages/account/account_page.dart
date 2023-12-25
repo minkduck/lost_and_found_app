@@ -82,7 +82,7 @@ class _AccountPageState extends State<AccountPage> {
                 //   ],
                 // ) :const Center(child: CircularProgressIndicator(),),
                 Gap(AppLayout.getHeight(50)),
-                Gap(AppLayout.getHeight(30)),
+                Gap(AppLayout.getHeight(20)),
                 Gap(AppLayout.getHeight(50)),
                 Center(
                   child: AppButton(boxColor: AppColors.primaryColor, textButton: "Profile", onTap: () {
