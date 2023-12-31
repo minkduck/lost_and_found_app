@@ -42,12 +42,13 @@ class UserController extends GetxController {
   }
   Future<void> putUserByUserId(String firstName,String lastName ,String male, String phone, int campusId) async {
     accessToken = await AppConstrants.getToken();
+    uid = await AppConstrants.getUid();
     var headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'
     };
     var request = http.Request('PUT',
-        Uri.parse(AppConstrants.PUTUSERBYUID_URL));
+        Uri.parse("${AppConstrants.PUTUSERBYUID_URL}/$uid"));
     request.body = json.encode({
       "firstName": firstName,
       "lastName": lastName,
@@ -205,7 +206,7 @@ class UserController extends GetxController {
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
-      SnackbarUtils().showSuccess(title: "Success", message: "Verify account successful");
+      SnackbarUtils().showSuccess(title: "Success", message: "Request verify account successful");
       Get.toNamed(RouteHelper.getInitial(4));
 
     }

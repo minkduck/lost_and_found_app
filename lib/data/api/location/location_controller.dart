@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import '../../../utils/app_constraints.dart';
 class LocationController extends GetxController{
   late String accessToken = "";
+  late String campusId = "";
+
 
   List<dynamic> _locationList = [];
   List<dynamic> get locationList => _locationList;
@@ -42,11 +44,12 @@ class LocationController extends GetxController{
   }
   Future<List<dynamic>> getAllLocationPages() async {
     accessToken = await AppConstrants.getToken();
+    campusId = await AppConstrants.getCampusId();
     var headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'
     };
-      var request = http.Request('GET', Uri.parse(AppConstrants.GETALLLOCATION_URL));
+      var request = http.Request('GET', Uri.parse(AppConstrants.GETALLLOCATION_URL+campusId));
       request.headers.addAll(headers);
 
       http.StreamedResponse response = await request.send();
@@ -83,7 +86,7 @@ class LocationController extends GetxController{
       final resultList = jsonResponse['result'];
       _isLoaded = true;
       update();
-      print("locationByid " + resultList.toString());
+      // print("locationByid " + resultList.toString());
       return resultList;
     } else {
       print(response.statusCode);

@@ -13,6 +13,7 @@ import '../../utils/app_assets.dart';
 import '../../utils/app_constraints.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
+import '../../utils/snackbar_utils.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
 import '../message/chat_page.dart';
@@ -42,6 +43,7 @@ class _PostDetailState extends State<PostDetail> {
   var editCommentTextController = TextEditingController();
   late String uid = "";
   String? postLocationNames;
+  bool? loadingFinished = false;
 
   Future<void> postCommentAndReloadComments(String comment) async {
     await CommentController().postCommentByPostId(widget.pageId, comment);
@@ -54,22 +56,36 @@ class _PostDetailState extends State<PostDetail> {
     }
   }
 
-  Future<void> _refreshData() async {
-    await postController.getPostListById(widget.pageId).then((result) {
-      if (_isMounted) {
-        setState(() {
-          postList = result;
-        });
-      }
-    });
-    await commentController.getCommentByPostId(widget.pageId).then((result) {
-      if (_isMounted) {
-        setState(() {
-          commentList = result;
-        });
-      }
-    });
+  Future<void> togglePostFlagStatus(int postId, Future<void> Function(int, String) action, String reason) async {
+    try {
+      await action(postId, reason);
+
+      // Manually update the item status based on the isFlagActive field
+      setState(() {
+        postList['isFlagActive'] = !(postList['isFlagActive'] ?? false);
+      });
+    } catch (e) {
+      print('Error toggling item status: $e');
+    }
   }
+
+  Future<void> flagPost(int postId, String reason) async {
+    await togglePostFlagStatus(postId, postController.postFlagPostByPostId, reason);
+  }
+
+  Future<void> loadFlagPosts(int postId) async {
+    final flagPosts = await postController.getFlagPost(postId);
+    if (_isMounted) {
+      setState(() {
+        final postToUpdate = postList;
+        if (postToUpdate != null) {
+          postToUpdate['isFlagActive'] = flagPosts['postId'] == postId && flagPosts['isActive'];
+        }
+      });
+    }
+  }
+
+
 
   Future<void> bookmarkPost(int postId) async {
     try {
@@ -115,7 +131,7 @@ class _PostDetailState extends State<PostDetail> {
     return locationNames;
   }
 
-  Future<void> loadAndDisplayLocationNames() async {
+/*  Future<void> loadAndDisplayLocationNames() async {
     if (postList['postLocationIdList'] != null) {
       List<int> locationIds = List<int>.from(postList['postLocationIdList']);
 
@@ -128,6 +144,64 @@ class _PostDetailState extends State<PostDetail> {
       }
       print("postLocationNames: " + postLocationNames.toString());
     }
+  }*/
+
+  Future<void> loadAndDisplayLocationNames(dynamic postList) async {
+    if (postList['postLocationList'] != null) {
+      List<dynamic> postLocationList = postList['postLocationList'];
+
+      if (postLocationList.isNotEmpty) {
+        List locationNames = postLocationList.map((location) {
+          return location['locationName'];
+        }).toList();
+        print(locationNames);
+        if (_isMounted) {
+          setState(() {
+            postList['postLocationNames'] = locationNames.join(', ');
+          });
+        }
+      }
+    }
+  }
+  Future<void> loadAndDisplayCategoryNames(dynamic postList) async {
+    if (postList['postCategoryList'] != null) {
+      List<dynamic> postCategoryList = postList['postCategoryList'];
+
+      if (postCategoryList.isNotEmpty) {
+        List categoryNames = postCategoryList.map((caregories) {
+          return caregories['name'];
+        }).toList();
+        print(categoryNames);
+        if (_isMounted) {
+          setState(() {
+            postList['postCategoryNames'] = categoryNames.join(', ');
+          });
+        }
+      }
+    }
+  }
+
+  Future<void> _refreshData() async {
+    await postController.getPostListById(widget.pageId).then((result) {
+      if (_isMounted) {
+        setState(() {
+          postList = result;
+        });
+      }
+    });
+    await loadBookmarkedPost(widget.pageId);
+
+    await commentController.getCommentByPostId(widget.pageId).then((result) {
+      if (_isMounted) {
+        setState(() {
+          commentList = result;
+        });
+      }
+    });
+    await loadFlagPosts(widget.pageId);
+    uid = await AppConstrants.getUid();
+    loadAndDisplayLocationNames(postList);
+    loadAndDisplayCategoryNames(postList);
   }
 
   @override
@@ -151,12 +225,22 @@ class _PostDetailState extends State<PostDetail> {
           });
         }
       });
+      await loadFlagPosts(widget.pageId);
       uid = await AppConstrants.getUid();
-      loadAndDisplayLocationNames();
-
+      loadAndDisplayLocationNames(postList);
+      loadAndDisplayCategoryNames(postList);
+      setState(() {
+        loadingFinished = true;
+      });
     });
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    loadingFinished = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +253,7 @@ class _PostDetailState extends State<PostDetail> {
               child: Padding(
                 padding: EdgeInsets.all(12.0),                child: SingleChildScrollView(
 
-      child: postList.isNotEmpty ? Column(
+      child: postList.isNotEmpty && loadingFinished! ? Column(
                   children: [
                     Gap(AppLayout.getHeight(50)),
                     Row(
@@ -202,10 +286,12 @@ class _PostDetailState extends State<PostDetail> {
                                   'postId': postList['id'],
                                   'title': postList['title'],
                                   'description': postList['postContent'],
-                                  "postLocationId": postList['locationName'],
-                                  "postCategoryId": postList['categoryName'],
+                                  "postLocationIdList": postList['postLocationIdList'] ?? [],
+                                  "postCategoryIdList": postList['postCategoryIdList'] ?? [],
+                                  "lostDateFrom": postList['lostDateFrom'],
+                                  "lostDateTo": postList['lostDateTo'],
                                 };
-
+                                print("postData: " + postData.toString());
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -301,7 +387,37 @@ class _PostDetailState extends State<PostDetail> {
 */
                             ],
                           ),
+                          Gap(AppLayout.getHeight(10)),
+                          GestureDetector(
+                                onTap: () async {
+                                  String otherUserId = postList['user']['id'];
+
+                                  await ChatController().createUserChats(uid, otherUserId);
+                                  // Get.toNamed(RouteHelper.getInitial(2));
+                                  String chatId = uid.compareTo(otherUserId) > 0 ? uid + otherUserId : otherUserId + uid;
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatPage(
+                                        chat: Chat(
+                                          uid: otherUserId,
+                                          name: postList['user']['fullName'] ?? 'No Name',
+                                          image: postList['user']['avatar'] ?? '',
+                                          lastMessage: '', // You may want to pass initial message if needed
+                                          time: '',
+                                          chatId:chatId, // You may want to pass the chatId if needed
+                                          formattedDate: '',
+                                          otherId: otherUserId,
+                                          date: DateTime.now(),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Text("Message", style: TextStyle(color: AppColors.primaryColor, fontSize: 20),),
+                              ),
                           Gap(AppLayout.getHeight(30)),
+
                           Container(
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -342,13 +458,81 @@ class _PostDetailState extends State<PostDetail> {
                             ),
                           ),
                           Gap(AppLayout.getHeight(30)),
+/*
                           IconAndTextWidget(
                             icon: Icons.location_on,
                             text: postLocationNames ?? 'No Location',
                             size: 15,
                             iconColor: Colors.black,
                           ),
+*/
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.category,
+                                color: Theme.of(context).iconTheme.color,
+                                size: AppLayout.getHeight(24),
+                              ),
+                              const Gap(5),
+                              Expanded(
+                                child: Text(
+                                  postList['postCategoryNames'] ?? 'No Categories',
+                                  maxLines: 5,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
 
+                          Gap(AppLayout.getHeight(15)),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                color: Theme.of(context).iconTheme.color,
+                                size: AppLayout.getHeight(24),
+                              ),
+                              const Gap(5),
+                              Expanded(
+                                child: Text(
+                                  postList['postLocationNames'] ?? 'No Locations',
+                                  maxLines: 5,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Gap(AppLayout.getHeight(15)),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.timer_sharp,
+                                color: Theme.of(context).iconTheme.color,
+                                size: AppLayout.getHeight(24),
+                              ),
+                              const Gap(5),
+                              postList['lostDateFrom'] != null && postList['lostDateTo'] != null ? Row(
+                                children: [
+                                  Text(
+                                    postList['lostDateFrom'] != null
+                                        ? DateFormat('yyyy-MM-dd').format(DateTime.parse(postList['lostDateFrom']))
+                                        : '-',
+                                    maxLines: 5,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(" to "),
+                                  Text(
+                                    postList['lostDateTo'] != null
+                                        ? DateFormat('yyyy-MM-dd').format(DateTime.parse(postList['lostDateTo']))
+                                        : '-',
+                                    maxLines: 5,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+
+                                ],
+                              ) : Text("Don't remember"),
+                            ],
+                          ),
                           Gap(AppLayout.getHeight(30)),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -356,9 +540,9 @@ class _PostDetailState extends State<PostDetail> {
                               IconButton(
                                 icon: postList['isActive'] ?? false
                                     ? Icon(Icons.bookmark,
-                                  color: Colors.white, size: 30,)
+                                  color: Theme.of(context).iconTheme.color, size: 30,)
                                     : Icon(Icons.bookmark_outline,
-                                  color: Colors.white, size: 30,),
+                                  color: Theme.of(context).iconTheme.color, size: 30,),
                                 onPressed: () {
                                   bookmarkPost(postList['id']);
                                 },
@@ -367,10 +551,75 @@ class _PostDetailState extends State<PostDetail> {
                                   icon: Icons.comment,
                                   text: commentList.length.toString(),
                                   iconColor: Colors.grey),
-                              IconAndTextWidget(
-                                  icon: Icons.flag,
-                                  text: "100",
-                                  iconColor: Colors.grey),
+                              postList['user']['id'] == uid ? Container()  : IconButton(
+                                icon: postList['isFlagActive'] ?? false
+                                    ? Icon(Icons.flag, color: Theme.of(context).iconTheme.color, size: 30,)
+                                    : Icon(Icons.flag_outlined, color: Theme.of(context).iconTheme.color, size: 30,),
+                                onPressed: () {
+                                  String? selectedReason;
+
+                                  if (postList['isFlagActive'] ?? false) {
+                                    flagPost(postList['id'], "FALSE_INFORMATION");
+                                    return;
+                                  }
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Why are you flagging this item?"),
+                                        content: StatefulBuilder(
+                                          builder: (BuildContext context, StateSetter setState) {
+                                            return Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                DropdownButton<String>(
+                                                  value: selectedReason,
+                                                  items: ["FALSE_INFORMATION", "VIOLATED_USER_POLICIES", "SPAM"].map((String value) {
+                                                    return DropdownMenuItem<String>(
+                                                      value: value,
+                                                      child: Text(value),
+                                                    );
+                                                  }).toList(),
+                                                  onChanged: (String? newValue) {
+                                                    setState(() {
+                                                      selectedReason = newValue;
+                                                    });
+                                                  },
+                                                  hint: Text("Select Reason"),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context); // Cancel button pressed
+                                            },
+                                            child: Text("Cancel"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              if (selectedReason != null) {
+                                                Navigator.pop(context); // Close the dialog
+
+                                                // Provide the selected reason to the flagItem function
+                                                flagPost(postList['id'], selectedReason!);
+                                              } else {
+                                                // Show a message if no reason is selected
+                                                // You can replace this with a Snackbar or any other UI feedback
+                                                SnackbarUtils().showError(title: "", message: "You must select a reason");
+                                              }
+                                            },
+                                            child: Text("Flag"),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
                             ],
                           )
                         ],
@@ -519,7 +768,7 @@ class _PostDetailState extends State<PostDetail> {
                 ),
               ),
             )),
-            Container(
+            postList['postStatus'] == 'ACTIVE' ? Container(
               padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
@@ -570,7 +819,7 @@ class _PostDetailState extends State<PostDetail> {
                   ],
                 ),
               ),
-            )
+            ) : Container()
           ],
         ),
       ),

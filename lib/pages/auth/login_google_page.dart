@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:lost_and_find_app/data/api/campus/campus_controller.dart';
 import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:lost_and_find_app/widgets/app_button.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/auth/google_sign_in.dart';
+import '../../data/api/category/category_controller.dart';
 import '../../utils/app_assets.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/snackbar_utils.dart';
@@ -19,13 +23,13 @@ class LoginGooglePage extends StatefulWidget {
 
 class _LoginGooglePageState extends State<LoginGooglePage> {
   String? selectedCampus;
-  List<DropdownMenuItem<String>> items = [
-    DropdownMenuItem(value: 1.toString(), child: Text('Ho Chi Minh Campus')),
-    DropdownMenuItem(value: 3.toString(), child: Text('Hanoi Campus')),
-    DropdownMenuItem(value: 2.toString(), child: Text('Da Nang Campus')),
-    DropdownMenuItem(value: 4.toString(), child: Text('Can Tho Campus')),
-  ];
+  List<dynamic> campusList = [];
+  List<DropdownMenuItem<String>> items = [];
+
+
   late ValueChanged<String?> onChanged;
+  final CampusController campusController = Get.put(CampusController());
+
 
   @override
   void initState() {
@@ -35,6 +39,18 @@ class _LoginGooglePageState extends State<LoginGooglePage> {
         selectedCampus = newValue;
       });
     };
+    campusController.getAllCampus().then((result) {
+        setState(() {
+          campusList = result;
+          items = campusList.map((campus) {
+            return DropdownMenuItem(
+              value: campus['id'].toString(),
+              child: Text(campus['name']),
+            );
+          }).toList();
+        });
+    });
+
   }
 
   @override
