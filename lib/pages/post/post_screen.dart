@@ -87,52 +87,87 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   List<dynamic> filterPostsByCategories() {
-    // Apply category filtering first
-    final List<dynamic> filteredByCategories = selectedCategoryGroup == null
-        ? postList
-        : postList.where((post) {
-      final category = post['categoryName'];
-      return selectedCategoryGroup['categories']
-          .any((selectedCategory) => selectedCategory['name'] == category);
-    }).toList();
+    List<dynamic> filteredPosts = [];
 
-    // Apply text filter
-    final filteredByText = filteredByCategories
-        .where((post) =>
-    selectedCategories.isEmpty ||
-        selectedCategories.contains(post['categoryName']))
-        .where((post) =>
-    filterText.isEmpty ||
-        (post['title'] != null &&
-            post['title'].toLowerCase().contains(filterText.toLowerCase())))
-        .toList();
+    if (selectedCategoryGroup != null) {
+      // Filter posts by selected category group
+      filteredPosts = postList.where((post) {
+        List<dynamic> postCategories = post['postCategoryList'];
+        return postCategories.any((category) =>
+        category['categoryGroup']['name'] == selectedCategoryGroup['name']);
+      }).toList();
 
-    return filteredByText;
+      // If specific categories are selected, further filter posts
+      if (selectedCategories.isNotEmpty) {
+        filteredPosts = filteredPosts.where((post) {
+          List<dynamic> postCategories = post['postCategoryList'];
+          return postCategories.any((category) =>
+          selectedCategories.contains(category['name']) &&
+              category['categoryGroup']['name'] == selectedCategoryGroup['name']);
+        }).toList();
+      }
+    } else if (selectedCategories.isNotEmpty) {
+      // No category group selected, but specific categories are selected
+      filteredPosts = postList.where((post) {
+        List<dynamic> postCategories = post['postCategoryList'];
+        return postCategories.any((category) =>
+            selectedCategories.contains(category['name']));
+      }).toList();
+    } else {
+      // No category group or category selected, return all posts
+      filteredPosts = postList.toList();
+    }
+
+    // Filter posts based on the search text
+    if (filterText.isNotEmpty) {
+      filteredPosts = filteredPosts.where((post) =>
+          post['title'].toLowerCase().contains(filterText.toLowerCase())).toList(); // Convert to List
+    }
+
+    return filteredPosts;
   }
 
   List<dynamic> filterMyPostsByCategories() {
-    // Apply category filtering first
-    final List<dynamic> filteredByCategories = selectedCategoryGroup == null
-        ? mypostList
-        : mypostList.where((item) {
-      final category = item['categoryName'];
-      return selectedCategoryGroup['categories']
-          .any((selectedCategory) => selectedCategory['name'] == category);
-    }).toList();
+    List<dynamic> filteredPosts = [];
 
-    // Apply text filter
-    final filteredByText = filteredByCategories
-        .where((post) =>
-    selectedCategories.isEmpty ||
-        selectedCategories.contains(post['categoryName']))
-        .where((post) =>
-    filterText.isEmpty ||
-        (post['name'] != null &&
-            post['name'].toLowerCase().contains(filterText.toLowerCase())))
-        .toList();
+    if (selectedCategoryGroup != null) {
+      // Filter posts by selected category group
+      filteredPosts = mypostList.where((post) {
+        List<dynamic> postCategories = post['postCategoryList'];
+        return postCategories.any((category) =>
+        category['categoryGroup']['name'] == selectedCategoryGroup['name']);
+      }).toList();
 
-    return filteredByText;
+      // If specific categories are selected, further filter posts
+      if (selectedCategories.isNotEmpty) {
+        filteredPosts = filteredPosts.where((post) {
+          List<dynamic> postCategories = post['postCategoryList'];
+          return postCategories.any((category) =>
+          selectedCategories.contains(category['name']) &&
+              category['categoryGroup']['name'] == selectedCategoryGroup['name']);
+        }).toList();
+      }
+    } else if (selectedCategories.isNotEmpty) {
+      // No category group selected, but specific categories are selected
+      filteredPosts = mypostList.where((post) {
+        List<dynamic> postCategories = post['postCategoryList'];
+        return postCategories.any((category) =>
+            selectedCategories.contains(category['name']));
+      }).toList();
+    } else {
+      // No category group or category selected, return all posts
+      filteredPosts = mypostList.toList();
+    }
+
+    // Filter posts based on the search text
+    if (filterText.isNotEmpty) {
+      filteredPosts = filteredPosts.where((post) =>
+          post['title'].toLowerCase().contains(filterText.toLowerCase())).toList(); // Convert to List
+    }
+
+    return filteredPosts;
   }
+
 
   Future<void> _refreshData() async {
     uid = await AppConstrants.getUid();
@@ -303,17 +338,37 @@ class _PostScreenState extends State<PostScreen> {
     return locationNames;
   }
 
+/*
   Future<void> loadAndDisplayLocationNames(dynamic post) async {
     if (post['postLocationIdList'] != null) {
       List<int> locationIds = List<int>.from(post['postLocationIdList']);
 
       final locationNames = await getLocationNames(locationIds);
-      print("locationNames: "+locationNames.toString());
-      print("locationNames:"+locationNames.toString());
+      // print("locationNames: "+locationNames.toString());
+
       if (_isMounted) {
         setState(() {
           post['postLocationNames'] = locationNames.join(', ');
         });
+      }
+    }
+  }
+*/
+
+  Future<void> loadAndDisplayLocationNames(dynamic post) async {
+    if (post['postLocationList'] != null) {
+      List<dynamic> postLocationList = post['postLocationList'];
+
+      if (postLocationList.isNotEmpty) {
+        List locationNames = postLocationList.map((location) {
+          return location['locationName'];
+        }).toList();
+
+        if (_isMounted) {
+          setState(() {
+            post['postLocationNames'] = locationNames.join(', ');
+          });
+        }
       }
     }
   }
@@ -329,7 +384,7 @@ class _PostScreenState extends State<PostScreen> {
         if (_isMounted) {
           setState(() {
             postList = result;
-            postList.removeWhere((post) => post['postStatus'] == 'DELETED');
+            postList.removeWhere((post) => post['postStatus'] == 'DISABLED');
             setState(() {
               postList = result;
               Future.forEach(postList, (post) async {
@@ -436,7 +491,7 @@ class _PostScreenState extends State<PostScreen> {
                     Container(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Post',
+                        'All',
                         style: Theme.of(context).textTheme.displayMedium,
                       ),
                     ),
@@ -562,7 +617,7 @@ class _PostScreenState extends State<PostScreen> {
 
                               final post = filteredPost[index];
                               final locationList = loadAndDisplayLocationNames(post);
-                              print("locationList: " + locationList.toString());
+                              // print("locationList: " + locationList.toString());
                               return GestureDetector(
                                   onTap: () {
                                     Navigator.of(context).push(
@@ -660,12 +715,29 @@ class _PostScreenState extends State<PostScreen> {
                                           ),
                                         ),
                                         Gap(AppLayout.getHeight(30)),
-                                        IconAndTextWidget(
+/*                                        IconAndTextWidget(
                                           icon: Icons.location_on,
                                           text: (post['postLocationNames'] as String?) ?? 'No Location',
                                           size: 15,
                                           iconColor: Colors.black,
-                                        ),
+                                        ),*/
+                                        Row(
+                                          children: [
+                                              Icon(
+                                                Icons.location_on,
+                                                color: Theme.of(context).iconTheme.color,
+                                                size: AppLayout.getHeight(24),
+                                              ),
+                                              const Gap(5),
+                                            Expanded(
+                                              child: Text(
+                                                (post['postLocationNames'] as String?) ?? 'No Location',
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                  ),
                                         Gap(AppLayout.getHeight(30)),
                                         Row(
                                           mainAxisAlignment:
@@ -710,7 +782,7 @@ class _PostScreenState extends State<PostScreen> {
                                                             children: [
                                                               DropdownButton<String>(
                                                                 value: selectedReason,
-                                                                items: ["WrongInformation", "ViolatedUser", "Spam", "Others"].map((String value) {
+                                                                items: ["FALSE_INFORMATION", "VIOLATED_USER_POLICIES", "SPAM"].map((String value) {
                                                                   return DropdownMenuItem<String>(
                                                                     value: value,
                                                                     child: Text(value),
@@ -787,6 +859,7 @@ class _PostScreenState extends State<PostScreen> {
                       itemBuilder: (BuildContext context, int index) {
 
                         final post = filteredMyPost[index];
+                        loadAndDisplayLocationNames(post);
                         return GestureDetector(
                             onTap: () {
                               Navigator.of(context).push(
@@ -886,7 +959,7 @@ class _PostScreenState extends State<PostScreen> {
                                   Gap(AppLayout.getHeight(30)),
                                   IconAndTextWidget(
                                     icon: Icons.location_on,
-                                    text: post['locationName'] ??
+                                    text: post['postLocationNames'] ??
                                         'No Location',
                                     size: 15,
                                     iconColor: Colors.black,
@@ -899,9 +972,9 @@ class _PostScreenState extends State<PostScreen> {
                                       IconButton(
                                         icon: post['isBookMarkActive'] ?? false
                                             ? Icon(Icons.bookmark,
-                                          color: Colors.white, size: 30,)
+                                          color: Theme.of(context).iconTheme.color, size: 30,)
                                             : Icon(Icons.bookmark_outline,
-                                          color: Colors.white, size: 30,),
+                                          color: Theme.of(context).iconTheme.color, size: 30,),
                                         onPressed: () {
                                           bookmarkPost(post['id']);
                                         },
@@ -911,10 +984,7 @@ class _PostScreenState extends State<PostScreen> {
                                           icon: Icons.comment,
                                           text: getCommentCountForMyPost(post['id']).toString(),
                                           iconColor: Colors.grey),
-                                      IconAndTextWidget(
-                                          icon: Icons.flag,
-                                          text: "100",
-                                          iconColor: Colors.grey),
+                                      Text("")
                                     ],
                                   )
                                 ],
