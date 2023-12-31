@@ -1,5 +1,6 @@
 
 
+import 'package:lost_and_find_app/data/api/campus/campus_controller.dart';
 import 'package:lost_and_find_app/data/api/item/receipt_controller.dart';
 import 'package:lost_and_find_app/data/api/notifications/notification_controller.dart';
 import 'package:lost_and_find_app/data/api/user/user_controller.dart';
@@ -50,4 +51,7 @@ Future<void> init() async {
 
   //notification
   Get.lazyPut(() => NotificationController());
+
+  //campus
+  Get.lazyPut(() => CampusController());
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:lost_and_find_app/data/api/auth/google_sign_in.dart';
+import 'package:lost_and_find_app/data/api/campus/campus_controller.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/api/comment/comment_controller.dart';
 import 'package:lost_and_find_app/data/api/item/item_controller.dart';
@@ -33,80 +34,85 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  Stream? member;
-  final _productSizeList = ["Small", "Medium", "Large", "XLarge"];
-  String? _selectedValue = "";
-  late String fcmToken = "";
-  late String accessToken = "";
-  TextEditingController textController = TextEditingController();
-  List<Map<String, dynamic>> userAndChatList = [];
+  String searchText = '';
+  String selectedCategory = '';
+  String selectedLocation = '';
 
-  Future<void> fetchAndPrintUserChats() async {
-    ChatController(uid: FirebaseAuth.instance.currentUser!.uid)
-        .getGroupChats("FzEZGbNisxb96Y8IaFC0nQ2S7Zr1FLtIEJvuMgfg58u4sXhzxPn9qr73")
-        .then((val) {
-      setState(() {
-        member = val;
-      });
-      print("chats:" + member.toString());
-    });
-  }
-
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedValue = _productSizeList[0];
-
-    // Future<void> fetchAndPrintUserChats() async {
-    ChatController(uid: FirebaseAuth.instance.currentUser!.uid)
-        .getGroupChats("FzEZGbNisxb96Y8IaFC0nQ2S7Zr1FLtIEJvuMgfg58u4sXhzxPn9qr73")
-        .then((val) {
-      setState(() {
-        member = val;
-      });
-      print("chats:" + member.toString());
-    });
-    // }
-
-  }
+  // Sample data for categories and locations
+  List<String> categories = ['Category 1', 'Category 2', 'Category 3'];
+  List<String> locations = ['Location 1', 'Location 2', 'Location 3'];
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('hello'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                // fcmToken = await AppConstrants.getFcmToken();
-                // accessToken = await AppConstrants.getToken();
-                // SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
-                // SnackbarUtils().showError(title: "Error", message: "Some thing wrong");
-                // SnackbarUtils().showInfo(title: "Info", message: "Info");
-                // SnackbarUtils().showLoading(message: "loading");
-                // Get.find<ItemController>().getItemByUidList();
-                // Get.find<CategoryController>().getCategoryGroupList();
-                // Get.find<PostController>().getPostByUidList();
-                Get.find<LocationController>().getLocationById(1);
-                // Get.find<NotificationController>().getNotificationListByUserId();
-                // fcmToken = await AppConstrants.getFcmToken();
-                // print("fcmToken" + fcmToken);
-
-              },
-              child: Text('button'),
-            ),
-            Gap(AppLayout.getHeight(20)),
-            Column(
-                children:[
-
-                ]
-            )
-          ],
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Search Page'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    searchText = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Enter Search Text',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedCategory,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCategory = value!;
+                  });
+                },
+                items: categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category, // Make sure each value is unique
+                    child: Text(category),
+                  );
+                }).toList(),
+                decoration: InputDecoration(
+                  labelText: 'Select Category',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedLocation,
+                onChanged: (value) {
+                  setState(() {
+                    selectedLocation = value!;
+                  });
+                },
+                items: locations.map((location) {
+                  return DropdownMenuItem(
+                    value: location,
+                    child: Text(location),
+                  );
+                }).toList(),
+                decoration: InputDecoration(
+                  labelText: 'Select Location',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Perform search based on searchText, selectedCategory, and selectedLocation
+                  print('Searching for: $searchText, $selectedCategory, $selectedLocation');
+                },
+                child: Text('Search'),
+              ),
+            ],
+          ),
         ),
       ),
     );

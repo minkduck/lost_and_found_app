@@ -46,6 +46,8 @@ class _CreatePostState extends State<CreatePost> {
   final LocationController locationController = Get.put(LocationController());
   List<String> selectedLocations = [];
   String? selectedLocationsString;
+  DateTime? lostDateFrom;
+  DateTime? lostDateTo;
 
   List<MultiSelectItem<String>> getMultiSelectLocations() {
     return locationList
@@ -63,6 +65,41 @@ class _CreatePostState extends State<CreatePost> {
       location['name']?.toString() ?? '',
     ))
         .toList();
+  }
+
+  Future<void> _selectLostDateFrom(BuildContext context) async {
+    DateTime currentDate = DateTime.now();
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: lostDateFrom ?? currentDate,
+      firstDate: DateTime(2022),
+      lastDate: currentDate,
+    );
+
+    if (picked != null && picked != lostDateFrom) {
+      setState(() {
+        lostDateFrom = picked;
+      });
+    }
+  }
+
+// Add a new method for selecting LostDateTo
+  Future<void> _selectLostDateTo(BuildContext context) async {
+    DateTime currentDate = DateTime.now();
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: lostDateTo ?? currentDate,
+      firstDate: lostDateFrom!,
+      lastDate: currentDate,
+    );
+
+    if (picked != null && picked != lostDateTo) {
+      setState(() {
+        lostDateTo = picked;
+      });
+    }
   }
 
   @override
@@ -209,7 +246,7 @@ class _CreatePostState extends State<CreatePost> {
                     setState(() {
                       selectedCategories = values;
                       // Update selectedCategoriesString with the correct format
-                      selectedCategoriesString = '|${values.join(",")}|';
+                      selectedCategoriesString = '|${values.join("|")}|';
                     });
                   },
                   titleText: "Categories",
@@ -224,7 +261,7 @@ class _CreatePostState extends State<CreatePost> {
                     setState(() {
                       selectedLocations = values;
                       // Update selectedLocationsString with the correct format
-                      selectedLocationsString = '|${values.join(",")}|';
+                      selectedLocationsString = '|${values.join("|")}|';
                     });
                   },
                   titleText: "Locations",
@@ -251,6 +288,91 @@ class _CreatePostState extends State<CreatePost> {
                   titleText: "Location",
                 ),*/
                 Gap(AppLayout.getHeight(20)),
+
+                //lostDatefrom
+                Container(
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.only(left: 20),
+                  child: Text(
+                    "Lost Date From",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Gap(AppLayout.getHeight(15)),
+                GestureDetector(
+                  onTap: () => _selectLostDateFrom(context),
+                  child: Container(
+                    height: AppLayout.getHeight(55),
+                    margin: EdgeInsets.only(
+                      left: AppLayout.getHeight(20),
+                      right: AppLayout.getHeight(20),
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(AppLayout.getHeight(20)),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 4,
+                          spreadRadius: 4,
+                          offset: Offset(0, 4),
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        lostDateFrom != null
+                            ? "${lostDateFrom!.toLocal()}".split(' ')[0]
+                            : "Tap to select date",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ),
+                Gap(AppLayout.getHeight(20)),
+
+                //lostDateTo
+                Container(
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.only(left: 20),
+                  child: Text(
+                    "Lost Date To",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Gap(AppLayout.getHeight(15)),
+                GestureDetector(
+                  onTap: () => _selectLostDateTo(context),
+                  child: Container(
+                    height: AppLayout.getHeight(55),
+                    margin: EdgeInsets.only(
+                      left: AppLayout.getHeight(20),
+                      right: AppLayout.getHeight(20),
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(AppLayout.getHeight(20)),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 4,
+                          spreadRadius: 4,
+                          offset: Offset(0, 4),
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        lostDateTo != null
+                            ? "${lostDateTo!.toLocal()}".split(' ')[0]
+                            : "Tap to select date",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ),
+                Gap(AppLayout.getHeight(20)),
+
                 //image
                 ElevatedButton(
                   onPressed: () {
@@ -350,6 +472,8 @@ class _CreatePostState extends State<CreatePost> {
                                   postContentController.text,
                                   selectedCategoriesString!,
                                   selectedLocationsString!,
+                                  lostDateFrom != null ? lostDateFrom!.toLocal().toString() : null,
+                                  lostDateTo != null ? lostDateTo!.toLocal().toString() : null,
                                   imagePaths,
                                 );
                               } else {

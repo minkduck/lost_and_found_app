@@ -92,12 +92,12 @@ class _AccountPageState extends State<AccountPage> {
                   }),
                 ),
                 Gap(AppLayout.getHeight(50)),
-                AppButton(boxColor: AppColors.primaryColor, textButton: "My QR Code", onTap: () {
+                verifyStatus == 'VERIFIED'? AppButton(boxColor: AppColors.primaryColor, textButton: "My QR Code", onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (context) => MyQrCode()));
 
-                }),
-                Gap(AppLayout.getHeight(50)),
+                }) : Container(),
+                verifyStatus == 'VERIFIED'?Gap(AppLayout.getHeight(50)) : Container(),
                 AppButton(boxColor: AppColors.primaryColor, textButton: "My List Claim Item", onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (context) => ItemClaimByUser()));

@@ -20,6 +20,11 @@ class AppConstrants{
     return prefs.getString('verifyStatus') ?? '';
   }
 
+  static Future<String> getCampusId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('campusId') ?? '';
+  }
+
   static const String APP_NAME = "Lost&Find";
   static const int APP_VERSION = 1;
 
@@ -37,9 +42,11 @@ class AppConstrants{
 
   //location
   static const String GETLOCATIONWITHPAGINATION_URL = "$BASE_URL/api/locations";
-  static const String GETALLLOCATION_URL = "$BASE_URL/api/locations/all";
+  static const String GETALLLOCATION_URL = "$BASE_URL/api/locations/all-by-campus?campusId=";
   static const String GETLOCATIONBYID_URL = "$BASE_URL/api/locations?LocationId=";
 
+  //campus
+  static const String GETALLCAMPUS_URL = "$BASE_URL/api/campuses/all";
 
   //item
   static const String GETITEMWITHPAGINATION_URL = "$BASE_URL/api/items?ItemStatus=";
@@ -48,7 +55,7 @@ class AppConstrants{
   static const String POSTITEM_URL = "$BASE_URL/api/items";
 
   //post
-  static const String GETPOSTWITHPAGINATION_URL = "$BASE_URL/api/posts";
+  static const String GETPOSTWITHPAGINATION_URL = "$BASE_URL/api/posts?CampusId=";
   static const String GETPOSTBYID_URL = "$BASE_URL/api/posts/";
   static const String POSTPOST_URL = "$BASE_URL/api/posts/";
   static const String GETPOSTMEDIABYID_URL = "$BASE_URL/api/posts/";
@@ -98,5 +105,9 @@ class AppConstrants{
   //notification
   static const String GETALLNOTIBYUSERID = "$BASE_URL/api/notifications/get-all-notification/";
   static const String PUSHNOTIFICATIONS = "$BASE_URL/api/notifications/push";
+
+  //giveaway
+  static const String GETGIVEAWAYSTATUS_URL = "$BASE_URL/api/giveaways/query-with-status?GiveawayStatus=";
+  static const String GETALLGIVEAWAY_URL = "$BASE_URL/api/giveaways";
 
 }

@@ -164,14 +164,61 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 String imageUrl = media['media']['url'];
                 imageUrls.add(imageUrl);
               }
-              isItemClaimed = itemlist['itemClaims']['claimStatus']  ?? false;
+            }
+            if (itemlist['itemClaims'] != null && itemlist['itemClaims'] is List) {
+              var claimsList = itemlist['itemClaims'];
+              var matchingClaim = claimsList.firstWhere(
+                    (claim) => claim['userId'] == uid,
+                orElse: () => null,
+              );
 
+              if (matchingClaim != null) {
+                isItemClaimed = matchingClaim['isActive'] == true ? true : false;
+              }
+            }
+            if (itemlist['foundDate'] != null) {
+              String foundDate = itemlist['foundDate'];
+              if (foundDate.contains('|')) {
+                List<String> dateParts = foundDate.split('|');
+                if (dateParts.length == 2) {
+                  String date = dateParts[0].trim();
+                  String slot = dateParts[1].trim();
+
+                  // Check if the date format needs to be modified
+                  if (date.contains(' ')) {
+                    // If it contains time, remove the time part
+                    date = date.split(' ')[0];
+                  }
+
+                  // Update the foundDate in the itemlist
+                  itemlist['foundDate'] = '$date $slot';
+                }
+              }
             }
           }
         });
       }
     });
+    await loadBookmarkedItems(widget.pageId);
+    await loadFlagItems(widget.pageId);
+    await receiptController.getReceiptByItemId(widget.pageId).then((result) async {
+      if (_isMounted) {
+        recepitList = result;
+        for (var receipt in recepitList) {
+          final userId = receipt['receiverId'];
+          final userMap = await userController.getUserByUserId(userId);
+          final Map<String, dynamic> claimInfo = {
+            'receipt': receipt,
+            'user': userMap != null ? userMap : null, // Check if user is null
+          };
+          print("claimInfo:" + claimInfo.toString());
+          setState(() {
+            userReceiptList.add(claimInfo);
+          });
+        }
+      }
 
+    });
   }
 
 
@@ -471,6 +518,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                   ),
 
                 ),
+                Gap(AppLayout.getHeight(10)),
+
                 // time
                 Container(
                     padding: EdgeInsets.only(
@@ -480,6 +529,21 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                         icon: Icons.timer_sharp,
                         text: itemlist['foundDate'],
                         iconColor: Colors.grey)),
+                Gap(AppLayout.getHeight(5)),
+
+                //category
+                Container(
+                    padding: EdgeInsets.only(
+                        left: AppLayout.getWidth(16),
+                        top: AppLayout.getHeight(8)),
+                    child: IconAndTextWidget(
+                        icon: Icons.category,
+                        text: itemlist.isNotEmpty
+                            ? itemlist['categoryName']
+                            : 'No Location',
+                        iconColor: Colors.black)),
+                Gap(AppLayout.getHeight(5)),
+
                 //location
                 Container(
                     padding: EdgeInsets.only(
@@ -491,6 +555,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                             ? itemlist['locationName']
                             : 'No Location',
                         iconColor: Colors.black)),
+
                 //description
                 Gap(AppLayout.getHeight(10)),
                 Container(
@@ -521,15 +586,22 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       ),
                     ),
                     Gap(AppLayout.getHeight(50)),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => AnotherProfileUser( userId: itemlist['user']['id'],)));
-                      },
-                      child: Text(
-                        itemlist.isNotEmpty
-                          ? itemlist['user']['fullName'] :
-                          'No Name', style: TextStyle(fontSize: 20),),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context, MaterialPageRoute(builder: (context) => AnotherProfileUser( userId: itemlist['user']['id'],)));
+                        },
+
+                        child: Text(
+                          itemlist.isNotEmpty
+                            ? itemlist['user']['fullName'] :
+                            'No Name', style: TextStyle(fontSize: 20),
+                          maxLines: 5,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                      ),
                     )
                   ],
                 ),

@@ -10,6 +10,7 @@ import '../../../utils/snackbar_utils.dart';
 class PostController extends GetxController{
   late String accessToken = "";
   late String uid = "";
+  late String campusId = "";
 
   List<dynamic> _postList = [];
   List<dynamic> get postList => _postList;
@@ -21,11 +22,12 @@ class PostController extends GetxController{
 
   Future<List<dynamic>> getPostList() async {
     accessToken = await AppConstrants.getToken();
+    campusId = await AppConstrants.getCampusId();
     var headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'
     };
-    var request = http.Request('GET', Uri.parse(AppConstrants.GETPOSTWITHPAGINATION_URL));
+    var request = http.Request('GET', Uri.parse(AppConstrants.GETPOSTWITHPAGINATION_URL+campusId));
     // var request = http.Request('GET', Uri.parse("https://lostandfound.io.vn/api/posts/query-with-status?PostStatus=All"));
 
     request.headers.addAll(headers);
@@ -167,6 +169,8 @@ class PostController extends GetxController{
       String postContent,
       String postLocationId,
       String postCategoryId,
+      String? lostDateFrom,
+      String? lostDateTo,
       List<String> medias ) async {
     try {
       accessToken = await AppConstrants.getToken();
@@ -177,9 +181,17 @@ class PostController extends GetxController{
       request.fields.addAll({
         'Title': title,
         'PostContent': postContent,
-        'PostLocationId': postLocationId,
-        'PostCategoryId': postCategoryId,
+        'PostLocation': postLocationId,
+        'PostCategory': postCategoryId,
       });
+      if (lostDateFrom != null && lostDateFrom.isNotEmpty) {
+        request.fields['LostDateFrom'] = lostDateFrom;
+      }
+
+      // Conditionally add 'LostDateTo' if it has data
+      if (lostDateTo != null && lostDateTo.isNotEmpty) {
+        request.fields['LostDateTo'] = lostDateTo;
+      }
       for (var media in medias) {
         request.files.add(await http.MultipartFile.fromPath('Medias', media));
       }
@@ -213,7 +225,10 @@ class PostController extends GetxController{
       String title,
       String description,
       String categoryId,
-      String locationId) async {
+      String locationId,
+      String? lostDateFrom,
+      String? lostDateTo,
+      ) async {
     accessToken = await AppConstrants.getToken();
     var headers = {
       'Content-Type': 'application/json',
@@ -224,8 +239,10 @@ class PostController extends GetxController{
     request.body = json.encode({
       "title": title,
       "postContent": description,
-      "postLocationId": locationId,
-      "postCategoryId": categoryId,
+      "postLocation": locationId,
+      "postCategory": categoryId,
+      "lostDateFrom": lostDateFrom,
+      "lostDateTo": lostDateTo
     });
     request.headers.addAll(headers);
 
@@ -349,12 +366,13 @@ class PostController extends GetxController{
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'
     };
-    var request = http.MultipartRequest('POST', Uri.parse("${AppConstrants.POSTFLAGBYPOSTID}/$postId"));
+    var request = http.MultipartRequest('POST', Uri.parse("${AppConstrants.POSTFLAGBYPOSTID}$postId"));
     request.fields.addAll({
       'reason': reason
     });
     request.headers.addAll(headers);
-
+    print(request);
+    print(request.fields);
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 201) {
