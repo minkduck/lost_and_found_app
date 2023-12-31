@@ -110,11 +110,6 @@ class GoogleSignInProvider extends ChangeNotifier {
         avatar = user.photoURL!;
       });
 
-      userList = await userController.getUserLoginByUserId(uid, idToken!);
-      print("uid" + uid);
-      final campus = userList["campus"];
-      print("campus: "+ campus.toString());
-      if (campus == null) {
         var headers = {
           'Content-Type': 'application/json'
         };
@@ -134,15 +129,16 @@ class GoogleSignInProvider extends ChangeNotifier {
         if (response.statusCode == 200) {
           print(await response.stream.bytesToString());
           print('login api success');
-          print('first login');
           SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
           final user = await FirebaseAuth.instance.currentUser!;
           final idTokenUser = await user.getIdToken();
           print("id Token User: " + idTokenUser.toString());
           print(idTokenUser?.substring(0, 1000));
           print(idTokenUser?.substring(1000));
-
+          userList = await userController.getUserLoginByUserId(uid, idTokenUser!);
           final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('verifyStatus', userList['verifyStatus'].toString());
+          await prefs.setString('campusId', userList['campus']['id'].toString());
           await prefs.setString('access_token', idTokenUser.toString());
           await prefs.setString('uid', uid);
           await postAuthen();
@@ -152,61 +148,13 @@ class GoogleSignInProvider extends ChangeNotifier {
             members = val;
           });
           print("sn " + members.toString());*/
-        } else {
-          print(response.reasonPhrase);
-        }
-      } else {
-        // If userList["campus"] is not null, compare campusId with userList["campus"]["id"]
-        if (campus["id"].toString() != campusId) {
+        } else if (response.statusCode == 403) {
           logout();
           SnackbarUtils().showError(title: "Campus", message: 'You have logged in to the wrong campus.');
-          return;
-        }
-
-        print("Continuing with login process...");
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('verifyStatus', userList['verifyStatus'].toString());
-
-        var headers = {
-          'Content-Type': 'application/json'
-        };
-        var request = await http.Request('POST', Uri.parse(AppConstrants.LOGINGOOGLE_URL));
-        request.body = json.encode({
-          "uid": uid,
-          "email": email,
-          "name": name,
-          "avatar": avatar,
-          "phone": "string",
-          "campusId": campusId
-        });
-        request.headers.addAll(headers);
-
-        http.StreamedResponse response = await request.send();
-
-        if (response.statusCode == 200) {
-          print(await response.stream.bytesToString());
-          print('login api success');
-          SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
-          final user = await FirebaseAuth.instance.currentUser!;
-          final idTokenUser = await user.getIdToken();
-          print("id Token User: " + idTokenUser.toString());
-          print(idTokenUser?.substring(0, 1000));
-          print(idTokenUser?.substring(1000));
-
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('access_token', idTokenUser.toString());
-          await prefs.setString('uid', uid);
-          await postAuthen();
-/*          ChatController(uid: FirebaseAuth.instance.currentUser!.uid)
-              .gettingUserChats()
-              .then((val) {
-            members = val;
-          });
-          print("sn " + members.toString());*/
         } else {
           print(response.reasonPhrase);
         }
-      }
+
     } catch (e) {
       print(e.toString());
     }

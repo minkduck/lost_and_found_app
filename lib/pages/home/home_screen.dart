@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool myItemsLoading = false;
   bool itemsLoading = false;
   late String uid = "";
-
+  bool? loadingFinished = false;
   final ItemController itemController = Get.put(ItemController());
   String filterText = '';
   bool itemsSelected = true;
@@ -293,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       firstLoged();
     });
-    Future.delayed(Duration(seconds: 2), () async {
+    Future.delayed(Duration(seconds: 1), () async {
       uid = await AppConstrants.getUid();
       await itemController.getItemList().then((result) {
         if (_isMounted) {
@@ -344,6 +344,9 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         }
       });
+      setState(() {
+        loadingFinished = true;
+      });
     });
   }
 
@@ -351,6 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _isMounted = false;
     super.dispose();
+    loadingFinished = false;
   }
 
   @override
@@ -684,12 +688,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ],
                                               ),
                                               Gap(AppLayout.getHeight(10)),
-                                              IconAndTextWidget(
-                                                icon: Icons.location_on,
-                                                text: item['locationName'] ??
-                                                    'No Location',
-                                                size: 15,
-                                                iconColor: Colors.black,
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.location_on,
+                                                    color: Theme.of(context).iconTheme.color,
+                                                    size: AppLayout.getHeight(24),
+                                                  ),
+                                                  const Gap(5),
+                                                  Expanded(
+                                                    child: Text(
+                                                      item['locationName'] ??
+                                                          'No Location',
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                               Gap(AppLayout.getHeight(15)),
                                               Container(
@@ -833,12 +848,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ],
                                     ),
-                                    IconAndTextWidget(
-                                      icon: Icons.location_on,
-                                      text: item['locationName'] ??
-                                          'No Location',
-                                      size: 15,
-                                      iconColor: Colors.black,
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.location_on,
+                                          color: Theme.of(context).iconTheme.color,
+                                          size: AppLayout.getHeight(24),
+                                        ),
+                                        const Gap(5),
+                                        Expanded(
+                                          child: Text(
+                                            item['locationName'] ??
+                                                'No Location',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     Gap(AppLayout.getWidth(15)),
                                     Container(
