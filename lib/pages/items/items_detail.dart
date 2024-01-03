@@ -155,16 +155,6 @@ class _ItemsDetailsState extends State<ItemsDetails> {
         setState(() {
           itemlist = result;
           if (itemlist != null) {
-            var itemMedias = itemlist['itemMedias'];
-
-            if (itemMedias != null && itemMedias is List) {
-              List mediaList = itemMedias;
-
-              for (var media in mediaList) {
-                String imageUrl = media['media']['url'];
-                imageUrls.add(imageUrl);
-              }
-            }
             if (itemlist['itemClaims'] != null && itemlist['itemClaims'] is List) {
               var claimsList = itemlist['itemClaims'];
               var matchingClaim = claimsList.firstWhere(
@@ -190,8 +180,16 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                     date = date.split(' ')[0];
                   }
 
+                  // Parse the original date
+                  DateFormat originalDateFormat = DateFormat("yyyy-MM-dd");
+                  DateTime originalDate = originalDateFormat.parse(date);
+
+                  // Format the date in the desired format
+                  DateFormat desiredDateFormat = DateFormat("dd-MM-yyyy");
+                  String formattedDate = desiredDateFormat.format(originalDate);
+
                   // Update the foundDate in the itemlist
-                  itemlist['foundDate'] = '$date $slot';
+                  itemlist['foundDate'] = '$formattedDate $slot';
                 }
               }
             }
@@ -275,8 +273,16 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       date = date.split(' ')[0];
                     }
 
+                    // Parse the original date
+                    DateFormat originalDateFormat = DateFormat("yyyy-MM-dd");
+                    DateTime originalDate = originalDateFormat.parse(date);
+
+                    // Format the date in the desired format
+                    DateFormat desiredDateFormat = DateFormat("dd-MM-yyyy");
+                    String formattedDate = desiredDateFormat.format(originalDate);
+
                     // Update the foundDate in the itemlist
-                    itemlist['foundDate'] = '$date $slot';
+                    itemlist['foundDate'] = '$formattedDate $slot';
                   }
                 }
               }
@@ -589,8 +595,10 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                              context, MaterialPageRoute(builder: (context) => AnotherProfileUser( userId: itemlist['user']['id'],)));
+                          if (itemlist['user']['fullName'] != uid) {
+                            Navigator.push(
+                                context, MaterialPageRoute(builder: (context) => AnotherProfileUser( userId: itemlist['user']['id'],)));
+                          }
                         },
 
                         child: Text(
@@ -714,8 +722,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
               ],
             )
                 : SizedBox(
-              width: AppLayout.getWidth(100),
-              height: AppLayout.getHeight(300),
+              width: AppLayout.getScreenWidth(),
+              height: AppLayout.getScreenHeight()-200,
               child: const Center(
                 child: CircularProgressIndicator(),
               ),

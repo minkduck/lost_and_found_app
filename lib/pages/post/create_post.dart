@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,6 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
 import 'package:lost_and_find_app/data/api/post/post_controller.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 
 import '../../data/api/category/category_controller.dart';
 import '../../data/api/location/location_controller.dart';
@@ -102,6 +105,46 @@ class _CreatePostState extends State<CreatePost> {
     }
   }
 
+  Future<List<int>> compressImage(
+      String imagePath, int targetWidth, int targetHeight, int quality) async {
+    List<int> imageBytes = await File(imagePath).readAsBytes();
+    img.Image image = img.decodeImage(Uint8List.fromList(imageBytes))!;
+    img.Image resizedImage =
+    img.copyResize(image, width: targetWidth, height: targetHeight);
+    return img.encodeJpg(resizedImage, quality: quality);
+  }
+
+  Future<void> compressAndCreatePost() async {
+    List<String> compressedImagePaths = [];
+    for (var imageFile in imageFileList!) {
+      List<int> compressedImage = await compressImage(
+          imageFile.path, 800, 600, 80); // Adjust parameters as needed
+      // Save or upload the compressed image and get the new path
+      // Example: saveToDisk(compressedImage, 'compressed_image.jpg');
+      // String compressedImagePath = 'path/to/compressed_image.jpg';
+      String compressedImagePath =
+      await saveToDisk(compressedImage, 'compressed_image.jpg');
+      compressedImagePaths.add(compressedImagePath);
+    }
+
+    // Now you can use compressedImagePaths to create the item
+    await PostController().createPost(
+        titleController.text,
+        postContentController.text,
+        selectedCategoriesString!,
+        selectedLocationsString!,
+        lostDateFrom != null ? lostDateFrom!.toLocal().toString() : null,
+    lostDateTo != null ? lostDateTo!.toLocal().toString() : null,
+    compressedImagePaths,
+    );
+  }
+
+  Future<String> saveToDisk(List<int> data, String fileName) async {
+    final File file = File('${(await getTemporaryDirectory()).path}/$fileName');
+    await file.writeAsBytes(data);
+    return file.path;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -192,16 +235,17 @@ class _CreatePostState extends State<CreatePost> {
                 Gap(AppLayout.getHeight(20)),
 
                 //title
-                LayoutBuilder(builder: (context, contraints) {
+                LayoutBuilder(builder: (context, constraints) {
                   return SizedBox(
-                    height: AppLayout.getHeight(50),
+                    height: AppLayout.getHeight(75),
                     child: TextFormField(
                       expands: true,
                       controller: titleController,
                       maxLines: null,
+                      maxLength: 50, // Set the maximum length to 50 symbols
                       onSaved: (value) => titleController.text = value!,
                       decoration: InputDecoration(
-                        hintText: 'Title', // Add your hint text here
+                        hintText: 'Title',
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -222,6 +266,7 @@ class _CreatePostState extends State<CreatePost> {
                       expands: true,
                       controller: postContentController,
                       maxLines: null,
+                      maxLength: 250,
                       decoration: InputDecoration(
                         hintText: 'Description', // Add your hint text here
                       ),
@@ -465,17 +510,18 @@ class _CreatePostState extends State<CreatePost> {
                               if (imageFileList != null && imageFileList!.isNotEmpty) {
                                 // code here
                                 List<String> imagePaths = imageFileList!.map((image) => image.path).toList();
-                                print(titleController.text + '-' + postContentController.text +
+                                print(titleController.text + '-' + postContentController.text + lostDateFrom.toString() + lostDateTo.toString() +
                                     '-' + selectedCategoriesString! + '-' + selectedLocationsString! + '-' + imagePaths.toString());
-                                await PostController().createPost(
-                                  titleController.text,
-                                  postContentController.text,
-                                  selectedCategoriesString!,
-                                  selectedLocationsString!,
-                                  lostDateFrom != null ? lostDateFrom!.toLocal().toString() : null,
-                                  lostDateTo != null ? lostDateTo!.toLocal().toString() : null,
-                                  imagePaths,
-                                );
+                                // await PostController().createPost(
+                                //   titleController.text,
+                                //   postContentController.text,
+                                //   selectedCategoriesString!,
+                                //   selectedLocationsString!,
+                                //   lostDateFrom != null ? lostDateFrom!.toLocal().toString() : null,
+                                //   lostDateTo != null ? lostDateTo!.toLocal().toString() : null,
+                                //   imagePaths,
+                                // );
+                                await compressAndCreatePost();
                               } else {
                                 SnackbarUtils().showError(title: "Image", message: "You must add image");
                               }

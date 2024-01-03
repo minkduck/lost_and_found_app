@@ -200,7 +200,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ],
-              ) :const Center(child: CircularProgressIndicator(),),
+              ) :SizedBox(height: AppLayout.getScreenHeight(), width: AppLayout.getScreenWidth(),child: const Center(child: CircularProgressIndicator(),)),
 
             ],
           ),

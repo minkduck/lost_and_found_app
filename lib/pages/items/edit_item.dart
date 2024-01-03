@@ -207,6 +207,7 @@ class _EditItemState extends State<EditItem> {
                 AppTextFieldDescription(
                   textController: descriptionController,
                   titleText: "Description",
+                  limitSymbols: 100,
                   onFocusChange: (isFocused) {
                     setState(() {
                       isDescriptionFocused = isFocused;

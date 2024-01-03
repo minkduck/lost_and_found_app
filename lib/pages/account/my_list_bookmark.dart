@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 import 'package:lost_and_find_app/data/api/item/item_controller.dart';
 
 import '../../data/api/comment/comment_controller.dart';
 import '../../data/api/post/post_controller.dart';
 import '../../test/time/time_widget.dart';
+import '../../utils/app_constraints.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
+import '../../utils/snackbar_utils.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
+import '../../widgets/time_ago_found_widget.dart';
 import '../items/items_detail.dart';
 import '../post/post_detail.dart';
 
@@ -24,6 +28,7 @@ class MyListBookmark extends StatefulWidget {
 
 class _MyItemBookmarkState extends State<MyListBookmark> {
   bool _isMounted = false;
+  late String uid = "";
 
   List<dynamic> itemBookmarkList = [];
   final ItemController itemController = Get.put(ItemController());
@@ -74,6 +79,7 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
     }
   }
 
+
   String? getUrlFromItem(Map<String, dynamic> item) {
     if (item.containsKey('itemMedias')) {
       final itemMedias = item['itemMedias'] as List;
@@ -123,7 +129,113 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
       print('Error loading bookmarked items for item $itemId: $e');
     }
   }
-  
+
+  Future<void> togglePostFlagStatus(int postId, Future<void> Function(int, String) action, String reason) async {
+    try {
+      await action(postId, reason);
+
+      // Manually update the item status based on the isFlagActive field
+      setState(() {
+        postBookmarkList.forEach((post) {
+          if (post['id'] == postId) {
+            post['isFlagActive'] = !(post['isFlagActive'] ?? false);
+          }
+        });
+      });
+    } catch (e) {
+      print('Error toggling post status: $e');
+    }
+  }
+
+  Future<void> flagPost(int postId, String reason) async {
+    await togglePostFlagStatus(postId, postController.postFlagPostByPostId, reason);
+  }
+
+  Future<void> loadFlagPosts(int postId) async {
+    try {
+      final flagPosts = await postController.getFlagPost(postId);
+      print("flagPosts: " + flagPosts.toString());
+      if (_isMounted) {
+        setState(() {
+          final postToUpdate = postBookmarkList.firstWhere((post) => post['id'] == postId, orElse: () => null);
+          if (postToUpdate != null) {
+            postToUpdate['isFlagActive'] = flagPosts['postId'] == postId && flagPosts['isActive'];
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading flag posts: $e');
+    }
+  }
+
+  Future<void> loadAndDisplayLocationNames(dynamic post) async {
+    if (post['postLocationList'] != null) {
+      List<dynamic> postLocationList = post['postLocationList'];
+
+      if (postLocationList.isNotEmpty) {
+        List locationNames = postLocationList.map((location) {
+          return location['locationName'];
+        }).toList();
+
+        if (_isMounted) {
+          setState(() {
+            post['postLocationNames'] = locationNames.join(', ');
+          });
+        }
+      }
+    }
+  }
+  Future<void> loadAndDisplayCategoryNames(dynamic postList) async {
+    if (postList['postCategoryList'] != null) {
+      List<dynamic> postCategoryList = postList['postCategoryList'];
+
+      if (postCategoryList.isNotEmpty) {
+        List categoryNames = postCategoryList.map((caregories) {
+          return caregories['name'];
+        }).toList();
+        print(categoryNames);
+        if (_isMounted) {
+          setState(() {
+            postList['postCategoryNames'] = categoryNames.join(', ');
+          });
+        }
+      }
+    }
+  }
+
+  Future<void> toggleItemFlagStatus(int itemId, Future<void> Function(int, String) action, String reason) async {
+    try {
+      await action(itemId, reason);
+
+      // Manually update the item status based on the isFlagActive field
+      setState(() {
+        itemBookmarkList.forEach((item) {
+          if (item['id'] == itemId) {
+            item['isFlagActive'] = !(item['isFlagActive'] ?? false);
+          }
+        });
+      });
+    } catch (e) {
+      print('Error toggling item status: $e');
+    }
+  }
+
+  Future<void> flagItem(int itemId, String reason) async {
+    await toggleItemFlagStatus(itemId, itemController.postFlagItemByItemId, reason);
+  }
+
+  Future<void> loadFlagItems(int itemId) async {
+    final flagItems = await itemController.getFlagItems(itemId);
+    if (_isMounted) {
+      setState(() {
+        final itemToUpdate = itemBookmarkList.firstWhere((item) => item['id'] == itemId, orElse: () => null);
+        if (itemToUpdate != null) {
+          itemToUpdate['isFlagActive'] = flagItems['itemId'] == itemId && flagItems['isActive'];
+        }
+      });
+    }
+  }
+
   Future<void> _refreshData() async {
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
@@ -200,10 +312,15 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
     super.initState();
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
+      uid = await AppConstrants.getUid();
       await postController.getPostBookmark().then((result) {
         if (_isMounted) {
           setState(() {
             postBookmarkList = result;
+            Future.forEach(postBookmarkList, (post) async {
+              final postIdForFlag = post['id'];
+              await loadFlagPosts(postIdForFlag);
+            });
 
             Future<void> loadBookmarkedItemsForAllItems() async {
               for (final item in postBookmarkList) {
@@ -250,6 +367,15 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
             }
 
             loadBookmarkedItemsForAllItems();
+
+            Future<void> loadFlagItemsForAllItems() async {
+              for (final item in itemBookmarkList) {
+                final itemIdForFlag = item['id'];
+                await loadFlagItems(itemIdForFlag);
+              }
+            }
+
+            loadFlagItemsForAllItems();
           });
         }
       }).whenComplete(() {
@@ -352,21 +478,50 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                       final item = itemBookmarkList[index];
                       final mediaUrl = getUrlFromItem(item) ??
                           "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png";
+                      if (item['foundDate'] != null) {
+                        String foundDate = item['foundDate'];
+                        if (foundDate.contains('|')) {
+                          List<String> dateParts = foundDate.split('|');
+                          if (dateParts.length == 2) {
+                            String date = dateParts[0].trim();
+                            String slot = dateParts[1].trim();
+
+                            // Check if the date format needs to be modified
+                            if (date.contains(' ')) {
+                              // If it contains time, remove the time part
+                              date = date.split(' ')[0];
+                            }
+                            DateFormat originalDateFormat = DateFormat("yyyy-MM-dd");
+                            DateTime originalDate = originalDateFormat.parse(date);
+
+                            // Format the date in the desired format
+                            DateFormat desiredDateFormat = DateFormat("dd-MM-yyyy");
+                            String formattedDate = desiredDateFormat.format(originalDate);
+                            String timeAgo = TimeAgoFoundWidget.formatTimeAgo(originalDate);
+
+                            // Update the foundDate in the itemlist
+                            item['foundDate'] = '$timeAgo';
+                          }
+                        }
+                      }
 
                       return Container(
                         decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(15)),
                         ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
                           children: [
                             Container(
-                              height: AppLayout.getHeight(140),
+                              height: AppLayout.getHeight(133),
                               width: AppLayout.getWidth(180),
                               child: Image.network(
                                 mediaUrl,
                                 fit: BoxFit.fill,
-                                errorBuilder: (context, error, stackTrace) {
+                                errorBuilder:
+                                    (context, error, stackTrace) {
                                   // Handle image loading errors
                                   return Image.network(
                                       "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png",
@@ -382,19 +537,12 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                                 right: AppLayout.getWidth(8),
                               ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
-                                  Gap(AppLayout.getHeight(8)),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      Expanded(
-                                        child: Text(
-                                          item['name'] ?? 'No Name',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
                                       IconButton(
                                         icon: item['isActive'] ?? false
                                             ? Icon(Icons.bookmark,
@@ -405,36 +553,136 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                                           bookmarkItem(item['id']);
                                         },
                                       ),
+                                      item['user']['id'] == uid ? Container()  : IconButton(
+                                        icon: item['isFlagActive'] ?? false
+                                            ? Icon(Icons.flag, color: Colors.redAccent)
+                                            : Icon(Icons.flag_outlined, color: Colors.redAccent),
+                                        onPressed: () {
+                                          String? selectedReason;
+
+                                          if (item['isFlagActive'] ?? false) {
+                                            flagItem(item['id'], "Wrong");
+                                            return;
+                                          }
+
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text("Why are you flagging this item?"),
+                                                content: StatefulBuilder(
+                                                  builder: (BuildContext context, StateSetter setState) {
+                                                    return Column(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        DropdownButton<String>(
+                                                          value: selectedReason,
+                                                          items: ["BLURRY", "WRONG", "INAPPROPRIATE"].map((String value) {
+                                                            return DropdownMenuItem<String>(
+                                                              value: value,
+                                                              child: Text(value),
+                                                            );
+                                                          }).toList(),
+                                                          onChanged: (String? newValue) {
+                                                            setState(() {
+                                                              selectedReason = newValue;
+                                                            });
+                                                          },
+                                                          hint: Text("Select Reason"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context); // Cancel button pressed
+                                                    },
+                                                    child: Text("Cancel"),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      if (selectedReason != null) {
+                                                        Navigator.pop(context); // Close the dialog
+                                                        print('selectedReason: '+ selectedReason.toString());
+
+                                                        // Provide the selected reason to the flagItem function
+                                                        flagItem(item['id'], selectedReason!);
+                                                      } else {
+                                                        // Show a message if no reason is selected
+                                                        // You can replace this with a Snackbar or any other UI feedback
+                                                        SnackbarUtils().showError(title: "", message: "You must select a reason");
+                                                      }
+                                                    },
+                                                    child: Text("Flag"),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item['name'] ?? 'No Name',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Gap(AppLayout.getHeight(10)),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on,
+                                        color: Theme.of(context).iconTheme.color,
+                                        size: AppLayout.getHeight(24),
+                                      ),
+                                      const Gap(5),
+                                      Expanded(
+                                        child: Text(
+                                          item['locationName'] ??
+                                              'No Location',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   Gap(AppLayout.getHeight(15)),
-                                  IconAndTextWidget(
-                                    icon: Icons.location_on,
-                                    text: item['locationName'] ?? 'No Location',
-                                    size: 15,
-                                    iconColor: Colors.black,
-                                  ),
-                                  Gap(AppLayout.getWidth(15)),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8.0),
                                     child: Align(
-                                      alignment: Alignment.centerLeft,
+                                      alignment:
+                                      Alignment.centerLeft,
                                       child: Text(
-                                        item['createdDate'] != null
-                                            ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(item['createdDate']))}'
-                                            : 'No Date',
+                                        item['foundDate'] ?? '',
                                         maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(fontSize: 15),
+                                        overflow:
+                                        TextOverflow.ellipsis,
+                                        style:
+                                        TextStyle(fontSize: 15),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                            Spacer(),
                             Container(
                               child: AppButton(
-                                boxColor: AppColors.secondPrimaryColor,
+                                boxColor:
+                                AppColors.secondPrimaryColor,
                                 textButton: "Details",
                                 fontSize: 18,
                                 height: AppLayout.getHeight(30),
@@ -445,8 +693,10 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => ItemsDetails(
-                                          pageId: item['id'], page: "item"),
+                                      builder: (context) =>
+                                          ItemsDetails(
+                                              pageId: item['id'],
+                                              page: "item"),
                                     ),
                                   );
                                 },
@@ -482,6 +732,8 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                 itemBuilder: (BuildContext context, int index) {
 
                   final post = postBookmarkList[index];
+                  loadAndDisplayLocationNames(post);
+                  loadAndDisplayCategoryNames(post);
                   return GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
@@ -578,10 +830,29 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                                     .titleSmall,
                               ),
                             ),
-                            Gap(AppLayout.getHeight(30)),
+                            Gap(AppLayout.getHeight(20)),
+
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.category,
+                                  color: Theme.of(context).iconTheme.color,
+                                  size: AppLayout.getHeight(24),
+                                ),
+                                const Gap(5),
+                                Expanded(
+                                  child: Text(
+                                    post['postCategoryNames'] ?? 'No Categories',
+                                    maxLines: 5,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Gap(AppLayout.getHeight(10)),
                             IconAndTextWidget(
                               icon: Icons.location_on,
-                              text: post['locationName'] ??
+                              text: post['postLocationNames'] ??
                                   'No Location',
                               size: 15,
                               iconColor: Colors.black,
@@ -606,7 +877,77 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                                     icon: Icons.comment,
                                     text: getCommentCountForPost(post['id']).toString(),
                                     iconColor: Colors.grey),
-                                Text(""),
+                                post['user']['id'] == uid ? const Text("")  : IconButton(
+                                  icon: post['isFlagActive'] ?? false
+                                      ? Icon(Icons.flag, color: Theme.of(context).iconTheme.color, size: 30,)
+                                      : Icon(Icons.flag_outlined, color: Theme.of(context).iconTheme.color, size: 30,),
+                                  onPressed: () {
+                                    String? selectedReason;
+
+                                    if (post['isFlagActive'] ?? false) {
+                                      flagPost(post['id'], "FALSE_INFORMATION");
+                                      return;
+                                    }
+
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text("Why are you flagging this item?"),
+                                          content: StatefulBuilder(
+                                            builder: (BuildContext context, StateSetter setState) {
+                                              return Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  DropdownButton<String>(
+                                                    value: selectedReason,
+                                                    items: ["FALSE_INFORMATION", "VIOLATED_USER_POLICIES", "SPAM"].map((String value) {
+                                                      return DropdownMenuItem<String>(
+                                                        value: value,
+                                                        child: Text(value),
+                                                      );
+                                                    }).toList(),
+                                                    onChanged: (String? newValue) {
+                                                      setState(() {
+                                                        selectedReason = newValue;
+                                                      });
+                                                    },
+                                                    hint: Text("Select Reason"),
+                                                    isExpanded: true, // Add this line to make the dropdown button expand to the available width
+
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context); // Cancel button pressed
+                                              },
+                                              child: Text("Cancel"),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                if (selectedReason != null) {
+                                                  Navigator.pop(context); // Close the dialog
+
+                                                  // Provide the selected reason to the flagItem function
+                                                  flagPost(post['id'], selectedReason!);
+                                                } else {
+                                                  // Show a message if no reason is selected
+                                                  // You can replace this with a Snackbar or any other UI feedback
+                                                  SnackbarUtils().showError(title: "", message: "You must select a reason");
+                                                }
+                                              },
+                                              child: Text("Flag"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
                               ],
                             )
                           ],
