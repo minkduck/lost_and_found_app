@@ -20,6 +20,7 @@ import '../../utils/snackbar_utils.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/custom_search_bar.dart';
 import '../../widgets/icon_and_text_widget.dart';
+import '../../widgets/time_ago_found_widget.dart';
 import '../items/items_detail.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -548,9 +549,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                           // If it contains time, remove the time part
                                           date = date.split(' ')[0];
                                         }
+                                        DateFormat originalDateFormat = DateFormat("yyyy-MM-dd");
+                                        DateTime originalDate = originalDateFormat.parse(date);
+
+                                        // Format the date in the desired format
+                                        DateFormat desiredDateFormat = DateFormat("dd-MM-yyyy");
+                                        String formattedDate = desiredDateFormat.format(originalDate);
+                                        String timeAgo = TimeAgoFoundWidget.formatTimeAgo(originalDate);
 
                                         // Update the foundDate in the itemlist
-                                        item['foundDate'] = '$date';
+                                        item['foundDate'] = '$timeAgo';
                                       }
                                     }
                                   }
@@ -789,6 +797,32 @@ class _HomeScreenState extends State<HomeScreen> {
                         final item = filteredMyItems[index];
                         final mediaUrl = getUrlFromItem(item) ??
                             "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg";
+                        if (item['foundDate'] != null) {
+                          String foundDate = item['foundDate'];
+                          if (foundDate.contains('|')) {
+                            List<String> dateParts = foundDate.split('|');
+                            if (dateParts.length == 2) {
+                              String date = dateParts[0].trim();
+                              String slot = dateParts[1].trim();
+
+                              // Check if the date format needs to be modified
+                              if (date.contains(' ')) {
+                                // If it contains time, remove the time part
+                                date = date.split(' ')[0];
+                              }
+                              DateFormat originalDateFormat = DateFormat("yyyy-MM-dd");
+                              DateTime originalDate = originalDateFormat.parse(date);
+
+                              // Format the date in the desired format
+                              DateFormat desiredDateFormat = DateFormat("dd-MM-yyyy");
+                              String formattedDate = desiredDateFormat.format(originalDate);
+                              String timeAgo = TimeAgoFoundWidget.formatTimeAgo(originalDate);
+
+                              // Update the foundDate in the itemlist
+                              item['foundDate'] = '$timeAgo';
+                            }
+                          }
+                        }
 
                         return Container(
                           decoration: const BoxDecoration(
@@ -874,9 +908,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         alignment:
                                         Alignment.centerLeft,
                                         child: Text(
-                                          item['createdDate'] != null
-                                              ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(item['createdDate']))}'
-                                              : 'No Date',
+                                          item['foundDate']??'No date',
                                           maxLines: 1,
                                           overflow:
                                           TextOverflow.ellipsis,

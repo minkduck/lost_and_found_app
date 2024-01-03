@@ -66,7 +66,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: loadingFinished ? Column(
+          child:  Column(
             children: [
               Gap(AppLayout.getHeight(50)),
               Row(
@@ -79,7 +79,8 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                   ),
                 ],
               ),
-              ListView.builder(
+              if (loadingFinished! && giveawayList.isNotEmpty)
+                   ListView.builder(
                   shrinkWrap: true,
                   reverse: true,
                   physics: NeverScrollableScrollPhysics(),
@@ -249,15 +250,25 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                       ),
                     );
                   })
+              else if (loadingFinished! && giveawayList.isEmpty)
+                SizedBox(
+                  width: AppLayout.getScreenWidth(),
+                  height: AppLayout.getScreenHeight()-200,
+                  child: Center(
+                    child: Text("It doesn't have any giveaway"),
+                  ),
+                )
+                else
+              SizedBox(
+                width: AppLayout.getScreenWidth(),
+                height: AppLayout.getScreenHeight()-200,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
 
             ],
-          ) : SizedBox(
-            width: AppLayout.getScreenWidth(),
-            height: AppLayout.getScreenHeight(),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
+          )
         ),
       ),
     );
