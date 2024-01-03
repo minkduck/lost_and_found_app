@@ -16,6 +16,7 @@ import '../../utils/colors.dart';
 import '../../utils/snackbar_utils.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
+import '../account/another_profile_user.dart';
 import '../message/chat_page.dart';
 import 'edit_post.dart';
 
@@ -334,24 +335,30 @@ class _PostDetailState extends State<PostDetail> {
                                         NetworkImage(postList['user']['avatar']!),
                                   ),
                                   Gap(AppLayout.getHeight(15)),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        postList['user']['fullName'] ?? 'No Name',
-                                        style: Theme.of(context).textTheme.titleSmall,
-                                      ),
-                                      Gap(AppLayout.getHeight(5)),
-                                      Text(
-                                        postList['createdDate'] != null
-                                            ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(postList['createdDate']))}  --  '
-                                            '${DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['createdDate']))}'
-                                            : 'No Date',
-                                        style: TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.grey),
-                                      )
-                                    ],
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context, MaterialPageRoute(builder: (context) => AnotherProfileUser( userId: postList['user']['id'],)));
+                                    },
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          postList['user']['fullName'] ?? 'No Name',
+                                          style: Theme.of(context).textTheme.titleSmall,
+                                        ),
+                                        Gap(AppLayout.getHeight(5)),
+                                        Text(
+                                          postList['createdDate'] != null
+                                              ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(postList['createdDate']))}  --  '
+                                              '${DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['createdDate']))}'
+                                              : 'No Date',
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey),
+                                        )
+                                      ],
+                                    ),
                                   )
                                 ],
                               ),
@@ -388,6 +395,7 @@ class _PostDetailState extends State<PostDetail> {
                             ],
                           ),
                           Gap(AppLayout.getHeight(10)),
+/*
                           GestureDetector(
                                 onTap: () async {
                                   String otherUserId = postList['user']['id'];
@@ -416,6 +424,7 @@ class _PostDetailState extends State<PostDetail> {
                                 },
                                 child: Text("Message", style: TextStyle(color: AppColors.primaryColor, fontSize: 20),),
                               ),
+*/
                           Gap(AppLayout.getHeight(30)),
 
                           Container(
@@ -511,11 +520,11 @@ class _PostDetailState extends State<PostDetail> {
                                 size: AppLayout.getHeight(24),
                               ),
                               const Gap(5),
-                              postList['lostDateFrom'] != null && postList['lostDateTo'] != null ? Row(
+                              postList['lostDateFrom'] != null || postList['lostDateTo'] != null ? Row(
                                 children: [
                                   Text(
                                     postList['lostDateFrom'] != null
-                                        ? DateFormat('yyyy-MM-dd').format(DateTime.parse(postList['lostDateFrom']))
+                                        ? DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['lostDateFrom']))
                                         : '-',
                                     maxLines: 5,
                                     overflow: TextOverflow.ellipsis,
@@ -523,7 +532,7 @@ class _PostDetailState extends State<PostDetail> {
                                   Text(" to "),
                                   Text(
                                     postList['lostDateTo'] != null
-                                        ? DateFormat('yyyy-MM-dd').format(DateTime.parse(postList['lostDateTo']))
+                                        ? DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['lostDateTo']))
                                         : '-',
                                     maxLines: 5,
                                     overflow: TextOverflow.ellipsis,
@@ -587,6 +596,7 @@ class _PostDetailState extends State<PostDetail> {
                                                     });
                                                   },
                                                   hint: Text("Select Reason"),
+                                                  isExpanded: true,
                                                 ),
                                               ],
                                             );

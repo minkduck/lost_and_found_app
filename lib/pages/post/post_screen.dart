@@ -372,6 +372,23 @@ class _PostScreenState extends State<PostScreen> {
       }
     }
   }
+  Future<void> loadAndDisplayCategoryNames(dynamic postList) async {
+    if (postList['postCategoryList'] != null) {
+      List<dynamic> postCategoryList = postList['postCategoryList'];
+
+      if (postCategoryList.isNotEmpty) {
+        List categoryNames = postCategoryList.map((caregories) {
+          return caregories['name'];
+        }).toList();
+        print(categoryNames);
+        if (_isMounted) {
+          setState(() {
+            postList['postCategoryNames'] = categoryNames.join(', ');
+          });
+        }
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -406,7 +423,7 @@ class _PostScreenState extends State<PostScreen> {
           setState(() {
             mypostList = result;
             myPostLoading = false;
-            mypostList.removeWhere((post) => post['postStatus'] == 'DELETED');
+            mypostList.removeWhere((post) => post['postStatus'] == 'DISABLED');
             setState(() {
               mypostList = result;
             });
@@ -610,256 +627,15 @@ class _PostScreenState extends State<PostScreen> {
                       ? RefreshIndicator(
                     onRefresh: _refreshData,
                         child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: filteredPost.length,
-                            itemBuilder: (BuildContext context, int index) {
-
-                              final post = filteredPost[index];
-                              final locationList = loadAndDisplayLocationNames(post);
-                              // print("locationList: " + locationList.toString());
-                              return GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => PostDetail(
-                                            pageId: post['id'],
-                                            page: "post"), // Navigate to PostDetail
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      color: Theme.of(context).cardColor,
-                                    ),
-                                    margin: EdgeInsets.only(
-                                        bottom: AppLayout.getHeight(20)),
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 25,
-                                              backgroundImage: NetworkImage(
-                                                  post['user']
-                                                      ['avatar']!),
-                                            ),
-                                            Gap(AppLayout.getHeight(15)),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  post['user']
-                                                      ['fullName'],
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleSmall,
-                                                ),
-                                                Gap(AppLayout.getHeight(5)),
-                                                Text(
-                                                  post['createdDate'] != null
-                                                      ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
-                                                      : 'No Date',
-                                                  style: TextStyle(
-                                                      fontSize: 13,
-                                                      color: Colors.grey),
-                                                )
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                        Gap(AppLayout.getHeight(30)),
-                                        Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            post['title'],
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium,
-                                          ),
-                                        ),
-                                        Container(
-                                          height:
-                                              MediaQuery.of(context).size.height *
-                                                  0.3,
-                                          // Set a fixed height or use any other value
-                                          child: ListView.builder(
-                                            padding: EdgeInsets.zero, // Add this line to set zero padding
-                                            shrinkWrap: true,
-                                            scrollDirection: Axis.horizontal,
-                                            itemCount: post['postMedias']
-                                                .length,
-                                            itemBuilder: (context, indexs) {
-                                              return Container(
-                                                alignment: Alignment.centerLeft,
-                                                margin: EdgeInsets.only(
-                                                    left: AppLayout.getWidth(20)),
-                                                height: AppLayout.getHeight(151),
-                                                width: AppLayout.getWidth(180),
-                                                child: Image.network(
-                                                    post['postMedias']
-                                                        [indexs]['media']['url'] ?? 'https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png',
-                                                    fit: BoxFit.fill),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        Container(
-                                          child: Text(
-                                            post['postContent'],
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleSmall,
-                                          ),
-                                        ),
-                                        Gap(AppLayout.getHeight(30)),
-/*                                        IconAndTextWidget(
-                                          icon: Icons.location_on,
-                                          text: (post['postLocationNames'] as String?) ?? 'No Location',
-                                          size: 15,
-                                          iconColor: Colors.black,
-                                        ),*/
-                                        Row(
-                                          children: [
-                                              Icon(
-                                                Icons.location_on,
-                                                color: Theme.of(context).iconTheme.color,
-                                                size: AppLayout.getHeight(24),
-                                              ),
-                                              const Gap(5),
-                                            Expanded(
-                                              child: Text(
-                                                (post['postLocationNames'] as String?) ?? 'No Location',
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                  ),
-                                        Gap(AppLayout.getHeight(30)),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            IconButton(
-                                              icon: post['isBookMarkActive'] ?? false
-                                                  ? Icon(Icons.bookmark,
-                                                  color: Theme.of(context).iconTheme.color, size: 30,)
-                                                  : Icon(Icons.bookmark_outline,
-                                                  color: Theme.of(context).iconTheme.color, size: 30,),
-                                              onPressed: () {
-                                                bookmarkPost(post['id']);
-                                              },
-                                            ),
-
-                                            IconAndTextWidget(
-                                                icon: Icons.comment,
-                                                text: getCommentCountForPost(post['id']).toString(),
-                                                iconColor: Colors.grey),
-                                            post['user']['id'] == uid ? Container()  : IconButton(
-                                              icon: post['isFlagActive'] ?? false
-                                                  ? Icon(Icons.flag, color: Theme.of(context).iconTheme.color, size: 30,)
-                                                  : Icon(Icons.flag_outlined, color: Theme.of(context).iconTheme.color, size: 30,),
-                                              onPressed: () {
-                                                String? selectedReason;
-
-                                                if (post['isFlagActive'] ?? false) {
-                                                  flagPost(post['id'], "WrongInformation");
-                                                  return;
-                                                }
-
-                                                showDialog(
-                                                  context: context,
-                                                  builder: (BuildContext context) {
-                                                    return AlertDialog(
-                                                      title: Text("Why are you flagging this item?"),
-                                                      content: StatefulBuilder(
-                                                        builder: (BuildContext context, StateSetter setState) {
-                                                          return Column(
-                                                            mainAxisSize: MainAxisSize.min,
-                                                            children: [
-                                                              DropdownButton<String>(
-                                                                value: selectedReason,
-                                                                items: ["FALSE_INFORMATION", "VIOLATED_USER_POLICIES", "SPAM"].map((String value) {
-                                                                  return DropdownMenuItem<String>(
-                                                                    value: value,
-                                                                    child: Text(value),
-                                                                  );
-                                                                }).toList(),
-                                                                onChanged: (String? newValue) {
-                                                                  setState(() {
-                                                                    selectedReason = newValue;
-                                                                  });
-                                                                },
-                                                                hint: Text("Select Reason"),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      ),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(context); // Cancel button pressed
-                                                          },
-                                                          child: Text("Cancel"),
-                                                        ),
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            if (selectedReason != null) {
-                                                              Navigator.pop(context); // Close the dialog
-
-                                                              // Provide the selected reason to the flagItem function
-                                                              flagPost(post['id'], selectedReason!);
-                                                            } else {
-                                                              // Show a message if no reason is selected
-                                                              // You can replace this with a Snackbar or any other UI feedback
-                                                              SnackbarUtils().showError(title: "", message: "You must select a reason");
-                                                            }
-                                                          },
-                                                          child: Text("Flag"),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                );
-                                              },
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ));
-                            },
-                          ),
-                      )
-                      : SizedBox(
-                          width: AppLayout.getWidth(100),
-                          height: AppLayout.getHeight(300),
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : myPostsSelected ? myPostLoading ? SizedBox(
-                    width: AppLayout.getWidth(100),
-                    height: AppLayout.getHeight(300),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ) :
-                       mypostList.isNotEmpty & categoryGroupList.isNotEmpty
-                      ? RefreshIndicator(
-                    onRefresh: _refreshData,
-                    child: ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: filteredMyPost.length,
+                      itemCount: filteredPost.length,
                       itemBuilder: (BuildContext context, int index) {
 
-                        final post = filteredMyPost[index];
-                        loadAndDisplayLocationNames(post);
+                        final post = filteredPost[index];
+                        final locationList = loadAndDisplayLocationNames(post);
+                        loadAndDisplayCategoryNames(post);
+                        // print("locationList: " + locationList.toString());
                         return GestureDetector(
                             onTap: () {
                               Navigator.of(context).push(
@@ -956,13 +732,358 @@ class _PostScreenState extends State<PostScreen> {
                                           .titleSmall,
                                     ),
                                   ),
+                                  Gap(AppLayout.getHeight(20)),
+
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.category,
+                                        color: Theme.of(context).iconTheme.color,
+                                        size: AppLayout.getHeight(24),
+                                      ),
+                                      const Gap(5),
+                                      Expanded(
+                                        child: Text(
+                                          post['postCategoryNames'] ?? 'No Categories',
+                                          maxLines: 5,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  Gap(AppLayout.getHeight(10)),
+/*                                        IconAndTextWidget(
+                                          icon: Icons.location_on,
+                                          text: (post['postLocationNames'] as String?) ?? 'No Location',
+                                          size: 15,
+                                          iconColor: Colors.black,
+                                        ),*/
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on,
+                                        color: Theme.of(context).iconTheme.color,
+                                        size: AppLayout.getHeight(24),
+                                      ),
+                                      const Gap(5),
+                                      Expanded(
+                                        child: Text(
+                                          (post['postLocationNames'] as String?) ?? 'No Location',
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Gap(AppLayout.getHeight(10)),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.timer_sharp,
+                                        color: Theme.of(context).iconTheme.color,
+                                        size: AppLayout.getHeight(24),
+                                      ),
+                                      const Gap(5),
+                                      post['lostDateFrom'] != null || post['lostDateTo'] != null ? Row(
+                                        children: [
+                                          Text(
+                                            post['lostDateFrom'] != null
+                                                ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateFrom']))
+                                                : '-',
+                                            maxLines: 5,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(" to "),
+                                          Text(
+                                            post['lostDateTo'] != null
+                                                ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateTo']))
+                                                : '-',
+                                            maxLines: 5,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+
+                                        ],
+                                      ) : Text("Don't remember"),
+                                    ],
+                                  ),
                                   Gap(AppLayout.getHeight(30)),
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      IconButton(
+                                        icon: post['isBookMarkActive'] ?? false
+                                            ? Icon(Icons.bookmark,
+                                          color: Theme.of(context).iconTheme.color, size: 30,)
+                                            : Icon(Icons.bookmark_outline,
+                                          color: Theme.of(context).iconTheme.color, size: 30,),
+                                        onPressed: () {
+                                          bookmarkPost(post['id']);
+                                        },
+                                      ),
+
+                                      IconAndTextWidget(
+                                          icon: Icons.comment,
+                                          text: getCommentCountForPost(post['id']).toString(),
+                                          iconColor: Colors.grey),
+                                      post['user']['id'] == uid ? Container()  : IconButton(
+                                        icon: post['isFlagActive'] ?? false
+                                            ? Icon(Icons.flag, color: Theme.of(context).iconTheme.color, size: 30,)
+                                            : Icon(Icons.flag_outlined, color: Theme.of(context).iconTheme.color, size: 30,),
+                                        onPressed: () {
+                                          String? selectedReason;
+
+                                          if (post['isFlagActive'] ?? false) {
+                                            flagPost(post['id'], "FALSE_INFORMATION");
+                                            return;
+                                          }
+
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text("Why are you flagging this item?"),
+                                                content: StatefulBuilder(
+                                                  builder: (BuildContext context, StateSetter setState) {
+                                                    return Column(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        DropdownButton<String>(
+                                                          value: selectedReason,
+                                                          items: ["FALSE_INFORMATION", "VIOLATED_USER_POLICIES", "SPAM"].map((String value) {
+                                                            return DropdownMenuItem<String>(
+                                                              value: value,
+                                                              child: Text(value),
+                                                            );
+                                                          }).toList(),
+                                                          onChanged: (String? newValue) {
+                                                            setState(() {
+                                                              selectedReason = newValue;
+                                                            });
+                                                          },
+                                                          hint: Text("Select Reason"),
+                                                          isExpanded: true,
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context); // Cancel button pressed
+                                                    },
+                                                    child: Text("Cancel"),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      if (selectedReason != null) {
+                                                        Navigator.pop(context); // Close the dialog
+
+                                                        // Provide the selected reason to the flagItem function
+                                                        flagPost(post['id'], selectedReason!);
+                                                      } else {
+                                                        // Show a message if no reason is selected
+                                                        // You can replace this with a Snackbar or any other UI feedback
+                                                        SnackbarUtils().showError(title: "", message: "You must select a reason");
+                                                      }
+                                                    },
+                                                    child: Text("Flag"),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ));
+                      },
+                    ),
+                      )
+                      : SizedBox(
+                          width: AppLayout.getWidth(100),
+                          height: AppLayout.getHeight(300),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : myPostsSelected ? myPostLoading ? SizedBox(
+                    width: AppLayout.getWidth(100),
+                    height: AppLayout.getHeight(300),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ) :
+                       mypostList.isNotEmpty & categoryGroupList.isNotEmpty
+                      ? RefreshIndicator(
+                    onRefresh: _refreshData,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: filteredMyPost.length,
+                      itemBuilder: (BuildContext context, int index) {
+
+                        final post = filteredMyPost[index];
+                        loadAndDisplayLocationNames(post);
+                        loadAndDisplayCategoryNames(post);
+                        return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => PostDetail(
+                                      pageId: post['id'],
+                                      page: "post"), // Navigate to PostDetail
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Theme.of(context).cardColor,
+                              ),
+                              margin: EdgeInsets.only(
+                                  bottom: AppLayout.getHeight(20)),
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 25,
+                                        backgroundImage: NetworkImage(
+                                            post['user']
+                                            ['avatar']!),
+                                      ),
+                                      Gap(AppLayout.getHeight(15)),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            post['user']
+                                            ['fullName'],
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleSmall,
+                                          ),
+                                          Gap(AppLayout.getHeight(5)),
+                                          Text(
+                                            post['createdDate'] != null
+                                                ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
+                                                : 'No Date',
+                                            style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.grey),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  Gap(AppLayout.getHeight(30)),
+                                  Container(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      post['title'],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                  ),
+                                  Container(
+                                    height:
+                                    MediaQuery.of(context).size.height *
+                                        0.3,
+                                    // Set a fixed height or use any other value
+                                    child: ListView.builder(
+                                      padding: EdgeInsets.zero, // Add this line to set zero padding
+                                      shrinkWrap: true,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: post['postMedias']
+                                          .length,
+                                      itemBuilder: (context, indexs) {
+                                        return Container(
+                                          alignment: Alignment.centerLeft,
+                                          margin: EdgeInsets.only(
+                                              left: AppLayout.getWidth(20)),
+                                          height: AppLayout.getHeight(151),
+                                          width: AppLayout.getWidth(180),
+                                          child: Image.network(
+                                              post['postMedias']
+                                              [indexs]['media']['url'] ?? 'https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png',
+                                              fit: BoxFit.fill),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Container(
+                                    child: Text(
+                                      post['postContent'],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall,
+                                    ),
+                                  ),
+                                  Gap(AppLayout.getHeight(20)),
+
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.category,
+                                        color: Theme.of(context).iconTheme.color,
+                                        size: AppLayout.getHeight(24),
+                                      ),
+                                      const Gap(5),
+                                      Expanded(
+                                        child: Text(
+                                          post['postCategoryNames'] ?? 'No Categories',
+                                          maxLines: 5,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Gap(AppLayout.getHeight(10)),
                                   IconAndTextWidget(
                                     icon: Icons.location_on,
                                     text: post['postLocationNames'] ??
                                         'No Location',
                                     size: 15,
                                     iconColor: Colors.black,
+                                  ),
+                                  Gap(AppLayout.getHeight(10)),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.timer_sharp,
+                                        color: Theme.of(context).iconTheme.color,
+                                        size: AppLayout.getHeight(24),
+                                      ),
+                                      const Gap(5),
+                                      post['lostDateFrom'] != null || post['lostDateTo'] != null ? Row(
+                                        children: [
+                                          Text(
+                                            post['lostDateFrom'] != null
+                                                ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateFrom']))
+                                                : '-',
+                                            maxLines: 5,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(" to "),
+                                          Text(
+                                            post['lostDateTo'] != null
+                                                ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateTo']))
+                                                : '-',
+                                            maxLines: 5,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+
+                                        ],
+                                      ) : Text("Don't remember"),
+                                    ],
                                   ),
                                   Gap(AppLayout.getHeight(30)),
                                   Row(

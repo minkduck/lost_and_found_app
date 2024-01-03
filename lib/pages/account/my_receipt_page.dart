@@ -56,8 +56,7 @@ class _MyReceiptState extends State<MyReceipt> {
   void initState() {
     super.initState();
     _isMounted = true;
-    loadingReceiptReceiverList = true;
-    loadingReceiptSenderList = true;
+
 
     Future.delayed(Duration(seconds: 1), () async {
       uid = await AppConstrants.getUid();
@@ -69,6 +68,8 @@ class _MyReceiptState extends State<MyReceipt> {
         setState(() {
           processReceipt(senderResult, true);
           processReceipt(receiverResult, false);
+          loadingReceiptReceiverList = true;
+          loadingReceiptSenderList = true;
         });
       }
 
@@ -194,9 +195,8 @@ class _MyReceiptState extends State<MyReceipt> {
                     })
               ],
             ),
-            receiverSelected ?             loadingReceiptReceiverList
-                ? Container(height: 200,width: 200,child: Center(child: CircularProgressIndicator()))
-                : receiptReceiverList.isNotEmpty
+            receiverSelected
+                ? loadingReceiptReceiverList && receiptReceiverList.isNotEmpty
                 ? ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -410,19 +410,33 @@ class _MyReceiptState extends State<MyReceipt> {
                     ),
                   );
                 })
-                : Container(height: 200,width: 200,child: Center(child: Text(''),)) :             loadingReceiptSenderList
-                ? Container(height: 200,width: 200,child: Center(child: CircularProgressIndicator()))
-                : receiptSenderList.isNotEmpty
+                : loadingReceiptReceiverList && receiptReceiverList.isEmpty
+                ? SizedBox(
+              width: AppLayout.getScreenWidth(),
+              height: AppLayout.getScreenHeight() - 400,
+              child: Center(
+                child: Text("You haven't received any receipt"),
+              ),
+            )
+                : SizedBox(
+              width: AppLayout.getWidth(100),
+              height: AppLayout.getHeight(300),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+                : senderSelected
+                ? loadingReceiptSenderList && receiptSenderList.isNotEmpty
                 ? ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount: receiptSenderList.length,
+                itemCount: receiptReceiverList.length,
                 itemBuilder: (BuildContext context, int index) {
-                  final senderList = receiptSenderList[index];
-                  final receipt = senderList['receipt'];
-                  final receiver = senderList['receiver'];
-                  final sender = senderList['sender'];
-                  final item = senderList['item'];
+                  final receiverList = receiptReceiverList[index];
+                  final receipt = receiverList['receipt'];
+                  final receiver = receiverList['receiver'];
+                  final sender = receiverList['sender'];
+                  final item = receiverList['item'];
 
                   return Container(
                     decoration: BoxDecoration(
@@ -529,7 +543,6 @@ class _MyReceiptState extends State<MyReceipt> {
                                   .textTheme
                                   .titleSmall,
                             ),
-
                           ],
                         ),
                         Container(
@@ -627,8 +640,22 @@ class _MyReceiptState extends State<MyReceipt> {
                     ),
                   );
                 })
-                : Container(height: 200,width: 200,child: Center(child: Text(''),)),
-
+                : loadingReceiptSenderList && receiptSenderList.isEmpty
+                ? SizedBox(
+              width: AppLayout.getScreenWidth(),
+              height: AppLayout.getScreenHeight() - 400,
+              child: const Center(
+                child: Text("You haven't sent any receipt"),
+              ),
+            )
+                : SizedBox(
+              width: AppLayout.getWidth(100),
+              height: AppLayout.getHeight(300),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+                : Container()
           ],
         ),
       ),

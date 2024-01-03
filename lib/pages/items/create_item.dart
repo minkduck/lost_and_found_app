@@ -10,6 +10,7 @@ import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../widgets/app_drop_menu_filed_title.dart';
 import '../../widgets/app_text_field_description.dart';
+import '../../widgets/app_text_field_title_limit.dart';
 import '../../widgets/app_text_filed_title.dart';
 import '../../widgets/big_text.dart';
 
@@ -141,11 +142,12 @@ class _CreateItemState extends State<CreateItem> {
                 Gap(AppLayout.getHeight(20)),
 
                 //title
-                AppTextFieldTitle(
+                AppTextFieldTitleLimit(
                   textController: titleController,
                   hintText: "A title needs at least 10 characters",
                   titleText: "Title",
                   validator: 'Please input title',
+                  limitSymbols: 50,
                 ),
                 Gap(AppLayout.getHeight(45)),
 
@@ -154,6 +156,7 @@ class _CreateItemState extends State<CreateItem> {
                   textController: descriptionController,
                   hintText: "Describe important information",
                   titleText: "Description",
+                  limitSymbols: 100,
                   onFocusChange: (isFocused) {
                     setState(() {
                       isDescriptionFocused = isFocused;

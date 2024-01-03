@@ -9,6 +9,7 @@ class AppTextFieldDescription extends StatefulWidget {
   final String hintText;
   final String titleText;
   final ValueChanged<bool>? onFocusChange;
+  final int limitSymbols;
 
   AppTextFieldDescription({
     Key? key,
@@ -16,6 +17,7 @@ class AppTextFieldDescription extends StatefulWidget {
     required this.hintText,
     required this.titleText,
     this.onFocusChange,
+    required this.limitSymbols,
   }) : super(key: key);
 
   @override
@@ -64,6 +66,7 @@ class _AppTextFieldDescriptionState extends State<AppTextFieldDescription> {
                 style: Theme.of(context).textTheme.headlineSmall,
                 controller: widget.textController,
                 maxLines: null, // Allow unlimited lines
+                maxLength: widget.limitSymbols,
                 textInputAction: TextInputAction.done, // Change the keyboard action to "Done"
                 decoration: InputDecoration(
                   isDense: true,
