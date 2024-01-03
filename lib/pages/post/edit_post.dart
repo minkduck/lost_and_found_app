@@ -235,11 +235,12 @@ class _EditPostState extends State<EditPost> {
                 //title
                 LayoutBuilder(builder: (context, contraints) {
                   return SizedBox(
-                    height: AppLayout.getHeight(50),
+                    height: AppLayout.getHeight(75),
                     child: TextFormField(
                       expands: true,
                       controller: titleController,
                       maxLines: null,
+                      maxLength: 50,
                       onSaved: (value) => titleController.text = value!,
                       decoration: InputDecoration(
                         hintText: 'Title',
@@ -263,6 +264,7 @@ class _EditPostState extends State<EditPost> {
                       expands: true,
                       controller: postContentController,
                       maxLines: null,
+                      maxLength: 250,
                       decoration: InputDecoration(
                         hintText: 'Description',
                       ),
