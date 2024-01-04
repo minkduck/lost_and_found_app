@@ -21,6 +21,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/custom_search_bar.dart';
 import '../../widgets/icon_and_text_widget.dart';
 import '../../widgets/time_ago_found_widget.dart';
+import '../items/item_details_return.dart';
 import '../items/items_detail.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -40,14 +41,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<dynamic> itemlist = [];
   List<dynamic> myItemlist = [];
+  List<dynamic> returnItemlist = [];
+
   bool myItemsLoading = false;
   bool itemsLoading = false;
+  bool returnItemsLoading = false;
+
   late String uid = "";
   bool? loadingFinished = false;
   final ItemController itemController = Get.put(ItemController());
   String filterText = '';
   bool itemsSelected = true;
   bool myItemsSelected = false;
+  bool returnItemsSelected = false;
 
   bool _isMounted = false;
   String? firstLogin = '';
@@ -145,6 +151,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return filteredByText;
   }
+
+  List<dynamic> filterReturnItemsByCategories() {
+    // Apply category filtering first
+    final List<dynamic> filteredByCategories = selectedCategoryGroup == null
+        ? returnItemlist
+        : returnItemlist.where((item) {
+      final category = item['categoryName'];
+      return selectedCategoryGroup['categories']
+          .any((selectedCategory) => selectedCategory['name'] == category);
+    }).toList();
+
+    // Apply text filter
+    final filteredByText = filteredByCategories
+        .where((item) =>
+    selectedCategories.isEmpty ||
+        selectedCategories.contains(item['categoryName']))
+        .where((item) =>
+    filterText.isEmpty ||
+        (item['name'] != null &&
+            item['name'].toLowerCase().contains(filterText.toLowerCase())))
+        .toList();
+
+    return filteredByText;
+  }
+
 
   Future<void> toggleItemBookmarkStatus(int itemId, Future<void> Function(int) action) async {
     try {
@@ -345,6 +376,16 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         }
       });
+      await itemController.getReturnItem().then((result) {
+        if (_isMounted) {
+          setState(() {
+            returnItemlist = result;
+            returnItemsLoading = false;
+
+          });
+        }
+      });
+
       setState(() {
         loadingFinished = true;
       });
@@ -362,6 +403,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final filteredItems = filterItemsByCategories();
     final filteredMyItems = filterMyItemsByCategories();
+    final filteredReturnItems = filterReturnItemsByCategories();
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -408,34 +450,55 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     AppButton(
-                        boxColor: itemsSelected
-                            ? AppColors.primaryColor
-                            : AppColors.secondPrimaryColor,
-                        textButton: "Items",
-                        width: AppLayout.getWidth(150),
-                        height: AppLayout.getHeight(35),
-                        onTap: () {
-                          setState(() {
-                            itemsSelected = true;
-                            myItemsSelected = false;
-                          });
-                        }),
+                      boxColor: itemsSelected
+                          ? AppColors.primaryColor
+                          : AppColors.secondPrimaryColor,
+                      textButton: "Items",
+                      fontSize: 15,
+                      width: AppLayout.getWidth(100),
+                      height: AppLayout.getHeight(35),
+                      onTap: () {
+                        setState(() {
+                          itemsSelected = true;
+                          myItemsSelected = false;
+                          returnItemsSelected = false;
+                        });
+                      },
+                    ),
                     AppButton(
-                        boxColor: myItemsSelected
-                            ? AppColors.primaryColor
-                            : AppColors.secondPrimaryColor,
-                        textButton: "My Items",
-                        width: AppLayout.getWidth(150),
-                        height: AppLayout.getHeight(35),
-                        onTap: () {
-                          setState(() {
-                            itemsSelected = false;
-                            myItemsSelected = true;
-                          });
-                        })
+                      boxColor: myItemsSelected
+                          ? AppColors.primaryColor
+                          : AppColors.secondPrimaryColor,
+                      textButton: "My Items",
+                      fontSize: 15,
+                      width: AppLayout.getWidth(100),
+                      height: AppLayout.getHeight(35),
+                      onTap: () {
+                        setState(() {
+                          itemsSelected = false;
+                          myItemsSelected = true;
+                          returnItemsSelected = false;
+                        });
+                      },
+                    ),
+                    AppButton(
+                      boxColor: returnItemsSelected
+                          ? AppColors.primaryColor
+                          : AppColors.secondPrimaryColor,
+                      textButton: "Return Items",
+                      fontSize: 15,
+                      width: AppLayout.getWidth(150),
+                      height: AppLayout.getHeight(35),
+                      onTap: () {
+                        setState(() {
+                          itemsSelected = false;
+                          myItemsSelected = false;
+                          returnItemsSelected = true;
+                        });
+                      },
+                    ),
                   ],
-                ),
-                Gap(AppLayout.getHeight(10)),
+                ),                Gap(AppLayout.getHeight(10)),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SingleChildScrollView(
@@ -957,6 +1020,183 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Text("You haven't created any items yet"),
                                 ),
                               )
+                    : returnItemsSelected
+                        ? returnItemsLoading ? SizedBox(
+                      width: AppLayout.getWidth(100),
+                      height: AppLayout.getHeight(300),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ) :
+                    returnItemlist.isNotEmpty & categoryGroupList.isNotEmpty
+                        ? Center(
+                      child: GridView.builder(
+                        padding: EdgeInsets.all(15),
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                        SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: AppLayout.getWidth(200),
+                          childAspectRatio: 0.55,
+                          crossAxisSpacing: AppLayout.getWidth(20),
+                          mainAxisSpacing: AppLayout.getHeight(20),
+                        ),
+                        itemCount: filteredReturnItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredReturnItems[index];
+                          final mediaUrl = getUrlFromItem(item) ??
+                              "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg";
+                          if (item['foundDate'] != null) {
+                            String foundDate = item['foundDate'];
+                            if (foundDate.contains('|')) {
+                              List<String> dateParts = foundDate.split('|');
+                              if (dateParts.length == 2) {
+                                String date = dateParts[0].trim();
+                                String slot = dateParts[1].trim();
+
+                                // Check if the date format needs to be modified
+                                if (date.contains(' ')) {
+                                  // If it contains time, remove the time part
+                                  date = date.split(' ')[0];
+                                }
+                                DateFormat originalDateFormat = DateFormat("yyyy-MM-dd");
+                                DateTime originalDate = originalDateFormat.parse(date);
+
+                                // Format the date in the desired format
+                                DateFormat desiredDateFormat = DateFormat("dd-MM-yyyy");
+                                String formattedDate = desiredDateFormat.format(originalDate);
+                                String timeAgo = TimeAgoFoundWidget.formatTimeAgo(originalDate);
+
+                                // Update the foundDate in the itemlist
+                                item['foundDate'] = '$timeAgo';
+                              }
+                            }
+                          }
+
+                          return Container(
+                            decoration: const BoxDecoration(
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(15)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: AppLayout.getHeight(140),
+                                  width: AppLayout.getWidth(180),
+                                  child: Image.network(
+                                    mediaUrl,
+                                    fit: BoxFit.fill,
+                                    errorBuilder:
+                                        (context, error, stackTrace) {
+                                      // Handle image loading errors
+                                      return Image.network(
+                                          "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg",
+                                          fit: BoxFit.fill);
+                                    },
+                                  ),
+                                ),
+                                Container(
+                                  color: Theme.of(context).cardColor,
+                                  padding: EdgeInsets.only(
+                                    bottom: AppLayout.getHeight(28.5),
+                                    left: AppLayout.getWidth(8),
+                                    right: AppLayout.getWidth(8),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Gap(AppLayout.getHeight(20)),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              item['name'] ?? 'No Name',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Gap(AppLayout.getHeight(10)),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.location_on,
+                                            color: Theme.of(context).iconTheme.color,
+                                            size: AppLayout.getHeight(24),
+                                          ),
+                                          const Gap(5),
+                                          Expanded(
+                                            child: Text(
+                                              item['locationName'] ??
+                                                  'No Location',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Gap(AppLayout.getWidth(15)),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        child: Align(
+                                          alignment:
+                                          Alignment.centerLeft,
+                                          child: Text(
+                                            item['foundDate']??'No date',
+                                            maxLines: 1,
+                                            overflow:
+                                            TextOverflow.ellipsis,
+                                            style:
+                                            TextStyle(fontSize: 15),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Spacer(),
+                                Container(
+                                  child: AppButton(
+                                    boxColor:
+                                    AppColors.secondPrimaryColor,
+                                    textButton: "Details",
+                                    fontSize: 18,
+                                    height: AppLayout.getHeight(30),
+                                    width: AppLayout.getWidth(180),
+                                    topLeft: 1,
+                                    topRight: 1,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ItemDetailsReturn(
+                                                  pageId: item['id'],
+                                                  page: "item"),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                        : SizedBox(
+                      width: AppLayout.getScreenWidth(),
+                      height: AppLayout.getScreenHeight()-400,
+                      child: Center(
+                        child: Text("It doesn't have any return items"),
+                      ),
+                    )
                           : Container();
                 }),
               ],

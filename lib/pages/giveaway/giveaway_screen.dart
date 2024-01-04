@@ -8,8 +8,10 @@ import '../../data/api/giveaway/giveaway_controller.dart';
 import '../../data/api/notifications/notification_controller.dart';
 import '../../test/time/time_widget.dart';
 import '../../utils/app_assets.dart';
+import '../../utils/app_constraints.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/big_text.dart';
 
 class GiveawayScreen extends StatefulWidget {
@@ -22,9 +24,21 @@ class GiveawayScreen extends StatefulWidget {
 class _GiveawayScreenState extends State<GiveawayScreen> {
   bool _isMounted = false;
   bool loadingFinished = false;
+  bool isGiveawayParticipate = false;
+  late String uid = "";
 
   List<dynamic> giveawayList = [];
   final GiveawayController giveawayController = Get.put(GiveawayController());
+
+  List<Map<String, String>> giveawayStatusList = [
+    {'name': 'NOT_STARTED'},
+    {'name': 'ONGOING'},
+    {'name': 'REWARD_DISTRIBUTION_IN_PROGRESS'},
+    {'name': 'CLOSED'},
+    {'name': 'DISABLED'},
+  ];
+
+  List<String> selectedGiveawayStatus = [];
 
   String? getUrlFromItem(Map<String, dynamic> item) {
     if (item.containsKey('itemMedias')) {
@@ -42,15 +56,55 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
     return "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg";
   }
 
+  Future<void> participateGiveaway(int giveawayId) async {
+    try {
+      await giveawayController.postParticipateByGiveawayId(giveawayId);
+      setState(() {
+        isGiveawayParticipate = true;
+      });
+    } catch (e) {
+      print('Error participate Giveaway : $e');
+    }
+  }
+
+  // Function to unclaim an item
+  Future<void> unParticipateGiveaway(int giveawayId) async {
+    try {
+      await giveawayController.postParticipateByGiveawayId(giveawayId);
+      setState(() {
+        isGiveawayParticipate = false;
+      });
+    } catch (e) {
+      print('Error unParticipate Giveaway : $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
+      uid = await AppConstrants.getUid();
       giveawayController.getGiveawayList().then((result) {
         if (_isMounted) {
           setState(() {
             giveawayList = result;
+
+            if (giveawayList.isNotEmpty) {
+              giveawayList.forEach((giveaway) {
+                final participants = giveaway['giveawayParticipants'] as List<dynamic>;
+                if (participants.isNotEmpty) {
+                  final currentUser = participants.firstWhere(
+                          (participant) =>
+                      participant['user']['id'] == uid,
+                      orElse: () => null);
+
+                  if (currentUser != null) {
+                    isGiveawayParticipate = currentUser['isActive'];
+                  }
+                }
+              });
+            }
           });
         }
       });
@@ -62,6 +116,12 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    List<dynamic> filteredGiveawayList = giveawayList
+        .where((giveaway) =>
+    selectedGiveawayStatus.isEmpty ||
+        selectedGiveawayStatus.contains(giveaway['giveawayStatus']))
+        .toList();
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -79,14 +139,49 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                   ),
                 ],
               ),
+              Gap(AppLayout.getHeight(25)),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: giveawayStatusList
+                        .map((status) => GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (selectedGiveawayStatus.contains(status['name'])) {
+                            selectedGiveawayStatus.remove(status['name']);
+                          } else {
+                            selectedGiveawayStatus.add(status['name']!);
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 16),
+                        child: BigText(
+                          text: status['name'] != null ? status['name'].toString() : 'No Status',
+                          color: selectedGiveawayStatus.contains(status['name'])
+                              ? AppColors
+                              .primaryColor // Selected text color
+                              : AppColors.secondPrimaryColor,
+                          fontW: FontWeight.w500,
+                        ),
+                      ),
+                    ))
+                        .toList(),
+                  ),
+                ),
+              ),
               if (loadingFinished! && giveawayList.isNotEmpty)
                    ListView.builder(
                   shrinkWrap: true,
                   reverse: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: giveawayList.length,
+                  itemCount: filteredGiveawayList.length,
                   itemBuilder: (BuildContext context, int index) {
-                    final giveaway = giveawayList[index];
+                    final giveaway = filteredGiveawayList[index];
 
                     return Container(
                       decoration: BoxDecoration(
@@ -205,13 +300,14 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                           ),
                           Gap(AppLayout.getHeight(20)),
 
-                          Container(
+/*                          Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               color: AppColors.primaryColor,  // Set color to AppColors.primaryColor
                             ),
                             child: InkWell(
                               onTap: () {
+
                               },
                               child: Ink(
                                 width: AppLayout.getWidth(250),
@@ -245,6 +341,17 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                                 ),
                               ),
                             ),
+                          )*/
+                          AppButton1(
+                            boxColor: isGiveawayParticipate ? AppColors.primaryColor : AppColors.secondPrimaryColor,
+                            textButton: isGiveawayParticipate ? "Participated" : "Participate",
+                            onTap: () async {
+                              if (isGiveawayParticipate) {
+                                await unParticipateGiveaway(giveaway['id']);
+                              } else {
+                                await participateGiveaway(giveaway['id']);
+                              }
+                            },
                           )
                         ],
                       ),
@@ -269,6 +376,78 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
 
             ],
           )
+        ),
+      ),
+    );
+  }
+}
+
+class AppButton1 extends StatelessWidget {
+  final Color boxColor;
+  final String textButton;
+  final VoidCallback onTap;
+  double height;
+  double width;
+  double topLeft;
+  double topRight;
+  double bottomLeft;
+  double bottomRight;
+  double fontSize;
+
+  AppButton1(
+      {Key? key,
+        required this.boxColor,
+        required this.textButton,
+        required this.onTap,
+        this.height = 0,
+        this.width = 0,
+        this.bottomRight = 0,
+        this.topRight = 0,
+        this.topLeft = 0,
+        this.bottomLeft = 0,
+        this.fontSize = 20})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+    color: boxColor,),
+    child: InkWell(
+        onTap: () {
+          onTap();
+        },
+        child: Ink(
+          width: AppLayout.getWidth(250),
+          height: AppLayout.getHeight(50),
+          decoration: BoxDecoration(
+            color: boxColor,  // Use the provided boxColor
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(AppLayout.getHeight(15)) ,
+              topRight:  Radius.circular(AppLayout.getHeight(15)) ,
+              bottomLeft: Radius.circular(AppLayout.getHeight(15)) ,
+              bottomRight: Radius.circular(AppLayout.getHeight(15)) ,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: Offset(0, 1),
+              )
+            ],
+          ),
+          child: Center(
+            child: Text(
+              textButton,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+            ),
+          ),
         ),
       ),
     );

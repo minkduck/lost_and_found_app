@@ -525,15 +525,15 @@ class _PostDetailState extends State<PostDetail> {
                                   Text(
                                     postList['lostDateFrom'] != null
                                         ? DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['lostDateFrom']))
-                                        : '-',
+                                        : '',
                                     maxLines: 5,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  Text(" to "),
+                                  postList['lostDateFrom'] != null && postList['lostDateTo'] != null ? Text(" to ") : Text(""),
                                   Text(
                                     postList['lostDateTo'] != null
                                         ? DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['lostDateTo']))
-                                        : '-',
+                                        : '',
                                     maxLines: 5,
                                     overflow: TextOverflow.ellipsis,
                                   ),
