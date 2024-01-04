@@ -55,6 +55,7 @@ class ItemController extends GetxController{
       throw Exception('Failed to load getItemList');
     }
   }
+
   Future<Map<String, dynamic>> getItemListById(int id) async {
     accessToken = await AppConstrants.getToken();
     var headers = {
@@ -141,6 +142,36 @@ class ItemController extends GetxController{
       throw Exception('Failed to load getItemByUidList');
     }
   }
+
+  Future<List<dynamic>> getReturnItem() async {
+    accessToken = await AppConstrants.getToken();
+    campusId = await AppConstrants.getCampusId();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse(AppConstrants.GETRETURNITEM_URL + campusId));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      _isLoaded = true;
+      update();
+      print("getReturnItem " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getReturnItem');
+    }
+  }
+
 
   Future<void> createItem(
       String name,

@@ -110,7 +110,7 @@ class _AccountPageState extends State<AccountPage> {
 
                 }),
                 Gap(AppLayout.getHeight(50)),
-                AppButton(boxColor: AppColors.primaryColor, textButton: "My Receipt", onTap: () {
+                AppButton(boxColor: AppColors.primaryColor, textButton: "My TransferRecord", onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (context) => MyReceipt()));
 

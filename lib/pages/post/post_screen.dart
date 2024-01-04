@@ -790,15 +790,15 @@ class _PostScreenState extends State<PostScreen> {
                                           Text(
                                             post['lostDateFrom'] != null
                                                 ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateFrom']))
-                                                : '-',
+                                                : '',
                                             maxLines: 5,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          Text(" to "),
+                                          post['lostDateFrom'] != null && post['lostDateTo'] != null ? Text(" to ") : Text(""),
                                           Text(
                                             post['lostDateTo'] != null
                                                 ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateTo']))
-                                                : '-',
+                                                : '',
                                             maxLines: 5,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -1040,19 +1040,29 @@ class _PostScreenState extends State<PostScreen> {
                                       Expanded(
                                         child: Text(
                                           post['postCategoryNames'] ?? 'No Categories',
-                                          maxLines: 5,
+                                          maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],
                                   ),
                                   Gap(AppLayout.getHeight(10)),
-                                  IconAndTextWidget(
-                                    icon: Icons.location_on,
-                                    text: post['postLocationNames'] ??
-                                        'No Location',
-                                    size: 15,
-                                    iconColor: Colors.black,
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on,
+                                        color: Theme.of(context).iconTheme.color,
+                                        size: AppLayout.getHeight(24),
+                                      ),
+                                      const Gap(5),
+                                      Expanded(
+                                        child: Text(
+                                          (post['postLocationNames'] as String?) ?? 'No Location',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   Gap(AppLayout.getHeight(10)),
                                   Row(
@@ -1068,15 +1078,15 @@ class _PostScreenState extends State<PostScreen> {
                                           Text(
                                             post['lostDateFrom'] != null
                                                 ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateFrom']))
-                                                : '-',
+                                                : '',
                                             maxLines: 5,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          Text(" to "),
+                                          post['lostDateFrom'] != null && post['lostDateTo'] != null ? Text(" to ") : Text(""),
                                           Text(
                                             post['lostDateTo'] != null
                                                 ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateTo']))
-                                                : '-',
+                                                : '',
                                             maxLines: 5,
                                             overflow: TextOverflow.ellipsis,
                                           ),

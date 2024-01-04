@@ -363,6 +363,48 @@ class _AnotherProfileUserState extends State<AnotherProfileUser> {
             Gap(AppLayout.getHeight(10)),
             Text(userList['fullName'] ?? '-', style: Theme.of(context).textTheme.headlineMedium,),
             Gap(AppLayout.getHeight(20)),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 30),
+              padding: EdgeInsets.only(top: AppLayout.getHeight(20), bottom: AppLayout.getHeight(20)),
+              decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  boxShadow: [
+                    BoxShadow(
+                        blurRadius: 4,
+                        spreadRadius: 4,
+                        offset: Offset(0, 4),
+                        color: Colors.grey.withOpacity(0.2))
+                  ]),
+              // color: Colors.red,
+              child: Column(
+                // crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding:  EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                    child: IconAndTextWidget(icon: Icons.email, text: userList['email']?? '-', iconColor: AppColors.secondPrimaryColor),
+                  ),
+
+                  Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
+                  Gap(AppLayout.getHeight(10)),
+
+                  Padding(
+                    padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                    child: IconAndTextWidget(icon: FontAwesomeIcons.genderless, text: userList['gender'] ?? '-', iconColor: AppColors.secondPrimaryColor),
+
+                  ),
+                  Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
+                  Gap(AppLayout.getHeight(10)),
+
+                  Padding(
+                    padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
+                    child: IconAndTextWidget(icon: Icons.phone, text: userList['phone']?? '-', iconColor: AppColors.secondPrimaryColor),
+                  ),
+
+                ],
+              ),
+            ),
+            Gap(AppLayout.getHeight(20)),
             userList['id'] != uid ? Center(
                 child: AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Send Message", onTap: () async {
                   String otherUserId = userList['id'];
@@ -416,48 +458,6 @@ class _AnotherProfileUserState extends State<AnotherProfileUser> {
               thickness: 1,       // Thickness of the dashes
               indent: 20,         // Indent (left padding) of the divider
               endIndent: 20,      // End indent (right padding) of the divider
-            ),
-            Gap(AppLayout.getHeight(10)),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 30),
-              padding: EdgeInsets.only(top: AppLayout.getHeight(20), bottom: AppLayout.getHeight(20)),
-              decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                  boxShadow: [
-                    BoxShadow(
-                        blurRadius: 4,
-                        spreadRadius: 4,
-                        offset: Offset(0, 4),
-                        color: Colors.grey.withOpacity(0.2))
-                  ]),
-              // color: Colors.red,
-              child: Column(
-                // crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding:  EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
-                    child: IconAndTextWidget(icon: Icons.email, text: userList['email']?? '-', iconColor: AppColors.secondPrimaryColor),
-                  ),
-
-                  Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
-                  Gap(AppLayout.getHeight(10)),
-
-                  Padding(
-                    padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
-                    child: IconAndTextWidget(icon: FontAwesomeIcons.genderless, text: userList['gender'] ?? '-', iconColor: AppColors.secondPrimaryColor),
-
-                  ),
-                  Divider(color: Colors.grey,thickness: 1, indent: 30,endIndent: 30,),
-                  Gap(AppLayout.getHeight(10)),
-
-                  Padding(
-                    padding: EdgeInsets.only(bottom: AppLayout.getHeight(8), left: AppLayout.getWidth(40)),
-                    child: IconAndTextWidget(icon: Icons.phone, text: userList['phone']?? '-', iconColor: AppColors.secondPrimaryColor),
-                  ),
-
-                ],
-              ),
             ),
             Gap(AppLayout.getHeight(30)),
             Row(
