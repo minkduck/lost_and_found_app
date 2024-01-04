@@ -288,12 +288,42 @@ class _CreatePostState extends State<CreatePost> {
                   selectedValues: selectedCategories,
                   items: getMultiSelectCategories(),
                   onChanged: (values) {
-                    setState(() {
-                      selectedCategories = values;
-                      // Update selectedCategoriesString with the correct format
-                      selectedCategoriesString = '|${values.join("|")}|';
-                    });
+                    if (values.length <= 10) {
+                      setState(() {
+                        selectedCategories = values;
+                        // Update selectedCategoriesString with the correct format
+                        selectedCategoriesString = '|${values.join("|")}|';
+                      });
+                    } else {
+                      // Automatically remove excess categories
+                      setState(() {
+                        selectedCategories = values.take(10).toList();
+                        // Update selectedCategoriesString with the correct format
+                        selectedCategoriesString = '|${selectedCategories.join("|")}|';
+                      });
+
+                      // Show a dialog or a snackbar to inform the user about the limit.
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Limit Exceeded'),
+                            content: Text('You can only choose up to 10 categories.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   },
+
+
                   titleText: "Categories",
                 ),
                 Gap(AppLayout.getHeight(20)),
@@ -303,11 +333,39 @@ class _CreatePostState extends State<CreatePost> {
                   selectedValues: selectedLocations,
                   items: getMultiSelectLocations(),
                   onChanged: (values) {
-                    setState(() {
-                      selectedLocations = values;
-                      // Update selectedLocationsString with the correct format
-                      selectedLocationsString = '|${values.join("|")}|';
-                    });
+                    if (values.length <= 10) {
+                      setState(() {
+                        selectedLocations = values;
+                        // Update selectedLocationsString with the correct format
+                        selectedLocationsString = '|${values.join("|")}|';
+                      });
+                    } else {
+                      // Automatically remove excess locations
+                      setState(() {
+                        selectedLocations = values.take(10).toList();
+                        // Update selectedLocationsString with the correct format
+                        selectedLocationsString = '|${selectedLocations.join("|")}|';
+                      });
+
+                      // Show a dialog or a snackbar to inform the user about the limit.
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Limit Exceeded'),
+                            content: Text('You can only choose up to 10 locations.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   },
                   titleText: "Locations",
                 ),

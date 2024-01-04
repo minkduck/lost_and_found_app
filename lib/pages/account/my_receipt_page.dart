@@ -151,7 +151,7 @@ class _MyReceiptState extends State<MyReceipt> {
                       ),
                     ),
                     BigText(
-                      text: "List Receipt",
+                      text: "List TransferRecord",
                       size: 20,
                       color: AppColors.secondPrimaryColor,
                       fontW: FontWeight.w500,

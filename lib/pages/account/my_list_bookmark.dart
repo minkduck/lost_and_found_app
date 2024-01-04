@@ -734,6 +734,7 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                   final post = postBookmarkList[index];
                   loadAndDisplayLocationNames(post);
                   loadAndDisplayCategoryNames(post);
+
                   return GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
@@ -850,12 +851,53 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                               ],
                             ),
                             Gap(AppLayout.getHeight(10)),
-                            IconAndTextWidget(
-                              icon: Icons.location_on,
-                              text: post['postLocationNames'] ??
-                                  'No Location',
-                              size: 15,
-                              iconColor: Colors.black,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  color: Theme.of(context).iconTheme.color,
+                                  size: AppLayout.getHeight(24),
+                                ),
+                                const Gap(5),
+                                Expanded(
+                                  child: Text(
+                                    (post['postLocationNames'] as String?) ?? 'No Location',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Gap(AppLayout.getHeight(10)),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.timer_sharp,
+                                  color: Theme.of(context).iconTheme.color,
+                                  size: AppLayout.getHeight(24),
+                                ),
+                                const Gap(5),
+                                post['lostDateFrom'] != null || post['lostDateTo'] != null ? Row(
+                                  children: [
+                                    Text(
+                                      post['lostDateFrom'] != null
+                                          ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateFrom']))
+                                          : '',
+                                      maxLines: 5,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    post['lostDateFrom'] != null && post['lostDateTo'] != null ? Text(" to ") : Text(""),
+                                    Text(
+                                      post['lostDateTo'] != null
+                                          ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateTo']))
+                                          : '',
+                                      maxLines: 5,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+
+                                  ],
+                                ) : Text("Don't remember"),
+                              ],
                             ),
                             Gap(AppLayout.getHeight(30)),
                             Row(

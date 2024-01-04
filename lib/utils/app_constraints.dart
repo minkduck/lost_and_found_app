@@ -53,6 +53,7 @@ class AppConstrants{
   static const String GETITEMBYID_URL = "$BASE_URL/api/items/id/";
   static const String GETITEMBYUID_URL = "$BASE_URL/api/items?FoundUserId=";
   static const String POSTITEM_URL = "$BASE_URL/api/items";
+  static const String GETRETURNITEM_URL = "$BASE_URL/api/items/query-returned?ItemStatus=ALL&CampusId=";
 
   //post
   static const String GETPOSTWITHPAGINATION_URL = "$BASE_URL/api/posts?CampusId=";
@@ -109,5 +110,8 @@ class AppConstrants{
   //giveaway
   static const String GETGIVEAWAYSTATUS_URL = "$BASE_URL/api/giveaways/query-with-status?GiveawayStatus=";
   static const String GETALLGIVEAWAY_URL = "$BASE_URL/api/giveaways";
+  static const String POSTPARTICIPATEGIVEAWAY_URL = "$BASE_URL/api/giveaways/participate-in-a-giveaway/";
 
+  //report
+  static const String POSTCREATEREPORT_URL = "$BASE_URL/api/reports";
 }

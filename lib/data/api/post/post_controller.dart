@@ -106,7 +106,6 @@ class PostController extends GetxController{
     }
   }
 
-
   Future<Map<String, dynamic>> getPostMediaById(int id) async {
     accessToken = await AppConstrants.getToken();
     var headers = {
