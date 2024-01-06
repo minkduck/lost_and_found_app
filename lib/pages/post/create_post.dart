@@ -115,28 +115,37 @@ class _CreatePostState extends State<CreatePost> {
   }
 
   Future<void> compressAndCreatePost() async {
-    List<String> compressedImagePaths = [];
-    for (var imageFile in imageFileList!) {
-      List<int> compressedImage = await compressImage(
-          imageFile.path, 800, 600, 80); // Adjust parameters as needed
-      // Save or upload the compressed image and get the new path
-      // Example: saveToDisk(compressedImage, 'compressed_image.jpg');
-      // String compressedImagePath = 'path/to/compressed_image.jpg';
-      String compressedImagePath =
-      await saveToDisk(compressedImage, 'compressed_image.jpg');
-      compressedImagePaths.add(compressedImagePath);
-    }
+    try {
+      List<List<int>> compressedImages = [];
 
-    // Now you can use compressedImagePaths to create the item
-    await PostController().createPost(
+      for (var imageFile in imageFileList!) {
+        List<int> compressedImage = await compressImage(
+            imageFile.path, 800, 600, 80); // Adjust parameters as needed
+        compressedImages.add(compressedImage);
+      }
+
+      List<String> compressedImagePaths = [];
+      for (var i = 0; i < compressedImages.length; i++) {
+        String compressedImagePath = await saveToDisk(
+            compressedImages[i], 'post_image_$i.jpg');
+        compressedImagePaths.add(compressedImagePath);
+      }
+
+      // Now you can use compressedImagePaths to create the post
+      await PostController().createPost(
         titleController.text,
         postContentController.text,
         selectedCategoriesString!,
         selectedLocationsString!,
         lostDateFrom != null ? lostDateFrom!.toLocal().toString() : null,
-    lostDateTo != null ? lostDateTo!.toLocal().toString() : null,
-    compressedImagePaths,
-    );
+        lostDateTo != null ? lostDateTo!.toLocal().toString() : null,
+        compressedImagePaths,
+      );
+    } catch (e) {
+      // Handle any exceptions
+      print("Error compressing and creating post: $e");
+      SnackbarUtils().showError(title: "Error", message: e.toString());
+    }
   }
 
   Future<String> saveToDisk(List<int> data, String fileName) async {

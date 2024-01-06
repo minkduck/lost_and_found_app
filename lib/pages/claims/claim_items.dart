@@ -58,6 +58,14 @@ class _ClaimItemsState extends State<ClaimItems> {
             });
           }
         }
+      }).whenComplete(() {
+        if (_isMounted) {
+          setState(() {
+            if (userClaimList.isEmpty) {
+              _isMounted = false;
+            }
+          });
+        }
       });
     });
   }
@@ -88,7 +96,8 @@ class _ClaimItemsState extends State<ClaimItems> {
               ),
             ],
           ),
-          userClaimList.isNotEmpty ? ListView.builder(
+          if (userClaimList.isNotEmpty)
+          ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             itemCount: userClaimList.length,
@@ -172,21 +181,21 @@ class _ClaimItemsState extends State<ClaimItems> {
                         Gap(AppLayout.getWidth(5)),
                         GestureDetector(
                           onTap: () async {
-                            await claimController.accpectClaimByItemIdAndUserId(widget.pageId, claim['userId']);
-                            final updatedClaims = await claimController.getListClaimByItemId(widget.pageId);
-                            final updatedUserClaimList = <Map<String, dynamic>>[];
-                            for (var claim in updatedClaims) {
-                              final userId = claim['userId'];
-                              final userMap = await userController.getUserByUserId(userId);
-                              updatedUserClaimList.add({
-                                'claim': claim,
-                                'user': userMap != null ? userMap : null,
-                              });
-                            }
-
-                            setState(() {
-                              userClaimList = updatedUserClaimList;
-                            });
+                            // await claimController.accpectClaimByItemIdAndUserId(widget.pageId, claim['userId']);
+                            // final updatedClaims = await claimController.getListClaimByItemId(widget.pageId);
+                            // final updatedUserClaimList = <Map<String, dynamic>>[];
+                            // for (var claim in updatedClaims) {
+                            //   final userId = claim['userId'];
+                            //   final userMap = await userController.getUserByUserId(userId);
+                            //   updatedUserClaimList.add({
+                            //     'claim': claim,
+                            //     'user': userMap != null ? userMap : null,
+                            //   });
+                            // }
+                            //
+                            // setState(() {
+                            //   userClaimList = updatedUserClaimList;
+                            // });
                             Future.delayed(Duration(seconds: 2), () {
                               Navigator.push(
                                 context,
@@ -251,7 +260,23 @@ class _ClaimItemsState extends State<ClaimItems> {
                 ),
               ) : Container();
             },
-          ) :Center(child: CircularProgressIndicator(),),
+          )
+          else if (userClaimList.isEmpty && !_isMounted)
+            SizedBox(
+              width: AppLayout.getScreenWidth(),
+              height: AppLayout.getScreenHeight()-200,
+              child: Center(
+                child: Text("This item don't have any claims"),
+              ),
+            )
+          else
+            SizedBox(
+              width: AppLayout.getWidth(100),
+              height: AppLayout.getHeight(300),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
         ],
       ),
     );

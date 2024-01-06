@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -110,6 +113,52 @@ class _VerifyAccountState extends State<VerifyAccount> {
     setState(() {
       imageSchoolCard = null; // Clear the imageFile
     });
+  }
+
+  Future<List<int>> compressImage(
+      String imagePath, int targetWidth, int targetHeight, int quality) async {
+    List<int> imageBytes = await File(imagePath).readAsBytes();
+    img.Image image = img.decodeImage(Uint8List.fromList(imageBytes))!;
+    img.Image resizedImage =
+    img.copyResize(image, width: targetWidth, height: targetHeight);
+    return img.encodeJpg(resizedImage, quality: quality);
+  }
+
+  Future<void> compressAndCreateVerify(
+      XFile? imageCCIDFront, XFile? imageCCIDBack, XFile? imageSchoolCard) async {
+    // Handle the case when any of the imageFiles is null (not selected or taken)
+    if (imageCCIDFront == null || imageCCIDBack == null || imageSchoolCard == null) {
+      return;
+    }
+
+    List<String> compressedImagePaths = [];
+
+    // Convert XFile to List<XFile> for iteration
+    List<XFile> imageFiles = [imageCCIDFront, imageCCIDBack, imageSchoolCard];
+
+    for (var imageFile in imageFiles) {
+      List<int> compressedImage = await compressImage(
+          imageFile.path, 800, 600, 80); // Adjust parameters as needed
+      String compressedImagePath =
+      await saveToDisk(compressedImage, '${imageFile.name}_compressed.jpg');
+      compressedImagePaths.add(compressedImagePath);
+    }
+
+    await UserController().verifyAccount(
+      schoolIdController.text,
+      compressedImagePaths[0],
+      compressedImagePaths[1],
+      compressedImagePaths[2],
+    );
+
+    // Use compressedImagePaths as needed
+    print(compressedImagePaths);
+  }
+
+  Future<String> saveToDisk(List<int> data, String fileName) async {
+    final File file = File('${(await getTemporaryDirectory()).path}/$fileName');
+    await file.writeAsBytes(data);
+    return file.path;
   }
 
   @override

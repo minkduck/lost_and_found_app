@@ -8,6 +8,7 @@ import 'package:lost_and_find_app/pages/account/my_post_bookmark.dart';
 import 'package:lost_and_find_app/pages/account/my_receipt_page.dart';
 import 'package:lost_and_find_app/pages/account/profile_page.dart';
 import 'package:lost_and_find_app/pages/account/verify_account.dart';
+import 'package:lost_and_find_app/pages/report/my_report.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/api/auth/google_sign_in.dart';
@@ -119,6 +120,12 @@ class _AccountPageState extends State<AccountPage> {
                 AppButton(boxColor: AppColors.primaryColor, textButton: "My List Notifications", onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (context) => MyListNotifications()));
+
+                }),
+                Gap(AppLayout.getHeight(50)),
+                AppButton(boxColor: AppColors.primaryColor, textButton: "My Report", onTap: () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => MyReport()));
 
                 }),
                 Gap(AppLayout.getHeight(50)),

@@ -72,15 +72,18 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
   }
 
   Future<void> compressAndCreateItem() async {
-    List<String> compressedImagePaths = [];
+    List<List<int>> compressedImages = [];
+
     for (var imageFile in imageFileList!) {
       List<int> compressedImage = await compressImage(
           imageFile.path, 800, 600, 80); // Adjust parameters as needed
-      // Save or upload the compressed image and get the new path
-      // Example: saveToDisk(compressedImage, 'compressed_image.jpg');
-      // String compressedImagePath = 'path/to/compressed_image.jpg';
-      String compressedImagePath =
-      await saveToDisk(compressedImage, 'compressed_image.jpg');
+      compressedImages.add(compressedImage);
+    }
+
+    List<String> compressedImagePaths = [];
+    for (var i = 0; i < compressedImages.length; i++) {
+      String compressedImagePath = await saveToDisk(
+          compressedImages[i], 'item_image_$i.jpg');
       compressedImagePaths.add(compressedImagePath);
     }
 

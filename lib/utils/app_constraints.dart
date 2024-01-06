@@ -114,4 +114,6 @@ class AppConstrants{
 
   //report
   static const String POSTCREATEREPORT_URL = "$BASE_URL/api/reports";
+  static const String GETREPORTBYUSERID_URL = "$BASE_URL/api/reports/get-by-user/";
+
 }
