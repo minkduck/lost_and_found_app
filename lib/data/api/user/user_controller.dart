@@ -213,7 +213,7 @@ class UserController extends GetxController {
     else {
       print(response.reasonPhrase);
       print(response.statusCode);
-      throw Exception('Failed to put User');
+      throw Exception('Failed to verifyAccount');
     }
   }
 

@@ -27,6 +27,7 @@ import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
 import '../../utils/snackbar_utils.dart';
 import '../../widgets/big_text.dart';
+import '../../widgets/zoomable_image.dart';
 
 class ItemsDetails extends StatefulWidget {
   final int pageId;
@@ -54,6 +55,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
   bool isItemClaimed = false;
   int itemId = 0;
   bool loadingAll = false;
+  late String verifyStatus = "";
 
   Map<String, dynamic> itemlist = {};
   final ItemController itemController = Get.put(ItemController());
@@ -231,6 +233,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
     itemId = widget.pageId;
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
+      verifyStatus = await AppConstrants.getVerifyStatus();
       uid = await AppConstrants.getUid();
       // uid = "FLtIEJvuMgfg58u4sXhzxPn9qr73";
       await itemController.getItemListById(widget.pageId).then((result) {
@@ -408,14 +411,29 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                     controller: _pageController,
                     itemCount: imageUrls.length,
                     itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.network(imageUrls[index]??"https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg",fit: BoxFit.fill,));
-                      // child: Image.network(imageUrls[index],fit: BoxFit.fill,));               );
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ZoomableImagePage(
+                                imageUrls: imageUrls,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.network(
+                            imageUrls[index] ??
+                                "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg",
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      );
                     },
                   ),
-                ),
-                Center(
+                ),                Center(
                   child: DotsIndicator(
                     dotsCount: imageUrls.isEmpty ? 1 : imageUrls.length,
                     position: currentPage,
@@ -669,11 +687,11 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                           Navigator.push(
                               context, MaterialPageRoute(builder: (context) => ClaimItems(pageId: widget.pageId, page: "Claim user",itemUserId: itemlist['user']['id'],)));
                         }))
-                : Center(
+                : verifyStatus == 'VERIFIED' ? Center(
                     child: AppButton(
                       boxColor: isItemClaimed ? AppColors.primaryColor : AppColors.secondPrimaryColor,
                       textButton: isItemClaimed ? "Claimed" : "Claim",
-                      onTap: isItemClaimed ? unclaimItem : claimItem,)) : Column(
+                      onTap: isItemClaimed ? unclaimItem : claimItem,)): Container() : Column(
                         children: [
                           Text('Receiver: ',
                             style: Theme.of(context).textTheme.labelMedium,
