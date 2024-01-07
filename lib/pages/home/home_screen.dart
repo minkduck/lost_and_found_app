@@ -485,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       boxColor: returnItemsSelected
                           ? AppColors.primaryColor
                           : AppColors.secondPrimaryColor,
-                      textButton: "Return Items",
+                      textButton: "Returned Items",
                       fontSize: 15,
                       width: AppLayout.getWidth(150),
                       height: AppLayout.getHeight(35),

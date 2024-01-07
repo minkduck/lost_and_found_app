@@ -16,6 +16,7 @@ import '../../utils/colors.dart';
 import '../../utils/snackbar_utils.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
+import '../../widgets/zoomable_image.dart';
 import '../account/another_profile_user.dart';
 import '../message/chat_page.dart';
 import 'edit_post.dart';
@@ -435,27 +436,39 @@ class _PostDetailState extends State<PostDetail> {
                               )),
                           Gap(AppLayout.getHeight(15)),
                           Container(
-                            height:
-                            MediaQuery.of(context).size.height *
-                                0.25,
-                            // Set a fixed height or use any other value
+                            height: MediaQuery.of(context).size.height * 0.25,
                             child: ListView.builder(
-                              padding: EdgeInsets.zero, // Add this line to set zero padding
+                              padding: EdgeInsets.zero,
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
-                              itemCount: postList['postMedias']
-                                  .length,
+                              itemCount: postList['postMedias'].length,
                               itemBuilder: (context, indexs) {
-                                return Container(
-                                  alignment: Alignment.centerLeft,
-                                  margin: EdgeInsets.only(
-                                      left: AppLayout.getWidth(20)),
-                                  height: AppLayout.getHeight(151),
-                                  width: AppLayout.getWidth(180),
-                                  child: Image.network(
-                                      postList['postMedias']
-                                      [indexs]['media']['url'] ?? Container(),
-                                      fit: BoxFit.fill),
+                                return GestureDetector(
+                                  onTap: () {
+                                    List<String> imageUrls = postList['postMedias']
+                                        .map((media) => media['media']['url']?.toString() ?? "")
+                                        .whereType<String>()
+                                        .toList();
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ZoomableImagePage(
+                                          imageUrls: imageUrls,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.only(left: AppLayout.getWidth(20)),
+                                    height: AppLayout.getHeight(151),
+                                    width: AppLayout.getWidth(180),
+                                    child: Image.network(
+                                      postList['postMedias'][indexs]['media']['url']?.toString() ??
+                                          'https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png',
+                                      fit: BoxFit.fill,
+                                    ),
+                                  ),
                                 );
                               },
                             ),

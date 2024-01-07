@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -43,6 +46,41 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
   final UserController userController= Get.put(UserController());
   bool _isMounted = false;
   final ItemController itemController = Get.put(ItemController());
+
+  Future<List<int>> compressImage(
+      String imagePath, int targetWidth, int targetHeight, int quality) async {
+    List<int> imageBytes = await File(imagePath).readAsBytes();
+    img.Image image = img.decodeImage(Uint8List.fromList(imageBytes))!;
+    img.Image resizedImage =
+    img.copyResize(image, width: targetWidth, height: targetHeight);
+    return img.encodeJpg(resizedImage, quality: quality);
+  }
+
+  Future<void> compressAndCreateReceipt() async {
+    List<String> compressedImagePaths = [];
+
+    // Convert XFile to List<XFile> for iteration
+    List<XFile> imageFiles = [widget.imageFile!];
+
+    for (var imageFile in imageFiles) {
+      List<int> compressedImage = await compressImage(
+          imageFile.path, 800, 600, 80); // Adjust parameters as needed
+      String compressedImagePath =
+      await saveToDisk(compressedImage, 'receipt_image_item ${widget.itemId}.jpg');
+      compressedImagePaths.add(compressedImagePath);
+    }
+    await ReceiptController().createReceipt(widget.userId, widget.itemUserId, widget.itemId, widget.imageFile!.path);
+
+    // Use compressedImagePaths as needed
+    print(compressedImagePaths);
+  }
+
+
+  Future<String> saveToDisk(List<int> data, String fileName) async {
+    final File file = File('${(await getTemporaryDirectory()).path}/$fileName');
+    await file.writeAsBytes(data);
+    return file.path;
+  }
 
   @override
   void initState() {
@@ -180,7 +218,7 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
               ),
               Gap(AppLayout.getHeight(50)),
               AppButton(boxColor: AppColors.primaryColor, textButton: "Done", onTap: () async {
-                await ReceiptController().createReceipt(widget.userId, widget.itemUserId, widget.itemId, widget.imageFile!.path);
+                await compressAndCreateReceipt();
               })
             ],
           ) : Center(child: CircularProgressIndicator(),),
