@@ -68,24 +68,34 @@ class _CreateReportState extends State<CreateReport> {
   }
 
   Future<void> compressAndCreateReport() async {
-    List<String> compressedImagePaths = [];
-    for (var imageFile in imageFileList!) {
-      List<int> compressedImage = await compressImage(
-          imageFile.path, 800, 600, 80); // Adjust parameters as needed
-      // Save or upload the compressed image and get the new path
-      // Example: saveToDisk(compressedImage, 'compressed_image.jpg');
-      // String compressedImagePath = 'path/to/compressed_image.jpg';
-      String compressedImagePath =
-      await saveToDisk(compressedImage, 'compressed_image.jpg');
-      compressedImagePaths.add(compressedImagePath);
-    }
+    try {
+      List<List<int>> compressedImages = [];
 
-    await ReportController().createReport(
-      titleController.text,
-      postContentController.text,
-      widget.itemId.toString(),
-      compressedImagePaths,
-    );
+      for (var imageFile in imageFileList!) {
+        List<int> compressedImage = await compressImage(
+            imageFile.path, 800, 600, 80); // Adjust parameters as needed
+        compressedImages.add(compressedImage);
+      }
+
+      List<String> compressedImagePaths = [];
+      for (var i = 0; i < compressedImages.length; i++) {
+        String compressedImagePath = await saveToDisk(
+            compressedImages[i], 'report_image_$i.jpg');
+        compressedImagePaths.add(compressedImagePath);
+      }
+
+      // Now you can use compressedImagePaths to create the report
+      await ReportController().createReport(
+        titleController.text,
+        postContentController.text,
+        widget.itemId.toString(),
+        compressedImagePaths,
+      );
+    } catch (e) {
+      // Handle any exceptions
+      print("Error compressing and creating report: $e");
+      SnackbarUtils().showError(title: "Error", message: e.toString());
+    }
   }
 
   Future<String> saveToDisk(List<int> data, String fileName) async {

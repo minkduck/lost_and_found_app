@@ -14,11 +14,12 @@ class GiveawayController extends GetxController{
 
   Future<List<dynamic>> getGiveawayStatusList() async {
     accessToken = await AppConstrants.getToken();
+    campusId = await AppConstrants.getCampusId();
     var headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'
     };
-    var request = http.Request('GET', Uri.parse('${AppConstrants.GETGIVEAWAYSTATUS_URL}ALL'));
+    var request = http.Request('GET', Uri.parse("${AppConstrants.GETGIVEAWAYSTATUS_URL}ALL&CampusId=$campusId"));
 
     request.headers.addAll(headers);
 

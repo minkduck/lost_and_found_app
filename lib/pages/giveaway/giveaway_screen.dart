@@ -31,11 +31,9 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
   final GiveawayController giveawayController = Get.put(GiveawayController());
 
   List<Map<String, String>> giveawayStatusList = [
-    {'name': 'NOT_STARTED'},
     {'name': 'ONGOING'},
     {'name': 'REWARD_DISTRIBUTION_IN_PROGRESS'},
     {'name': 'CLOSED'},
-    {'name': 'DISABLED'},
   ];
 
   List<String> selectedGiveawayStatus = [];
@@ -85,7 +83,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
       uid = await AppConstrants.getUid();
-      giveawayController.getGiveawayList().then((result) {
+      giveawayController.getGiveawayStatusList().then((result) {
         if (_isMounted) {
           setState(() {
             giveawayList = result;
@@ -182,6 +180,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                   itemCount: filteredGiveawayList.length,
                   itemBuilder: (BuildContext context, int index) {
                     final giveaway = filteredGiveawayList[index];
+                    final winnerUser = giveaway['winnerUser'];
 
                     return Container(
                       decoration: BoxDecoration(
@@ -298,61 +297,77 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                                   .titleSmall,
                             ),
                           ),
-                          Gap(AppLayout.getHeight(20)),
-
-/*                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: AppColors.primaryColor,  // Set color to AppColors.primaryColor
-                            ),
-                            child: InkWell(
-                              onTap: () {
-
-                              },
-                              child: Ink(
-                                width: AppLayout.getWidth(250),
-                                height: AppLayout.getHeight(50),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryColor,  // Use the provided boxColor
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(AppLayout.getHeight(15)) ,
-                                    topRight:  Radius.circular(AppLayout.getHeight(15)) ,
-                                    bottomLeft: Radius.circular(AppLayout.getHeight(15)) ,
-                                    bottomRight: Radius.circular(AppLayout.getHeight(15)) ,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.1),
-                                      spreadRadius: 1,
-                                      blurRadius: 2,
-                                      offset: Offset(0, 1),
-                                    )
-                                  ],
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "Join",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                    ),
-                                  ),
+                          Gap(AppLayout.getHeight(30)),
+                          giveaway['giveawayStatus'] == "CLOSED" ? Column(
+                            children: [
+                              Container(
+                                alignment: Alignment.bottomLeft,
+                                child: Text(
+                                  "Winner: ",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall,
                                 ),
                               ),
-                            ),
-                          )*/
-                          AppButton1(
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.only(
+                                        left: AppLayout.getWidth(16),
+                                        top: AppLayout.getHeight(8)),
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.grey[500],
+                                      radius: 25,
+                                      child: CircleAvatar(
+                                        radius: 25,
+                                        backgroundImage: NetworkImage(winnerUser['avatar']??"https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png"),
+                                      ),
+                                    ),
+                                  ),
+                                  Gap(AppLayout.getHeight(20)),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        winnerUser.isNotEmpty
+                                            ? winnerUser['fullName'] :
+                                        'No Name', style: TextStyle(fontSize: 12),
+                                        maxLines: 5,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Gap(AppLayout.getHeight(5)),
+                                      Text(
+                                        winnerUser.isNotEmpty
+                                            ? winnerUser['email'] :
+                                        'No Name', style: TextStyle(fontSize: 12),
+                                        maxLines: 5,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+
+                                    ],
+                                  ),
+
+                                ],
+                              ),
+
+                            ],
+                          ) : Container(),
+                          giveaway['giveawayStatus'] == 'ONGOING' ? AppButton1(
                             boxColor: isGiveawayParticipate ? AppColors.primaryColor : AppColors.secondPrimaryColor,
                             textButton: isGiveawayParticipate ? "Participated" : "Participate",
                             onTap: () async {
                               if (isGiveawayParticipate) {
                                 await unParticipateGiveaway(giveaway['id']);
+                                setState(() {
+                                  giveaway['participantsCount'];
+                                });
                               } else {
                                 await participateGiveaway(giveaway['id']);
+                                setState(() {
+                                  giveaway['participantsCount'];
+                                });
                               }
                             },
-                          )
+                          ) : Container()
                         ],
                       ),
                     );

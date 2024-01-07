@@ -31,6 +31,8 @@ class ReceiptController extends GetxController{
     request.files.add(await http.MultipartFile.fromPath('ReceiptMedia', media));
     request.headers.addAll(headers);
     print("request: " + request.toString());
+    print("request field: " + request.fields.toString());
+
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
@@ -39,6 +41,8 @@ class ReceiptController extends GetxController{
     } else {
       print(response.statusCode);
       print(response.reasonPhrase);
+      SnackbarUtils().showError(title: response.statusCode, message: response.reasonPhrase);
+
       throw Exception('Failed to create recepit');
     }
   }
