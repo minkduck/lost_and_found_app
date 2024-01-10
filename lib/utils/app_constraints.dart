@@ -74,6 +74,7 @@ class AppConstrants{
   static const String POSTAVATARUSER_URL = "$BASE_URL/api/users/media";
   static const String GETUSERBYEMAIL_URL = "$BASE_URL/api/users/email/";
   static const String VERIFYACCOUNT_URL = "$BASE_URL/api/users/media-credentials";
+  static const String QRCODE_URL = "$BASE_URL/api/users/qrcode?userId=";
 
   //claim
   static const String POSTCLAIMITEM_URL = "$BASE_URL/api/items/claim/";

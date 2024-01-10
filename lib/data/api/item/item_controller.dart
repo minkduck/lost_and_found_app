@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:lost_and_find_app/data/model/item/item_model.dart';
 
 import '../../../routes/route_helper.dart';
 import '../../../utils/app_constraints.dart';

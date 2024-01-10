@@ -33,6 +33,7 @@ class GoogleSignInProvider extends ChangeNotifier {
   late String name = "String";
   late String email = "String";
   late String avatar = "String";
+  late String? phoneUser;
   late String fcmToken ;
   late String accessToken = "";
   Stream? members;
@@ -82,6 +83,30 @@ class GoogleSignInProvider extends ChangeNotifier {
     return campus;
   }
 
+  Future<String?> getUserPhoneByUserIdAuth(String id, String accessToken1) async {
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken1'
+    };
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETUSERBYUID_URL}$id'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      phoneUser = jsonResponse['result']['phone'];
+
+      return phoneUser;
+    } else {
+      phoneUser = null;
+      print('first login');
+    }
+  }
+
 
   Future googleLogin(String campusId) async {
     await Firebase.initializeApp();
@@ -110,6 +135,8 @@ class GoogleSignInProvider extends ChangeNotifier {
         avatar = user.photoURL!;
       });
 
+      await getUserPhoneByUserIdAuth(uid, idToken!);
+
         var headers = {
           'Content-Type': 'application/json'
         };
@@ -119,7 +146,7 @@ class GoogleSignInProvider extends ChangeNotifier {
           "email": email,
           "name": name,
           "avatar": avatar,
-          "phone": "string",
+          "phone": phoneUser,
           "campusId": campusId
         });
         request.headers.addAll(headers);
@@ -163,16 +190,19 @@ class GoogleSignInProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    // Stop listening to authStateChanges
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {}).cancel();
+
+    // Sign out from Google and Firebase Auth
     await googleSignIn.signOut();
     await _auth.signOut();
 
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user == null) {
-        _isAuthenticated = false;
-        notifyListeners();
-      }
-    });
+    // Set _isAuthenticated to false
+    _isAuthenticated = false;
+
+    notifyListeners();
   }
+
 
 
 }

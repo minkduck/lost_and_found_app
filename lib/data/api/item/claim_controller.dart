@@ -120,7 +120,7 @@ class ClaimController extends GetxController{
     };
     var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTDENYCLAIMBYITEMIDANDUSERID_URL));
     request.fields.addAll({
-      'ReceiverId': userId,
+      'UserId': userId,
       'ItemId': itemId.toString(),
     });
 

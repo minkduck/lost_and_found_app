@@ -135,8 +135,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(userList['fullName']?? '-', style: Theme.of(context).textTheme.headlineMedium,),
-                      verifyStatus == 'VERIFIED'? Icon(Icons.verified, color: AppColors.primaryColor,): Container()
+                      Flexible(
+                        child: Text(
+                          userList['fullName'] ?? '-',
+                          maxLines: 2,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          overflow: TextOverflow.ellipsis, // Add this line to handle overflow
+                        ),
+                      ),
+                      if (verifyStatus == 'VERIFIED')
+                        Icon(Icons.verified, color: AppColors.primaryColor),
                     ],
                   ),
                   Gap(AppLayout.getHeight(30)),
