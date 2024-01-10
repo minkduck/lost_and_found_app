@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
-import 'package:lost_and_find_app/data/model/item/item_model.dart';
 import 'package:lost_and_find_app/pages/items/create_item.dart';
 import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/app_layout.dart';
@@ -427,15 +426,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'All',
-                        style: Theme.of(context).textTheme.displayMedium,
-                      ),
-                    ),
                     CustomSearchBar(
                       filterText: filterText,
                       // Pass the filter text

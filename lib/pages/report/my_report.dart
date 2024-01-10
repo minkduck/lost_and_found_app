@@ -34,6 +34,14 @@ class _MyReportState extends State<MyReport> {
 
           });
         }
+      }).whenComplete(() {
+        if (_isMounted) {
+          setState(() {
+            if (reportList.isEmpty) {
+              _isMounted = false;
+            }
+          });
+        }
       });
     });
   }

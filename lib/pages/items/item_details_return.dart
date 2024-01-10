@@ -144,7 +144,7 @@ class _ItemDetailsReturnState extends State<ItemDetailsReturn> {
                           ),
                         ),
                         BigText(
-                          text: "Home",
+                          text: "Item Detail",
                           size: 20,
                           color: AppColors.secondPrimaryColor,
                           fontW: FontWeight.w500,
@@ -152,11 +152,6 @@ class _ItemDetailsReturnState extends State<ItemDetailsReturn> {
                       ],
                     ),
                   ],
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: AppLayout.getWidth(30), top: AppLayout.getHeight(10)),
-                  child: Text('Item Detail', style: Theme.of(context).textTheme.displayMedium,),
                 ),
                 Gap(AppLayout.getHeight(20)),
 

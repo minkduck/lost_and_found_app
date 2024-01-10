@@ -20,37 +20,40 @@ final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin  = Flutte
 class FirebaseNotification {
   final _firebaseMessaging = FirebaseMessaging.instance;
 
-  Future initPushNotifications() async {
+  Future<void> initPushNotifications() async {
     print('initPushNotifications called');
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-        alert: true,
-        badge: true,
-        sound: true
+      alert: true,
+      badge: true,
+      sound: true,
     );
 
     LocalNotificationService.initilize();
 
-    FirebaseMessaging.instance.getInitialMessage().then((event) {});
+    FirebaseMessaging.instance.getInitialMessage().then((event) {
+      if (event != null) {
+        LocalNotificationService.showNotificationOnForeground(event);
+      }
+    });
 
-    //Forground State
     FirebaseMessaging.onMessage.listen((event) {
+      print('Foreground Message: $event');
       LocalNotificationService.showNotificationOnForeground(event);
     });
 
-    //Background State
     FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      print('Message Opened App: $event');
+      LocalNotificationService.showNotificationOnForeground(event);
     });
-
   }
-
 
   Future<void> initNotifications() async {
     await _firebaseMessaging.requestPermission();
     final fCMToken = await _firebaseMessaging.getToken();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('fcmToken', fCMToken.toString());
-    // print("fcmToken: " + fCMToken.toString());
+
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
     initPushNotifications();
   }

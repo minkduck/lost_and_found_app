@@ -14,20 +14,26 @@ class LocalNotificationService {
   }
 
   static void showNotificationOnForeground(RemoteMessage message) {
-    final notificationDetail = NotificationDetails(
-        android: AndroidNotificationDetails(
-            "com.example.lost_and_find_app",
-            "lost_and_find_app",
-            importance: Importance.max,
-            priority: Priority.high,
-          icon: AppAssets.appIcon
-        ));
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+      'com.example.lost_and_find_app',
+      'lost_and_find_app',
+      channelDescription: 'Lost and Find App Notification Channel',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: "@mipmap/launcher_icon", // Add your custom icon here
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails(android: androidPlatformChannelSpecifics);
 
     _notificationsPlugin.show(
-        DateTime.now().microsecond,
-        message.notification!.title,
-        message.notification!.body,
-        notificationDetail,
-        payload: message.data["message"]);
+      DateTime.now().microsecond,
+      message.notification!.title,
+      message.notification!.body,
+      platformChannelSpecifics,
+      payload: message.data["message"],
+    );
   }
+
 }

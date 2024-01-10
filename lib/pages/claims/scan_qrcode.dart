@@ -99,7 +99,7 @@ class _ScanQrCodeState extends State<ScanQrCode> {
           alignment: Alignment.center,
           children: [
             buildQrView(context),
-            Positioned(bottom: 10, child: buildResult()),
+            // Positioned(bottom: 10, child: buildResult()),
             Positioned(top: 10, child: buildControlButtons()),
           ],
         ),

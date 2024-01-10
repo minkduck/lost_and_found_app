@@ -27,7 +27,7 @@ class _MyListNotificationsState extends State<MyListNotifications> {
   void initState() {
     super.initState();
     _isMounted = true;
-    Future.delayed(Duration(seconds: 2), () async {
+    Future.delayed(Duration(seconds: 1), () async {
       notificationController.getNotificationListByUserId().then((result) {
         if (_isMounted) {
           setState(() {

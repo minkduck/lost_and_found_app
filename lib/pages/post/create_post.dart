@@ -44,6 +44,7 @@ class _CreatePostState extends State<CreatePost> {
   final CategoryController categoryController = Get.put(CategoryController());
   List<String> selectedCategories = [];
   String? selectedCategoriesString;
+  bool isCreatingPost = false;
 
   List<dynamic> locationList = [];
   final LocationController locationController = Get.put(LocationController());
@@ -573,6 +574,14 @@ class _CreatePostState extends State<CreatePost> {
                         textButton: "Create",
                         onTap: () async {
                           try {
+
+                            if (isCreatingPost) {
+                              // If creation is already in progress, do nothing or show a message.
+                              return;
+                            }
+
+                            isCreatingPost = true;
+
                             if (_formKey.currentState!.validate()) {
                               if (imageFileList != null && imageFileList!.isNotEmpty) {
                                 // code here

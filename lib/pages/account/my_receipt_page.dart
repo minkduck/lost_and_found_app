@@ -70,6 +70,7 @@ class _MyReceiptState extends State<MyReceipt> {
           processReceipt(senderResult, true);
           processReceipt(receiverResult, false);
           loadingReceiptReceiverList = false;
+          loadingReceiptSenderList = false;
         });
       }
 
@@ -225,38 +226,34 @@ class _MyReceiptState extends State<MyReceipt> {
                           children: [
                             Text(
                               'Receiver: ',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall,
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
                             Gap(AppLayout.getWidth(5)),
                             CircleAvatar(
                               radius: 25,
-                              backgroundImage: NetworkImage(
-                                  receiver['avatar']!),
+                              backgroundImage: NetworkImage(receiver['avatar']!),
                             ),
                             Gap(AppLayout.getHeight(15)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  receiver['fullName'],
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall,
-                                ),
-                                Gap(AppLayout.getHeight(5)),
-                                Text(
-                                  receiver['email'],
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall,
-                                ),
-
-                              ],
-                            )
+                            Flexible( // Wrap the Column with Flexible
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    receiver['fullName'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.titleSmall,
+                                  ),
+                                  Gap(AppLayout.getHeight(5)),
+                                  Text(
+                                    receiver['email'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.titleSmall,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                         Gap(AppLayout.getHeight(20)),
@@ -275,26 +272,30 @@ class _MyReceiptState extends State<MyReceipt> {
                                   sender['avatar']!),
                             ),
                             Gap(AppLayout.getHeight(15)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  sender['fullName'],
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall,
-                                ),
-                                Gap(AppLayout.getHeight(5)),
-                                Text(
-                                  sender['email'],
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall,
-                                ),
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    sender['fullName'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall,
+                                  ),
+                                  Gap(AppLayout.getHeight(5)),
+                                  Text(
+                                    sender['email'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall,
+                                  ),
 
-                              ],
+                                ],
+                              ),
                             )
                           ],
                         ),
@@ -449,38 +450,34 @@ class _MyReceiptState extends State<MyReceipt> {
                           children: [
                             Text(
                               'Receiver: ',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall,
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
                             Gap(AppLayout.getWidth(5)),
                             CircleAvatar(
                               radius: 25,
-                              backgroundImage: NetworkImage(
-                                  receiver['avatar']!),
+                              backgroundImage: NetworkImage(receiver['avatar']!),
                             ),
                             Gap(AppLayout.getHeight(15)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  receiver['fullName'],
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall,
-                                ),
-                                Gap(AppLayout.getHeight(5)),
-                                Text(
-                                  receiver['email'],
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall,
-                                ),
-
-                              ],
-                            )
+                            Flexible( // Wrap the Column with Flexible
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    receiver['fullName'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.titleSmall,
+                                  ),
+                                  Gap(AppLayout.getHeight(5)),
+                                  Text(
+                                    receiver['email'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.titleSmall,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                         Gap(AppLayout.getHeight(20)),
@@ -499,26 +496,30 @@ class _MyReceiptState extends State<MyReceipt> {
                                   sender['avatar']!),
                             ),
                             Gap(AppLayout.getHeight(15)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  sender['fullName'],
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall,
-                                ),
-                                Gap(AppLayout.getHeight(5)),
-                                Text(
-                                  sender['email'],
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall,
-                                ),
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    sender['fullName'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall,
+                                  ),
+                                  Gap(AppLayout.getHeight(5)),
+                                  Text(
+                                    sender['email'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall,
+                                  ),
 
-                              ],
+                                ],
+                              ),
                             )
                           ],
                         ),

@@ -503,15 +503,8 @@ class _PostScreenState extends State<PostScreen> {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'All',
-                        style: Theme.of(context).textTheme.displayMedium,
-                      ),
-                    ),
                     CustomSearchBar(
                       filterText: filterText, // Pass the filter text
                       onFilterTextChanged: onFilterTextChanged, // Set the filter text handler
@@ -665,26 +658,30 @@ class _PostScreenState extends State<PostScreen> {
                                             ['avatar']!),
                                       ),
                                       Gap(AppLayout.getHeight(15)),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            post['user']
-                                            ['fullName'],
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleSmall,
-                                          ),
-                                          Gap(AppLayout.getHeight(5)),
-                                          Text(
-                                            post['createdDate'] != null
-                                                ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
-                                                : 'No Date',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey),
-                                          )
-                                        ],
+                                      Flexible(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              post['user']
+                                              ['fullName'],
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleSmall,
+                                            ),
+                                            Gap(AppLayout.getHeight(5)),
+                                            Text(
+                                              post['createdDate'] != null
+                                                  ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
+                                                  : 'No Date',
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey),
+                                            )
+                                          ],
+                                        ),
                                       )
                                     ],
                                   ),
@@ -960,26 +957,30 @@ class _PostScreenState extends State<PostScreen> {
                                             ['avatar']!),
                                       ),
                                       Gap(AppLayout.getHeight(15)),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            post['user']
-                                            ['fullName'],
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleSmall,
-                                          ),
-                                          Gap(AppLayout.getHeight(5)),
-                                          Text(
-                                            post['createdDate'] != null
-                                                ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
-                                                : 'No Date',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey),
-                                          )
-                                        ],
+                                      Flexible(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              post['user']
+                                              ['fullName'],
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleSmall,
+                                            ),
+                                            Gap(AppLayout.getHeight(5)),
+                                            Text(
+                                              post['createdDate'] != null
+                                                  ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
+                                                  : 'No Date',
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey),
+                                            )
+                                          ],
+                                        ),
                                       )
                                     ],
                                   ),
