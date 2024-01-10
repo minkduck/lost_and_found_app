@@ -789,26 +789,30 @@ class _AnotherProfileUserState extends State<AnotherProfileUser> {
                                     ['avatar']!),
                               ),
                               Gap(AppLayout.getHeight(15)),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    post['user']
-                                    ['fullName'],
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall,
-                                  ),
-                                  Gap(AppLayout.getHeight(5)),
-                                  Text(
-                                    post['createdDate'] != null
-                                        ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
-                                        : 'No Date',
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey),
-                                  )
-                                ],
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      post['user']
+                                      ['fullName'],
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall,
+                                    ),
+                                    Gap(AppLayout.getHeight(5)),
+                                    Text(
+                                      post['createdDate'] != null
+                                          ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
+                                          : 'No Date',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey),
+                                    )
+                                  ],
+                                ),
                               )
                             ],
                           ),
@@ -876,12 +880,53 @@ class _AnotherProfileUserState extends State<AnotherProfileUser> {
                             ],
                           ),
                           Gap(AppLayout.getHeight(10)),
-                          IconAndTextWidget(
-                            icon: Icons.location_on,
-                            text: post['postLocationNames'] ??
-                                'No Location',
-                            size: 15,
-                            iconColor: Colors.black,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                color: Theme.of(context).iconTheme.color,
+                                size: AppLayout.getHeight(24),
+                              ),
+                              const Gap(5),
+                              Expanded(
+                                child: Text(
+                                  (post['postLocationNames'] as String?) ?? 'No Location',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Gap(AppLayout.getHeight(10)),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.timer_sharp,
+                                color: Theme.of(context).iconTheme.color,
+                                size: AppLayout.getHeight(24),
+                              ),
+                              const Gap(5),
+                              post['lostDateFrom'] != null || post['lostDateTo'] != null ? Row(
+                                children: [
+                                  Text(
+                                    post['lostDateFrom'] != null
+                                        ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateFrom']))
+                                        : '',
+                                    maxLines: 5,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  post['lostDateFrom'] != null && post['lostDateTo'] != null ? Text(" to ") : Text(""),
+                                  Text(
+                                    post['lostDateTo'] != null
+                                        ? DateFormat('dd-MM-yyyy').format(DateTime.parse(post['lostDateTo']))
+                                        : '',
+                                    maxLines: 5,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+
+                                ],
+                              ) : Text("Don't remember"),
+                            ],
                           ),
                           Gap(AppLayout.getHeight(30)),
                           Row(

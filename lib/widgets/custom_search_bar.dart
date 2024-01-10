@@ -28,7 +28,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     return AnimatedContainer(
       duration: Duration(milliseconds: 500), // Adjust the duration as needed
       curve: Curves.easeInOut, // Adjust the curve as needed
-      width: isSearching ? AppLayout.getWidth(320) : AppLayout.getWidth(48), // Adjust the width values
+      width: isSearching ? AppLayout.getWidth(350) : AppLayout.getWidth(48), // Adjust the width values
       decoration: BoxDecoration(
         color: AppColors.primaryColor, // Customize the background color
         borderRadius: BorderRadius.circular(isSearching ? 30 : 24), // Customize the border radius

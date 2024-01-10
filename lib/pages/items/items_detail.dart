@@ -356,7 +356,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                           ),
                         ),
                         BigText(
-                          text: "Home",
+                          text: "Item Detail",
                           size: 20,
                           color: AppColors.secondPrimaryColor,
                           fontW: FontWeight.w500,
@@ -395,11 +395,6 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       ],
                     ) : Container() : Container()
                   ],
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: AppLayout.getWidth(30), top: AppLayout.getHeight(10)),
-                  child: Text('Item Detail', style: Theme.of(context).textTheme.displayMedium,),
                 ),
                 Gap(AppLayout.getHeight(20)),
 
@@ -714,19 +709,26 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                                           backgroundImage: NetworkImage(user['avatar']),
                                         ),
                                       ),
-                                      Column(
-                                        children: [
-                                          Text(
-                                            user['fullName'] ?? '-',
-                                            style: Theme.of(context).textTheme.titleMedium,
-                                          ),
-                                          Gap(AppLayout.getHeight(5)),
-                                          Text(
-                                            user['email'] ?? '-',
-                                            style: Theme.of(context).textTheme.titleMedium,
-                                          ),
+                                      Gap(AppLayout.getWidth(10)),
+                                      Flexible(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              user['fullName'] ?? '-',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: Theme.of(context).textTheme.titleMedium,
+                                            ),
+                                            Gap(AppLayout.getHeight(5)),
+                                            Text(
+                                              user['email'] ?? '-',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: Theme.of(context).textTheme.titleMedium,
+                                            ),
 
-                                        ],
+                                          ],
+                                        ),
                                       ),
 
                                     ],

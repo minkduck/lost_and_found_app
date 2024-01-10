@@ -35,6 +35,7 @@ class _ClaimItemsState extends State<ClaimItems> {
   final Map<String, dynamic> userMap = {};
   final UserController userController = Get.put(UserController());
   late String uid = "";
+  bool isAcceptClaim = false;
 
   @override
   void initState() {
@@ -68,6 +69,13 @@ class _ClaimItemsState extends State<ClaimItems> {
         }
       });
     });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    isAcceptClaim = false;
   }
 
   @override
@@ -106,7 +114,7 @@ class _ClaimItemsState extends State<ClaimItems> {
               final claim = userClaimInfo['claim'];
               final user = userClaimInfo['user'];
               // print("user:" + user);
-              return claim['isActive'] ? Container(
+              return claim['claimStatus'] != "DENIED" ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: Theme.of(context).cardColor,
@@ -126,15 +134,18 @@ class _ClaimItemsState extends State<ClaimItems> {
                           ),
                         ),
                         Gap(AppLayout.getWidth(15)),
-                        Column(
-                          children: [
-                            Text(user['fullName'] ?? "No Name"),
-                            // const Text("Name"),
-                            Gap(AppLayout.getHeight(10)),
-                            Text(user['email'] ?? "No Email"),
-                            // const Text("Email"),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(user['fullName'] ?? "No Name", maxLines: 2, overflow: TextOverflow.ellipsis,),
+                              // const Text("Name"),
+                              Gap(AppLayout.getHeight(10)),
+                              Text(user['email'] ?? "No Email", maxLines: 2, overflow: TextOverflow.ellipsis,),
+                              // const Text("Email"),
 
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -196,6 +207,7 @@ class _ClaimItemsState extends State<ClaimItems> {
                             // setState(() {
                             //   userClaimList = updatedUserClaimList;
                             // });
+
                             Future.delayed(Duration(seconds: 2), () {
                               Navigator.push(
                                 context,

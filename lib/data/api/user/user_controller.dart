@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../../routes/route_helper.dart';
 import '../../../utils/app_constraints.dart';
 import '../../../utils/snackbar_utils.dart';
+import 'dart:typed_data';
 
 class UserController extends GetxController {
   late String accessToken = "";
@@ -201,8 +202,10 @@ class UserController extends GetxController {
     request.files.add(await http.MultipartFile.fromPath('CCIDBack', CCIDBack));
     request.files.add(await http.MultipartFile.fromPath('StudentCard', StudentCard));
     request.headers.addAll(headers);
-    print("request: " + request.fields.toString());
+    print("request field: " + request.fields.toString());
+    print("request files: " + request.files.toString());
     http.StreamedResponse response = await request.send();
+    print("Image Paths: $CCIDFront - $CCIDBack - $StudentCard");
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
@@ -217,4 +220,25 @@ class UserController extends GetxController {
     }
   }
 
+  Future<Uint8List?> getQrCode() async {
+    accessToken = await AppConstrants.getToken();
+    uid = await AppConstrants.getUid();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    };
+    var request = http.Request('GET', Uri.parse(AppConstrants.QRCODE_URL + uid));
+
+    request.headers.addAll(headers);
+
+    http.Response response = await http.Response.fromStream(await request.send());
+
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load QR code');
+    }
+  }
 }

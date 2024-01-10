@@ -46,6 +46,7 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
   final UserController userController= Get.put(UserController());
   bool _isMounted = false;
   final ItemController itemController = Get.put(ItemController());
+  bool isCreatingReceipt = false;
 
   Future<List<int>> compressImage(
       String imagePath, int targetWidth, int targetHeight, int quality) async {
@@ -114,6 +115,13 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    isCreatingReceipt = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
@@ -154,20 +162,27 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
                   backgroundImage: NetworkImage(userList['avatar'] ?? 'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg'),
                 ),
                 Gap(AppLayout.getWidth(10)),
-                Column(
-                  children: [
-                    Text(
-                      userList['fullName'] ?? '-',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Gap(AppLayout.getHeight(5)),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userList['fullName'] ?? '-',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Gap(AppLayout.getHeight(5)),
 
-                    Text(
-                      userList['email'] ?? '-',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                      Text(
+                        userList['email'] ?? '-',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
 
-                  ],
+                    ],
+                  ),
                 ),
 
 
@@ -184,19 +199,26 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
                   backgroundImage: NetworkImage(userItemList['avatar'] ?? 'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg'),
                 ),
                 Gap(AppLayout.getWidth(10)),
-                Column(
-                  children: [
-                    Text(
-                      userItemList['fullName'] ?? '-',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Gap(AppLayout.getHeight(5)),
-                    Text(
-                      userItemList['email'] ?? '-',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userItemList['fullName'] ?? '-',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Gap(AppLayout.getHeight(5)),
+                      Text(
+                        userItemList['email'] ?? '-',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
 
-                  ],
+                    ],
+                  ),
                 ),
 
 
@@ -218,10 +240,20 @@ class _GetAccepctClaimDetailState extends State<GetAccepctClaimDetail> {
               ),
               Gap(AppLayout.getHeight(50)),
               AppButton(boxColor: AppColors.primaryColor, textButton: "Done", onTap: () async {
+
+                if (isCreatingReceipt) {
+                  // If creation is already in progress, do nothing or show a message.
+                  return;
+                }
+
+                isCreatingReceipt = true;
                 await compressAndCreateReceipt();
               })
             ],
-          ) : Center(child: CircularProgressIndicator(),),
+          ) : SizedBox(
+            height: AppLayout.getScreenHeight()-200,
+              width: AppLayout.getScreenWidth(),
+              child: Center(child: CircularProgressIndicator(),)),
         ),
       ),
     );
