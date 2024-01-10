@@ -129,7 +129,7 @@ class _AccountPageState extends State<AccountPage> {
 
                 }),
                 Gap(AppLayout.getHeight(50)),
-                verifyStatus == 'VERIFIED'? Container() : AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Verify Account", onTap: () {
+                verifyStatus == 'VERIFIED'? Container() : AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Upload Credentials", onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (context) => VerifyAccount()));
 

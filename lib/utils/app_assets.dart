@@ -15,6 +15,6 @@ class AppAssets {
   static final String recover = imagePath + 'recover.png';
   static final String reconnect = imagePath + 'reconnect.png';
   static final String revive = imagePath + 'revive.png';
-  static final String appIcon = imagePath + 'app_icon5.png';
+  static final String appIcon = imagePath + 'app_icon_4.png';
 
 }

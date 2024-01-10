@@ -36,7 +36,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
     {'name': 'CLOSED'},
   ];
 
-  List<String> selectedGiveawayStatus = [];
+  List<String> selectedGiveawayStatus = ['ONGOING'];
 
   String? getUrlFromItem(Map<String, dynamic> item) {
     if (item.containsKey('itemMedias')) {
@@ -89,6 +89,8 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
             giveawayList = result;
 
             if (giveawayList.isNotEmpty) {
+              giveawayList.removeWhere((giveaway) => giveaway['giveawayStatus'] == 'NOT_STARTED');
+              giveawayList.removeWhere((giveaway) => giveaway['giveawayStatus'] == 'DISABLED');
               giveawayList.forEach((giveaway) {
                 final participants = giveaway['giveawayParticipants'] as List<dynamic>;
                 if (participants.isNotEmpty) {
@@ -325,25 +327,28 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                                     ),
                                   ),
                                   Gap(AppLayout.getHeight(20)),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        winnerUser.isNotEmpty
-                                            ? winnerUser['fullName'] :
-                                        'No Name', style: TextStyle(fontSize: 12),
-                                        maxLines: 5,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Gap(AppLayout.getHeight(5)),
-                                      Text(
-                                        winnerUser.isNotEmpty
-                                            ? winnerUser['email'] :
-                                        'No Name', style: TextStyle(fontSize: 12),
-                                        maxLines: 5,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                  Flexible(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          winnerUser.isNotEmpty
+                                              ? winnerUser['fullName'] :
+                                          'No Name', style: TextStyle(fontSize: 12),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Gap(AppLayout.getHeight(5)),
+                                        Text(
+                                          winnerUser.isNotEmpty
+                                              ? winnerUser['email'] :
+                                          'No Name', style: TextStyle(fontSize: 12),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
 
-                                    ],
+                                      ],
+                                    ),
                                   ),
 
                                 ],

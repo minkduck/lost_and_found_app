@@ -325,22 +325,24 @@ class _PostDetailState extends State<PostDetail> {
                       padding: const EdgeInsets.all(12.0),
                       child: Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => AnotherProfileUser(userId: postList['user']['id'])),
+                              );
+                            },
+                            child: Container(
+                              width: MediaQuery.of(context).size.width, // or use a fixed width as needed
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   CircleAvatar(
                                     radius: 25,
-                                    backgroundImage:
-                                        NetworkImage(postList['user']['avatar']!),
+                                    backgroundImage: NetworkImage(postList['user']['avatar'] ?? ''),
                                   ),
-                                  Gap(AppLayout.getHeight(15)),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context, MaterialPageRoute(builder: (context) => AnotherProfileUser( userId: postList['user']['id'],)));
-                                    },
+                                  Gap(AppLayout.getWidth(10)),
+                                  Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
@@ -351,49 +353,19 @@ class _PostDetailState extends State<PostDetail> {
                                         Gap(AppLayout.getHeight(5)),
                                         Text(
                                           postList['createdDate'] != null
-                                              ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(postList['createdDate']))}  --  '
-                                              '${DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['createdDate']))}'
+                                              ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(postList['createdDate']))}  --  ${DateFormat('dd-MM-yyyy').format(DateTime.parse(postList['createdDate']))}'
                                               : 'No Date',
                                           style: TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey),
-                                        )
+                                            fontSize: 13,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
-/*
-                              GestureDetector(
-                                onTap: () async {
-                                  String otherUserId = postList['user']['id'];
-
-                                  await ChatController().createUserChats(uid, otherUserId);
-                                  // Get.toNamed(RouteHelper.getInitial(2));
-                                  String chatId = uid.compareTo(otherUserId) > 0 ? uid + otherUserId : otherUserId + uid;
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatPage(
-                                        chat: Chat(
-                                          uid: otherUserId,
-                                          name: postList['user']['fullName'] ?? 'No Name',
-                                          image: postList['user']['avatar'] ?? '',
-                                          lastMessage: '', // You may want to pass initial message if needed
-                                          time: '',
-                                          chatId:chatId, // You may want to pass the chatId if needed
-                                          formattedDate: '',
-                                          otherId: otherUserId,
-                                          date: DateTime.now(),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Text("Message", style: TextStyle(color: AppColors.primaryColor, fontSize: 20),),
-                              )
-*/
-                            ],
+                            ),
                           ),
                           Gap(AppLayout.getHeight(10)),
 /*

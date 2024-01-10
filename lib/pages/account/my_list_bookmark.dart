@@ -764,26 +764,30 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                                       ['avatar']!),
                                 ),
                                 Gap(AppLayout.getHeight(15)),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      post['user']
-                                      ['fullName'],
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall,
-                                    ),
-                                    Gap(AppLayout.getHeight(5)),
-                                    Text(
-                                      post['createdDate'] != null
-                                          ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
-                                          : 'No Date',
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey),
-                                    )
-                                  ],
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        post['user']
+                                        ['fullName'],
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
+                                      Gap(AppLayout.getHeight(5)),
+                                      Text(
+                                        post['createdDate'] != null
+                                            ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(post['createdDate']))}'
+                                            : 'No Date',
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey),
+                                      )
+                                    ],
+                                  ),
                                 )
                               ],
                             ),

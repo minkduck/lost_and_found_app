@@ -30,6 +30,7 @@ class _CreateReportState extends State<CreateReport> {
   var titleController =
   TextEditingController();
   var postContentController = TextEditingController();
+  bool isCreatingReport = false;
 
   final ImagePicker imagePicker = ImagePicker();
 
@@ -102,6 +103,13 @@ class _CreateReportState extends State<CreateReport> {
     final File file = File('${(await getTemporaryDirectory()).path}/$fileName');
     await file.writeAsBytes(data);
     return file.path;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    isCreatingReport = false;
   }
 
   @override
@@ -281,6 +289,13 @@ class _CreateReportState extends State<CreateReport> {
                         textButton: "Create",
                         onTap: () async {
                           try {
+                            if (isCreatingReport) {
+                              // If creation is already in progress, do nothing or show a message.
+                              return;
+                            }
+
+                            isCreatingReport = true;
+
                             if (_formKey.currentState!.validate()) {
                               if (imageFileList != null && imageFileList!.isNotEmpty) {
                                 // code here

@@ -32,6 +32,8 @@ class ReceiptController extends GetxController{
     request.headers.addAll(headers);
     print("request: " + request.toString());
     print("request field: " + request.fields.toString());
+    print("request files: " + request.files.toString());
+
 
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
@@ -41,8 +43,6 @@ class ReceiptController extends GetxController{
     } else {
       print(response.statusCode);
       print(response.reasonPhrase);
-      SnackbarUtils().showError(title: response.statusCode, message: response.reasonPhrase);
-
       throw Exception('Failed to create recepit');
     }
   }

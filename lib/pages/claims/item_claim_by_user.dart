@@ -50,6 +50,7 @@ class _ItemClaimByUserState extends State<ItemClaimByUser> {
       if (_isMounted) {
         setState(() {
           itemClaimlist = result;
+          itemClaimlist.removeWhere((item) => item['itemStatus'] == 'RETURNED');
         });
       }
     }).whenComplete(() {
@@ -74,152 +75,154 @@ class _ItemClaimByUserState extends State<ItemClaimByUser> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Gap(AppLayout.getHeight(80)),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Icon(
-                  Icons.arrow_back_ios,
-                  color: Colors.grey,
-                  size: 30,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Gap(AppLayout.getHeight(80)),
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.grey,
+                    size: 30,
+                  ),
                 ),
-              ),
-              BigText(
-                text: "Claim Items",
-                size: 20,
-                color: AppColors.secondPrimaryColor,
-                fontW: FontWeight.w500,
-              ),
-            ],
-          ),
-          if (itemClaimlist.isNotEmpty)
-            Center(
-              child: GridView.builder(
-                padding: EdgeInsets.all(15),
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: AppLayout.getWidth(200),
-                  childAspectRatio: 0.55,
-                  crossAxisSpacing: AppLayout.getWidth(20),
-                  mainAxisSpacing: AppLayout.getHeight(20),
+                BigText(
+                  text: "Claim Items",
+                  size: 20,
+                  color: AppColors.secondPrimaryColor,
+                  fontW: FontWeight.w500,
                 ),
-                itemCount: itemClaimlist.length,
-                itemBuilder: (context, index) {
-                  final item = itemClaimlist[index];
-                  final mediaUrl = getUrlFromItem(item) ??
-                      "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png";
+              ],
+            ),
+            if (itemClaimlist.isNotEmpty)
+              Center(
+                child: GridView.builder(
+                  padding: EdgeInsets.all(15),
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: AppLayout.getWidth(200),
+                    childAspectRatio: 0.55,
+                    crossAxisSpacing: AppLayout.getWidth(20),
+                    mainAxisSpacing: AppLayout.getHeight(20),
+                  ),
+                  itemCount: itemClaimlist.length,
+                  itemBuilder: (context, index) {
+                    final item = itemClaimlist[index];
+                    final mediaUrl = getUrlFromItem(item) ??
+                        "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png";
 
-                  return Container(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: AppLayout.getHeight(151),
-                          width: AppLayout.getWidth(180),
-                          child: Image.network(
-                            mediaUrl,
-                            fit: BoxFit.fill,
-                            errorBuilder: (context, error, stackTrace) {
-                              // Handle image loading errors
-                              return Image.network(
-                                  "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png",
-                                  fit: BoxFit.fill);
-                            },
+                    return Container(
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: AppLayout.getHeight(151),
+                            width: AppLayout.getWidth(180),
+                            child: Image.network(
+                              mediaUrl,
+                              fit: BoxFit.fill,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Handle image loading errors
+                                return Image.network(
+                                    "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png",
+                                    fit: BoxFit.fill);
+                              },
+                            ),
                           ),
-                        ),
-                        Container(
-                          color: Theme.of(context).cardColor,
-                          padding: EdgeInsets.only(
-                            bottom: AppLayout.getHeight(28.5),
-                            left: AppLayout.getWidth(8),
-                            right: AppLayout.getWidth(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Gap(AppLayout.getHeight(8)),
-                              Text(
-                                item['name'] ?? 'No Name',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Gap(AppLayout.getHeight(15)),
-                              IconAndTextWidget(
-                                icon: Icons.location_on,
-                                text: item['locationName'] ?? 'No Location',
-                                size: 15,
-                                iconColor: Colors.black,
-                              ),
-                              Gap(AppLayout.getWidth(15)),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    item['createdDate'] != null
-                                        ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(item['createdDate']))}'
-                                        : 'No Date',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(fontSize: 15),
+                          Container(
+                            color: Theme.of(context).cardColor,
+                            padding: EdgeInsets.only(
+                              bottom: AppLayout.getHeight(28.5),
+                              left: AppLayout.getWidth(8),
+                              right: AppLayout.getWidth(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Gap(AppLayout.getHeight(8)),
+                                Text(
+                                  item['name'] ?? 'No Name',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Gap(AppLayout.getHeight(15)),
+                                IconAndTextWidget(
+                                  icon: Icons.location_on,
+                                  text: item['locationName'] ?? 'No Location',
+                                  size: 15,
+                                  iconColor: Colors.black,
+                                ),
+                                Gap(AppLayout.getWidth(15)),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      item['createdDate'] != null
+                                          ? '${TimeAgoWidget.formatTimeAgo(DateTime.parse(item['createdDate']))}'
+                                          : 'No Date',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(fontSize: 15),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        Container(
-                          child: AppButton(
-                            boxColor: AppColors.secondPrimaryColor,
-                            textButton: "Details",
-                            fontSize: 18,
-                            height: AppLayout.getHeight(30),
-                            width: AppLayout.getWidth(180),
-                            topLeft: 1,
-                            topRight: 1,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ItemsDetails(
-                                      pageId: item['id'], page: "item"),
-                                ),
-                              );
-                            },
+                          Container(
+                            child: AppButton(
+                              boxColor: AppColors.secondPrimaryColor,
+                              textButton: "Details",
+                              fontSize: 18,
+                              height: AppLayout.getHeight(30),
+                              width: AppLayout.getWidth(180),
+                              topLeft: 1,
+                              topRight: 1,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ItemsDetails(
+                                        pageId: item['id'], page: "item"),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            )
-          else if (itemClaimlist.isEmpty && !_isMounted)
-            SizedBox(
-              width: AppLayout.getScreenWidth(),
-              height: AppLayout.getScreenHeight()-200,
-              child: Center(
-                child: Text("You have not claimed any item yet"),
-              ),
-            )
-          else
-            SizedBox(
-              width: AppLayout.getWidth(100),
-              height: AppLayout.getHeight(300),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            )
-        ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              )
+            else if (itemClaimlist.isEmpty && !_isMounted)
+              SizedBox(
+                width: AppLayout.getScreenWidth(),
+                height: AppLayout.getScreenHeight()-200,
+                child: Center(
+                  child: Text("You have not claimed any item yet"),
+                ),
+              )
+            else
+              SizedBox(
+                width: AppLayout.getWidth(100),
+                height: AppLayout.getHeight(300),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
+          ],
+        ),
       ),
     );
   }

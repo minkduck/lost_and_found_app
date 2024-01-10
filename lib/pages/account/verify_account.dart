@@ -458,7 +458,7 @@ class _VerifyAccountState extends State<VerifyAccount> {
                 child: Center(
                   child: AppButton(
                       boxColor: AppColors.primaryColor,
-                      textButton: "Verify",
+                      textButton: "Upload",
                       onTap: () async {
                         try {
                           if (_formKey.currentState!.validate()) {
