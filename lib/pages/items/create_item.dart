@@ -41,6 +41,13 @@ class _CreateItemState extends State<CreateItem> {
   List<dynamic> locationList = [];
   final LocationController locationController = Get.put(LocationController());
 
+  String? validateFoundDate() {
+    if (selectedDate == null) {
+      return 'Please select a date';
+    }
+    return null;
+  }
+
   List<DropdownMenuItem<String>> getSlotItems() {
     return [
       'Before class',
@@ -205,7 +212,13 @@ class _CreateItemState extends State<CreateItem> {
                     ),
                   ),
                 ),
+                if (_formKey.currentState != null && _formKey.currentState!.validate())
+                  Text(
+                    validateFoundDate() ?? '',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 Gap(AppLayout.getHeight(45)),
+
 
                 //slot
                 AppDropdownFieldTitle(
@@ -269,25 +282,29 @@ class _CreateItemState extends State<CreateItem> {
 
                 Center(
                   child: AppButton(
-                      boxColor: AppColors.primaryColor,
-                      textButton: "Continue",
-                      onTap: () {
-                        if (_formKey.currentState!.validate()) {
-                          String foundDate = "$selectedDate|${selectedSlot!}";
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TakePictureScreen(
-                                        title: titleController.text,
-                                        description: descriptionController.text,
-                                        category: selectedCategoryValue!,
-                                        location: selectedLocationValue!,
-                                        foundDate: foundDate,
-                                      )));
-                        }
-                      }),
-                ),
-              ],
+                    boxColor: AppColors.primaryColor,
+                    textButton: "Continue",
+                    onTap: () {
+                      if (_formKey.currentState != null &&
+                          _formKey.currentState!.validate() &&
+                          validateFoundDate() == null) {
+                        String foundDate = "$selectedDate|${selectedSlot!}";
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TakePictureScreen(
+                              title: titleController.text,
+                              description: descriptionController.text,
+                              category: selectedCategoryValue!,
+                              location: selectedLocationValue!,
+                              foundDate: foundDate,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),              ],
             ),
           ),
         ),
