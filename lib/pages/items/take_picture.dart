@@ -127,7 +127,7 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
                   ),
                 ),
                 BigText(
-                  text: "Create Items",
+                  text: "Item",
                   size: 20,
                   color: AppColors.secondPrimaryColor,
                   fontW: FontWeight.w500,

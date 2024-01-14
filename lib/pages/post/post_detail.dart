@@ -47,6 +47,12 @@ class _PostDetailState extends State<PostDetail> {
   String? postLocationNames;
   bool? loadingFinished = false;
 
+  final Map<String, String> flagReasonsMap = {
+    "FALSE_INFORMATION": "False Information",
+    "VIOLATED_USER_POLICIES": "Violated User Policies",
+    "SPAM": "Spam",
+  };
+
   Future<void> postCommentAndReloadComments(String comment) async {
     await CommentController().postCommentByPostId(widget.pageId, comment);
     commentTextController.clear();
@@ -87,7 +93,34 @@ class _PostDetailState extends State<PostDetail> {
     }
   }
 
+  Future<void> toggleCommentFlagStatus(int commentId, Future<void> Function(int, String) action, String reason) async {
+    try {
+      await action(commentId, reason);
 
+      // Manually update the item status based on the isFlagActive field
+      setState(() {
+        postList['isFlagCommentActive'] = !(postList['isFlagCommentActive'] ?? false);
+      });
+    } catch (e) {
+      print('Error toggling item status: $e');
+    }
+  }
+
+  Future<void> flagComment(int commentId, String reason) async {
+    await toggleCommentFlagStatus(commentId, commentController.flagCommentByCommentId, reason);
+  }
+
+  Future<void> loadFlagComment(int commentId) async {
+    final flagComments = await commentController.getCommentFlagByCommentId(commentId);
+    if (_isMounted) {
+      setState(() {
+        final commentToUpdate = postList;
+        if (commentToUpdate != null) {
+          commentToUpdate['isFlagCommentActive'] = flagComments['id'] == commentId && flagComments['isActive'];
+        }
+      });
+    }
+  }
 
   Future<void> bookmarkPost(int postId) async {
     try {
@@ -96,10 +129,12 @@ class _PostDetailState extends State<PostDetail> {
       // Manually update the bookmark status based on the isActive field
       setState(() {
         postList['isActive'] = !(postList['isActive'] ?? false);
-      });    } catch (e) {
+      });
+    } catch (e) {
       print('Error bookmarking post: $e');
     }
   }
+
 
   Future<void> loadBookmarkedPost(int postId) async {
     try {
@@ -228,6 +263,10 @@ class _PostDetailState extends State<PostDetail> {
         }
       });
       await loadFlagPosts(widget.pageId);
+      for (var comment in commentList) {
+        var idComment = comment['id'];
+        await loadFlagComment(idComment);
+          }
       uid = await AppConstrants.getUid();
       loadAndDisplayLocationNames(postList);
       loadAndDisplayCategoryNames(postList);
@@ -253,9 +292,9 @@ class _PostDetailState extends State<PostDetail> {
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(12.0),                child: SingleChildScrollView(
-
-      child: postList.isNotEmpty && loadingFinished! ? Column(
+                padding: EdgeInsets.all(12.0),
+                child: SingleChildScrollView(
+                  child: postList.isNotEmpty && loadingFinished! ? Column(
                   children: [
                     Gap(AppLayout.getHeight(50)),
                     Row(
@@ -741,7 +780,80 @@ class _PostDetailState extends State<PostDetail> {
                                               child: Text("Delete", style: TextStyle(fontSize: 15,color: Colors.redAccent),),
                                             ),
                                           ],
-                                        ) : Container()
+                                        ) : Row(
+                                          children: [
+                                            IconButton(
+                                              icon: postList['isFlagCommentActive'] ?? false
+                                                  ? Icon(Icons.flag, color: Theme.of(context).iconTheme.color, size: 30,)
+                                                  : Icon(Icons.flag_outlined, color: Theme.of(context).iconTheme.color, size: 30,),
+                                              onPressed: () {
+                                                String? selectedReason;
+
+                                                if (postList['isFlagCommentActive'] ?? false) {
+                                                  flagComment(commentList[index]['id'], "FALSE_INFORMATION");
+                                                  return;
+                                                }
+
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: Text("Why are you flagging this comment?"),
+                                                      content: StatefulBuilder(
+                                                        builder: (BuildContext context, StateSetter setState) {
+                                                          return Column(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              DropdownButton<String>(
+                                                                value: selectedReason,
+                                                                items: flagReasonsMap.keys.map((String value) {
+                                                                  return DropdownMenuItem<String>(
+                                                                    value: value,
+                                                                    child: Text(flagReasonsMap[value]!),
+                                                                  );
+                                                                }).toList(),
+                                                                onChanged: (String? newValue) {
+                                                                  setState(() {
+                                                                    selectedReason = newValue;
+                                                                  });
+                                                                },
+                                                                hint: Text("Select Reason"),
+                                                                isExpanded: true,
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(context); // Cancel button pressed
+                                                          },
+                                                          child: Text("Cancel"),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            if (selectedReason != null) {
+                                                              Navigator.pop(context); // Close the dialog
+
+                                                              // Provide the selected reason to the flagItem function
+                                                              flagComment(commentList[index]['id'], selectedReason!);
+                                                            } else {
+                                                              // Show a message if no reason is selected
+                                                              // You can replace this with a Snackbar or any other UI feedback
+                                                              SnackbarUtils().showError(title: "", message: "You must select a reason");
+                                                            }
+                                                          },
+                                                          child: Text("Flag"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                            )
+                                          ],
+                                        )
                                       ],
                                     ),
                                   ],

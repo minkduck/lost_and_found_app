@@ -67,6 +67,9 @@ class AppConstrants{
   static const String GETCOMMENTBYPOSTBID_URL = "$BASE_URL/api/comments/get-by-post/";
   static const String POSTCOMMENTREPLYBYPOSTID_URL = "$BASE_URL/api/comments/reply-post/";
   static const String PUTCOMMENTBYPOSTID_URL = "$BASE_URL/api/comments/";
+  static const String POSTFLAGCOMMENTBYCOMMENTID_URL = "$BASE_URL/api/comments/flag-a-comment/";
+  static const String GETCOMMENTFLAGBYUSERID_URL = "$BASE_URL/api/comments/get-comment-flag?userId=";
+
 
   //user
   static const String GETUSERBYUID_URL = "$BASE_URL/api/users/";
