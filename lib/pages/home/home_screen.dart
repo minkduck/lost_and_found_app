@@ -175,7 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return filteredByText;
   }
 
-
   Future<void> toggleItemBookmarkStatus(int itemId, Future<void> Function(int) action) async {
     try {
       await action(itemId);
@@ -320,10 +319,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _isMounted = true;
     myItemsLoading = true;
     itemsLoading = true;
-
-    setState(() {
-      firstLoged();
-    });
     Future.delayed(Duration(seconds: 1), () async {
       uid = await AppConstrants.getUid();
       await itemController.getItemList().then((result) {
@@ -383,10 +378,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
           });
         }
-      });
-
-      setState(() {
-        loadingFinished = true;
       });
     });
   }
@@ -490,7 +481,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ],
-                ),                Gap(AppLayout.getHeight(10)),
+                ),
+                Gap(AppLayout.getHeight(10)),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SingleChildScrollView(
