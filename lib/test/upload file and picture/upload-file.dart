@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../utils/colors.dart';
 
 class UploadFile extends StatefulWidget {
-  const UploadFile({Key? key, required this.title});
+  const UploadFile({Key? key, required this.title}) : super(key: key);
 
   final String title;
 

@@ -136,8 +136,8 @@ class _CreatePostState extends State<CreatePost> {
       await PostController().createPost(
         titleController.text,
         postContentController.text,
-        selectedCategoriesString!,
         selectedLocationsString!,
+        selectedCategoriesString!,
         lostDateFrom != null ? lostDateFrom!.toLocal().toString() : null,
         lostDateTo != null ? lostDateTo!.toLocal().toString() : null,
         compressedImagePaths,
@@ -303,6 +303,7 @@ class _CreatePostState extends State<CreatePost> {
                         selectedCategories = values;
                         // Update selectedCategoriesString with the correct format
                         selectedCategoriesString = '|${values.join("|")}|';
+                        print("selectedCategoriesString: "+ selectedCategoriesString.toString());
                       });
                     } else {
                       // Automatically remove excess categories
@@ -587,7 +588,9 @@ class _CreatePostState extends State<CreatePost> {
                                 // code here
                                 List<String> imagePaths = imageFileList!.map((image) => image.path).toList();
                                 print(titleController.text + '-' + postContentController.text + lostDateFrom.toString() + lostDateTo.toString() +
-                                    '-' + selectedCategoriesString! + '-' + selectedLocationsString! + '-' + imagePaths.toString());
+                                    '-' +
+                                    'selectedCategoriesString' + selectedCategoriesString! + '-' +
+                                    'selectedLocationsString' + selectedLocationsString! + '-' + imagePaths.toString());
                                 // await PostController().createPost(
                                 //   titleController.text,
                                 //   postContentController.text,

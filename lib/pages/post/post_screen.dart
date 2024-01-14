@@ -22,7 +22,7 @@ import '../../widgets/big_text.dart';
 import '../../widgets/custom_search_bar.dart';
 
 class PostScreen extends StatefulWidget {
-  const PostScreen({Key? key});
+  const PostScreen({Key? key}) : super(key: key);
 
   @override
   State<PostScreen> createState() => _PostScreenState();
@@ -390,80 +390,90 @@ class _PostScreenState extends State<PostScreen> {
     }
   }
 
+  Future<void> fetchData() async {
+    try {
+    uid = await AppConstrants.getUid();
+    await postController.getPostList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          postList = result;
+          postList.removeWhere((post) => post['postStatus'] == 'DISABLED');
+          setState(() {
+            postList = result;
+            Future.forEach(postList, (post) async {
+              final postIdForBookmark = post['id'];
+              print(postIdForBookmark);
+              await loadBookmarkedPosts(postIdForBookmark);
+            });
+            Future.forEach(postList, (post) async {
+              final postIdForFlag = post['id'];
+              await loadFlagPosts(postIdForFlag);
+            });
+
+          });
+        });
+      }
+    });
+    await postController.getPostByUidList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          mypostList = result;
+          myPostLoading = false;
+          mypostList.removeWhere((post) => post['postStatus'] == 'DISABLED');
+          setState(() {
+            mypostList = result;
+          });
+        });
+      }
+    });
+    await categoryController.getCategoryList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          categoryList = result;
+        });
+      }
+    });
+    for (var post in postList) {
+      var idPost = post['id'];
+      final commentResult = await commentController.getCommentByPostId(idPost);
+      if (_isMounted) {
+        setState(() {
+          commentList.removeWhere((comment) => comment['postId'] == idPost);
+          commentList.addAll(commentResult);
+        });
+      }
+    }
+    for (var post in mypostList) {
+      var idPost = post['id'];
+      final commentResult = await commentController.getCommentByPostId(idPost);
+      if (_isMounted) {
+        setState(() {
+          commentMyList.removeWhere((comment) => comment['postId'] == idPost);
+          commentMyList.addAll(commentResult);
+        });
+      }
+    }
+    await categoryController.getCategoryGroupList().then((result) {
+      if (_isMounted) {
+        setState(() {
+          categoryGroupList = result;
+        });
+      }
+    });
+    print('hi');
+    } catch (error) {
+      // Handle errors, e.g., show an error message
+      print('Error fetching data: $error');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _isMounted = true;
     myPostLoading = true;
     Future.delayed(Duration(seconds: 1), () async {
-      uid = await AppConstrants.getUid();
-      await postController.getPostList().then((result) {
-        if (_isMounted) {
-          setState(() {
-            postList = result;
-            postList.removeWhere((post) => post['postStatus'] == 'DISABLED');
-            setState(() {
-              postList = result;
-              Future.forEach(postList, (post) async {
-                final postIdForBookmark = post['id'];
-                print(postIdForBookmark);
-                await loadBookmarkedPosts(postIdForBookmark);
-              });
-              Future.forEach(postList, (post) async {
-                final postIdForFlag = post['id'];
-                await loadFlagPosts(postIdForFlag);
-              });
-
-            });
-          });
-        }
-      });
-      await postController.getPostByUidList().then((result) {
-        if (_isMounted) {
-          setState(() {
-            mypostList = result;
-            myPostLoading = false;
-            mypostList.removeWhere((post) => post['postStatus'] == 'DISABLED');
-            setState(() {
-              mypostList = result;
-            });
-          });
-        }
-      });
-      await categoryController.getCategoryList().then((result) {
-        if (_isMounted) {
-          setState(() {
-            categoryList = result;
-          });
-        }
-      });
-      for (var post in postList) {
-        var idPost = post['id'];
-        final commentResult = await commentController.getCommentByPostId(idPost);
-        if (_isMounted) {
-          setState(() {
-            commentList.removeWhere((comment) => comment['postId'] == idPost);
-            commentList.addAll(commentResult);
-          });
-        }
-      }
-      for (var post in mypostList) {
-        var idPost = post['id'];
-        final commentResult = await commentController.getCommentByPostId(idPost);
-        if (_isMounted) {
-          setState(() {
-            commentMyList.removeWhere((comment) => comment['postId'] == idPost);
-            commentMyList.addAll(commentResult);
-          });
-        }
-      }
-      await categoryController.getCategoryGroupList().then((result) {
-        if (_isMounted) {
-          setState(() {
-            categoryGroupList = result;
-          });
-        }
-      });
+      fetchData();
     });
 
   }
@@ -479,6 +489,7 @@ class _PostScreenState extends State<PostScreen> {
   Widget build(BuildContext context) {
     final List<dynamic> filteredPost = filterPostsByCategories();
     final List<dynamic> filteredMyPost = filterMyPostsByCategories();
+    print('hi 1');
 
     return Scaffold(
       body: RefreshIndicator(
@@ -624,11 +635,12 @@ class _PostScreenState extends State<PostScreen> {
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: filteredPost.length,
                       itemBuilder: (BuildContext context, int index) {
+                        print('hi 2');
 
                         final post = filteredPost[index];
                         final locationList = loadAndDisplayLocationNames(post);
                         loadAndDisplayCategoryNames(post);
-                        // print("locationList: " + locationList.toString());
+                        print("locationList: " + locationList.toString());
                         return GestureDetector(
                             onTap: () {
                               Navigator.of(context).push(
@@ -924,6 +936,7 @@ class _PostScreenState extends State<PostScreen> {
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: filteredMyPost.length,
                       itemBuilder: (BuildContext context, int index) {
+                        print('hi 3');
 
                         final post = filteredMyPost[index];
                         loadAndDisplayLocationNames(post);

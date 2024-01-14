@@ -46,7 +46,7 @@ class ReportController extends GetxController{
         print('create report success');
         Get.toNamed(RouteHelper.getInitial(0));
         print(await response.stream.bytesToString());
-        SnackbarUtils().showSuccess(title: "Success", message: "Create new report successfully");
+        SnackbarUtils().showSuccess(title: "Success", message: "Create report successfully");
       }
       else {
         print(response.reasonPhrase);

@@ -197,13 +197,15 @@ class PostController extends GetxController{
 
       request.headers.addAll(headers);
 
+      print(" request.fields: "+  request.fields.toString());
+
       http.StreamedResponse response = await request.send();
 
       if (response.statusCode == 201) {
         print('create post success');
         Get.toNamed(RouteHelper.getInitial(1));
         print(await response.stream.bytesToString());
-        SnackbarUtils().showSuccess(title: "Success", message: "Create new post successfully");
+        SnackbarUtils().showSuccess(title: "Success", message: "Create post successfully");
       }
       else {
         print(response.reasonPhrase);
@@ -401,7 +403,6 @@ class PostController extends GetxController{
       final responseBody = await response.stream.bytesToString();
       final jsonResponse = json.decode(responseBody);
       print(responseBody);
-      print('200');
       final resultList = jsonResponse['result'];
       update();
       return resultList;

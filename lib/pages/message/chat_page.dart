@@ -130,17 +130,23 @@ class _ChatPageState extends State<ChatPage> {
               backgroundImage: NetworkImage(widget.chat.image),
             ),
             Gap(AppLayout.getWidth(20) * 0.75),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.chat.name,
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            )
+            Expanded(
+              flex: 2, // Adjust the flex values as needed
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.chat.name,
+                    style: TextStyle(fontSize: 16),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
+
       ),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: ChatController().getChatDataStream(widget.chat.chatId),
