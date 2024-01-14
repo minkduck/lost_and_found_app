@@ -256,7 +256,7 @@ class PostController extends GetxController{
     } else {
       print(response.statusCode);
       print(response.reasonPhrase);
-      throw Exception('Failed to delete getItemList');
+      throw Exception('Failed to update PostById');
     }
   }
 
