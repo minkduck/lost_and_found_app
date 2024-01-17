@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
+import 'package:lost_and_find_app/data/api/report/report_controller.dart';
 
 import '../../data/api/item/item_controller.dart';
 import '../../data/api/message/Chat.dart';
@@ -11,6 +12,7 @@ import '../../data/api/message/chat_controller.dart';
 import '../../utils/app_constraints.dart';
 import '../../utils/app_layout.dart';
 import '../../utils/colors.dart';
+import '../../utils/snackbar_utils.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/icon_and_text_widget.dart';
@@ -43,11 +45,106 @@ class _ItemDetailsReturnState extends State<ItemDetailsReturn> {
   bool isItemClaimed = false;
   int itemId = 0;
   bool loadingAll = false;
+  int? reportItemCount;
+  int? reportTodayCount;
+  List<dynamic> reportlist = [];
 
   Map<String, dynamic> itemlist = {};
   final ItemController itemController = Get.put(ItemController());
-  Future<void> _refreshData() async {
+  final ReportController reportController = Get.put(ReportController());
 
+  int countReportsToday(List<dynamic> reportItemList) {
+    // Get today's date
+    DateTime today = DateTime.now();
+
+    // Format today's date in the same format as 'createdDate'
+    String formattedToday = DateFormat("yyyy-MM-dd").format(today);
+
+    // Initialize report count
+    int reportCount = 0;
+
+    // Iterate through reportItemList
+    for (var report in reportItemList) {
+      // Extract the date part from 'createdDate'
+      String createdDate = report['createdDate'].split('T')[0];
+
+      // Check if the 'createdDate' matches today's date
+      if (createdDate == formattedToday) {
+        reportCount++;
+      }
+    }
+
+    return reportCount;
+  }
+
+  Future<void> _refreshData() async {
+    _pageController.addListener(() {
+      setState(() {
+        currentPage = _pageController.page ?? 0;
+      });
+    });
+    itemId = widget.pageId;
+    _isMounted = true;
+    Future.delayed(Duration(seconds: 1), () async {
+      uid = await AppConstrants.getUid();
+      reportTodayCount = await AppConstrants.getReportCount();
+      await reportController.getReportByItemIdAndUserId(widget.pageId).then((result) {
+        if (_isMounted) {
+          setState(() {
+            reportItemCount = result.length;
+          });
+        }
+      });
+      await itemController.getItemListById(widget.pageId).then((result) {
+        if (_isMounted) {
+          setState(() {
+            itemlist = result;
+            if (itemlist != null) {
+              var itemMedias = itemlist['itemMedias'];
+
+              if (itemMedias != null && itemMedias is List) {
+                List mediaList = itemMedias;
+
+                for (var media in mediaList) {
+                  String imageUrl = media['media']['url'];
+                  imageUrls.add(imageUrl);
+                }
+              }
+              if (itemlist['foundDate'] != null) {
+                String foundDate = itemlist['foundDate'];
+                if (foundDate.contains('|')) {
+                  List<String> dateParts = foundDate.split('|');
+                  if (dateParts.length == 2) {
+                    String date = dateParts[0].trim();
+                    String slot = dateParts[1].trim();
+
+                    // Check if the date format needs to be modified
+                    if (date.contains(' ')) {
+                      // If it contains time, remove the time part
+                      date = date.split(' ')[0];
+                    }
+
+                    // Parse the original date
+                    DateFormat originalDateFormat = DateFormat("yyyy-MM-dd");
+                    DateTime originalDate = originalDateFormat.parse(date);
+
+                    // Format the date in the desired format
+                    DateFormat desiredDateFormat = DateFormat("dd-MM-yyyy");
+                    String formattedDate = desiredDateFormat.format(originalDate);
+
+                    // Update the foundDate in the itemlist
+                    itemlist['foundDate'] = '$formattedDate $slot';
+                  }
+                }
+              }
+            }
+          });
+        }
+      });
+      setState(() {
+        loadingAll = true;
+      });
+    });
   }
 
   @override
@@ -62,6 +159,23 @@ class _ItemDetailsReturnState extends State<ItemDetailsReturn> {
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
       uid = await AppConstrants.getUid();
+      await reportController.getReportById().then((result) {
+        if (_isMounted) {
+          setState(() {
+            reportlist = result;
+            reportTodayCount = countReportsToday(reportlist);
+            print("reportTodayCount: $reportTodayCount");
+          });
+        }
+      });
+      await reportController.getReportByItemIdAndUserId(widget.pageId).then((result) {
+        if (_isMounted) {
+          setState(() {
+            reportItemCount = result.length;
+            print("reportItemCount: $reportItemCount");
+          });
+        }
+      });
       await itemController.getItemListById(widget.pageId).then((result) {
         if (_isMounted) {
           setState(() {
@@ -327,14 +441,22 @@ class _ItemDetailsReturnState extends State<ItemDetailsReturn> {
                 Gap(AppLayout.getHeight(20)),
                 itemlist['user']['id'] == uid ? Container() : Center(
                     child: AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Send Report", onTap: () async {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              CreateReport(itemId: itemId,),
-                        ),
-                      );
-                      
+                      if(reportTodayCount! < 3) {
+                        if (reportItemCount! < 3) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  CreateReport(itemId: itemId,),
+                            ),
+                          );
+
+                        } else {
+                          SnackbarUtils().showError(title: "Report", message: "You have already created 3 reports for this item");
+                        }
+                      } else {
+                        SnackbarUtils().showError(title: "Report", message: "You can only created 3 reports per day!");
+                      }
                     })),
               ],
             )

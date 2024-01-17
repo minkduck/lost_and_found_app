@@ -164,5 +164,31 @@ class ClaimController extends GetxController{
     }
 
   }
+  Future<void> revokeClaimByItemIdAndUserId(int itemId, String userId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(AppConstrants.POSTREVOKEDENYCLAIMBYITEMIDANDUSERID_URL));
+    request.fields.addAll({
+      'UserId': userId,
+      'ItemId': itemId.toString(),
+    });
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 204) {
+      print(await response.stream.bytesToString());
+      SnackbarUtils().showSuccess(title: "Success", message: "Rovoke claim successfully");
+    }
+    else {
+      print(response.reasonPhrase);
+      print(response.statusCode);
+      throw Exception('Failed to Deny claim');
+    }
+
+  }
 
 }

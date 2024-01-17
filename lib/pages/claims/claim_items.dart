@@ -114,7 +114,7 @@ class _ClaimItemsState extends State<ClaimItems> {
               final claim = userClaimInfo['claim'];
               final user = userClaimInfo['user'];
               // print("user:" + user);
-              return claim['claimStatus'] != "DENIED" ? Container(
+              return  Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: Theme.of(context).cardColor,
@@ -190,24 +190,8 @@ class _ClaimItemsState extends State<ClaimItems> {
                           ),
                         ),
                         Gap(AppLayout.getWidth(5)),
-                        GestureDetector(
+                        claim['claimStatus'] != "DENIED" ? GestureDetector(
                           onTap: () async {
-                            // await claimController.accpectClaimByItemIdAndUserId(widget.pageId, claim['userId']);
-                            // final updatedClaims = await claimController.getListClaimByItemId(widget.pageId);
-                            // final updatedUserClaimList = <Map<String, dynamic>>[];
-                            // for (var claim in updatedClaims) {
-                            //   final userId = claim['userId'];
-                            //   final userMap = await userController.getUserByUserId(userId);
-                            //   updatedUserClaimList.add({
-                            //     'claim': claim,
-                            //     'user': userMap != null ? userMap : null,
-                            //   });
-                            // }
-                            //
-                            // setState(() {
-                            //   userClaimList = updatedUserClaimList;
-                            // });
-
                             Future.delayed(Duration(seconds: 2), () {
                               Navigator.push(
                                 context,
@@ -223,18 +207,18 @@ class _ClaimItemsState extends State<ClaimItems> {
                           child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppColors.primaryColor, // Set the desired color for the circular border
+                              color: AppColors.primaryColor,
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(8.0), // Adjust the padding as needed
-                              child: Icon(FontAwesomeIcons.check, color: Colors.white), // You can set the color of the main icon
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(FontAwesomeIcons.check, color: Colors.white),
                             ),
                           ),
 
-                        ),
+                        ) : Container(),
 
                         Gap(AppLayout.getWidth(5)),
-                        GestureDetector(
+                        claim['claimStatus'] != "DENIED" ? GestureDetector(
                           onTap: () async {
                             await claimController.denyClaimByItemIdAndUserId(widget.pageId, claim['userId']);
                             final updatedClaims = await claimController.getListClaimByItemId(widget.pageId);
@@ -250,6 +234,7 @@ class _ClaimItemsState extends State<ClaimItems> {
 
                             setState(() {
                               userClaimList = updatedUserClaimList;
+                              claim['claimStatus'];
                             });
 
 
@@ -264,13 +249,44 @@ class _ClaimItemsState extends State<ClaimItems> {
                               child: Icon(FontAwesomeIcons.xmark, color: Colors.white),
                             ),
                           ),
-                        )
+                        ) : GestureDetector(
+                          onTap: () async {
+                            await claimController.revokeClaimByItemIdAndUserId(widget.pageId, claim['userId']);
+                            final updatedClaims = await claimController.getListClaimByItemId(widget.pageId);
+                            final updatedUserClaimList = <Map<String, dynamic>>[];
+                            for (var claim in updatedClaims) {
+                              final userId = claim['userId'];
+                              final userMap = await userController.getUserByUserId(userId);
+                              updatedUserClaimList.add({
+                                'claim': claim,
+                                'user': userMap != null ? userMap : null,
+                              });
+                            }
+
+                            setState(() {
+                              userClaimList = updatedUserClaimList;
+                              claim['claimStatus'];
+                            });
+
+
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.redAccent,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(Icons.change_circle_outlined, color: Colors.white),
+                            ),
+                          ),
+                        ),
                       ],
                     )
 
                   ],
                 ),
-              ) : Container();
+              );
             },
           )
           else if (userClaimList.isEmpty && !_isMounted)

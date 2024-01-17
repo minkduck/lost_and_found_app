@@ -24,6 +24,15 @@ class AppConstrants{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('campusId') ?? '';
   }
+  static Future<int> getClaimItemCount() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('claimItemCount') ?? 0;
+  }
+  static Future<int> getReportCount() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('reportCount') ?? 0;
+  }
+
 
   static const String APP_NAME = "Lost&Find";
   static const int APP_VERSION = 1;
@@ -86,6 +95,7 @@ class AppConstrants{
   static const String GETLISTFOUNDERUSER_URL = "$BASE_URL/api/items/claims/founder/item/";
   static const String POSTDENYCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/deny";
   static const String POSTACCPECTCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/accept";
+  static const String POSTREVOKEDENYCLAIMBYITEMIDANDUSERID_URL = "$BASE_URL/api/items/revoke-deny";
 
   //receipt
   static const String POSTRECEIPT_URL = "$BASE_URL/api/items/accept-with-receipt";
@@ -114,10 +124,12 @@ class AppConstrants{
   //giveaway
   static const String GETGIVEAWAYSTATUS_URL = "$BASE_URL/api/giveaways/query-with-status?GiveawayStatus=";
   static const String GETALLGIVEAWAY_URL = "$BASE_URL/api/giveaways";
+  static const String GETGIVEAWAYBYID_URL = "$BASE_URL/api/giveaways/";
   static const String POSTPARTICIPATEGIVEAWAY_URL = "$BASE_URL/api/giveaways/participate-in-a-giveaway/";
 
   //report
   static const String POSTCREATEREPORT_URL = "$BASE_URL/api/reports";
   static const String GETREPORTBYUSERID_URL = "$BASE_URL/api/reports/get-by-user/";
+  static const String GETREPORTBYUSERIDANDITEMID_URL = "$BASE_URL/api/reports/get-by-user-and-item?userId=";
 
 }

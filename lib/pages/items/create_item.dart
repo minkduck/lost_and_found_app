@@ -50,14 +50,14 @@ class _CreateItemState extends State<CreateItem> {
 
   List<DropdownMenuItem<String>> getSlotItems() {
     return [
-      'Before class',
+      'Before Class',
       'Slot 1',
       'Slot 2',
+      'Lunch Break',
       'Slot 3',
       'Slot 4',
       'Slot 5',
       'Slot 6',
-      'After class',
       'All day',
     ].map((String slot) {
       return DropdownMenuItem<String>(
@@ -212,11 +212,7 @@ class _CreateItemState extends State<CreateItem> {
                     ),
                   ),
                 ),
-                if (_formKey.currentState != null && _formKey.currentState!.validate())
-                  Text(
-                    validateFoundDate() ?? '',
-                    style: TextStyle(color: Colors.red),
-                  ),
+
                 Gap(AppLayout.getHeight(45)),
 
 

@@ -56,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _isMounted = false;
   String? firstLogin = '';
+  late String verifyStatus = "";
 
   String? getUrlFromItem(Map<String, dynamic> item) {
     if (item.containsKey('itemMedias')) {
@@ -263,6 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refreshData() async {
     _isMounted = true;
+    verifyStatus = await AppConstrants.getVerifyStatus();
     uid = await AppConstrants.getUid();
     await itemController.getItemList().then((result) async {
       if (_isMounted) {
@@ -320,12 +322,15 @@ class _HomeScreenState extends State<HomeScreen> {
     myItemsLoading = true;
     itemsLoading = true;
     Future.delayed(Duration(seconds: 1), () async {
+      verifyStatus = await AppConstrants.getVerifyStatus();
+
       uid = await AppConstrants.getUid();
       await itemController.getItemList().then((result) {
         if (_isMounted) {
           setState(() {
             itemlist = result;
             itemsLoading = false;
+            itemlist.removeWhere((item) => item['itemStatus'] == 'DELETED');
 
             Future.forEach(itemlist, (item) async {
               final itemIdForBookmark = item['id'];
@@ -351,6 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             myItemlist = result;
             myItemsLoading = false;
+            myItemlist.removeWhere((item) => item['itemStatus'] == 'DELETED');
 
             Future.forEach(myItemlist, (item) async {
               final itemIdForBookmark = item['id'];
@@ -579,7 +585,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   mainAxisSpacing: AppLayout.getHeight(20),
                                 ),
                                 itemCount: filteredItems.length,
-                                itemBuilder: (context, index) {
+                                itemBuilder: (BuildContext builderContext, index) {
                                   final item = filteredItems[index];
                                   final mediaUrl = getUrlFromItem(item) ??
                                       "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png";
@@ -635,7 +641,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                         Container(
-                                          color: Theme.of(context).cardColor,
+                                          color: Theme.of(builderContext).cardColor,
                                           padding: EdgeInsets.only(
                                             bottom: AppLayout.getHeight(28.5),
                                             left: AppLayout.getWidth(8),
@@ -840,7 +846,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisSpacing: AppLayout.getHeight(20),
                       ),
                       itemCount: filteredMyItems.length,
-                      itemBuilder: (context, index) {
+                      itemBuilder: (BuildContext builderContext, index) {
                         final item = filteredMyItems[index];
                         final mediaUrl = getUrlFromItem(item) ??
                             "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg";
@@ -896,7 +902,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               Container(
-                                color: Theme.of(context).cardColor,
+                                color: Theme.of(builderContext).cardColor,
                                 padding: EdgeInsets.only(
                                   bottom: AppLayout.getHeight(28.5),
                                   left: AppLayout.getWidth(8),
@@ -1026,7 +1032,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisSpacing: AppLayout.getHeight(20),
                         ),
                         itemCount: filteredReturnItems.length,
-                        itemBuilder: (context, index) {
+                        itemBuilder: (BuildContext builderContext, index) {
                           final item = filteredReturnItems[index];
                           final mediaUrl = getUrlFromItem(item) ??
                               "https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg";
@@ -1082,7 +1088,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 Container(
-                                  color: Theme.of(context).cardColor,
+                                  color: Theme.of(builderContext).cardColor,
                                   padding: EdgeInsets.only(
                                     bottom: AppLayout.getHeight(28.5),
                                     left: AppLayout.getWidth(8),
@@ -1188,7 +1194,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: verifyStatus == 'VERIFIED'? FloatingActionButton(
         onPressed: () {
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => CreateItem()));
@@ -1196,7 +1202,7 @@ class _HomeScreenState extends State<HomeScreen> {
         tooltip: 'Create Items',
         backgroundColor: AppColors.primaryColor,
         child: const Icon(Icons.add),
-      ),
+      ) : Container(),
     );
   }
 }

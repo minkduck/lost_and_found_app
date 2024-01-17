@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:lost_and_find_app/data/api/category/category_controller.dart';
 import 'package:lost_and_find_app/data/api/item/item_controller.dart';
 import 'package:lost_and_find_app/data/api/location/location_controller.dart';
@@ -19,7 +20,8 @@ class EditItem extends StatefulWidget {
   final String initialTitle;
   final String initialDescription;
   final String initialLocation;
-  final String foundDate;
+  final String slot;
+  final DateTime date;
   final String status;
 
   const EditItem({
@@ -29,7 +31,8 @@ class EditItem extends StatefulWidget {
     required this.initialTitle,
     required this.initialDescription,
     required this.initialLocation,
-    required this.foundDate,
+    required this.slot,
+    required this.date,
     required this.status
   }) : super(key: key);
 
@@ -74,14 +77,14 @@ class _EditItemState extends State<EditItem> {
 
   List<DropdownMenuItem<String>> getSlotItems() {
     return [
-      'Before class',
+      'Before Class',
       'Slot 1',
       'Slot 2',
+      'Lunch Break',
       'Slot 3',
       'Slot 4',
       'Slot 5',
       'Slot 6',
-      'After class',
       'All day',
     ].map((String slot) {
       return DropdownMenuItem<String>(
@@ -114,17 +117,8 @@ class _EditItemState extends State<EditItem> {
     _isMounted = true;
     titleController.text = widget.initialTitle;
     descriptionController.text = widget.initialDescription;
-
-    if (widget.foundDate != null) {
-      String foundDate = widget.foundDate;
-      List<String> dateParts = foundDate.split('|');
-      if (dateParts.length == 2) {
-        String date = dateParts[0].trim();
-        String slot = dateParts[1].trim();
-        selectedDate = DateTime.parse(date);
-        selectedSlot = slot;
-      }
-    }
+    selectedDate = widget.date;
+    selectedSlot = widget.slot;
     categoryController.getCategoryList().then((result) {
       if (_isMounted) {
         setState(() {

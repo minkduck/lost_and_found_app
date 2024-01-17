@@ -7,10 +7,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:lost_and_find_app/data/api/report/report_controller.dart';
 import 'package:lost_and_find_app/utils/app_constraints.dart';
 import 'package:lost_and_find_app/utils/snackbar_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../item/claim_controller.dart';
 import '../message/chat_controller.dart';
 import '../user/user_controller.dart';
 
@@ -38,6 +41,12 @@ class GoogleSignInProvider extends ChangeNotifier {
   late String accessToken = "";
   Stream? members;
   Map<String, dynamic> userList = {};
+  List<dynamic> claimItemList = [];
+  List<dynamic> reportItemList = [];
+
+  final ClaimController claimController = Get.put(ClaimController());
+  final ReportController reportController = Get.put(ReportController());
+
   final UserController userController= Get.put(UserController());
   Function? onCampusMismatch;
   User? getUser() {
@@ -107,7 +116,6 @@ class GoogleSignInProvider extends ChangeNotifier {
     }
   }
 
-
   Future googleLogin(String campusId) async {
     await Firebase.initializeApp();
 
@@ -156,25 +164,28 @@ class GoogleSignInProvider extends ChangeNotifier {
         if (response.statusCode == 200) {
           print(await response.stream.bytesToString());
           print('login api success');
-          SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
           final user = await FirebaseAuth.instance.currentUser!;
           final idTokenUser = await user.getIdToken();
           print("id Token User: " + idTokenUser.toString());
           print(idTokenUser?.substring(0, 1000));
           print(idTokenUser?.substring(1000));
           userList = await userController.getUserLoginByUserId(uid, idTokenUser!);
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('verifyStatus', userList['verifyStatus'].toString());
-          await prefs.setString('campusId', userList['campus']['id'].toString());
-          await prefs.setString('access_token', idTokenUser.toString());
-          await prefs.setString('uid', uid);
-          await postAuthen();
-/*          ChatController(uid: FirebaseAuth.instance.currentUser!.uid)
-              .gettingUserChats()
-              .then((val) {
-            members = val;
-          });
-          print("sn " + members.toString());*/
+          if (!userList['isActive']){
+            logout();
+            SnackbarUtils().showError(title: "Campus", message: 'You are banned from this system.');
+          } else {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('verifyStatus', userList['verifyStatus'].toString());
+            await prefs.setString('campusId', userList['campus']['id'].toString());
+            await prefs.setString('access_token', idTokenUser.toString());
+            await prefs.setString('uid', uid);
+            await postAuthen();
+            claimItemList = await claimController.getItemClaimByUidList();
+            await prefs.setInt('claimItemCount', claimItemList.length);
+            print('claimItemCount: ' + claimItemList.length.toString());
+            SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
+          }
+
         } else if (response.statusCode == 403) {
           logout();
           SnackbarUtils().showError(title: "Campus", message: 'You have logged in to the wrong campus.');

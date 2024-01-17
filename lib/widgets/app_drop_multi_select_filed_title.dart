@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lost_and_find_app/utils/colors.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 import '../utils/app_layout.dart';
@@ -63,6 +64,15 @@ class AppDropdownMultiSelectFieldTitle extends StatelessWidget {
               items: items,
               initialValue: selectedValues,
               listType: MultiSelectListType.CHIP,
+              selectedColor: AppColors.primaryColor,
+              selectedItemsTextStyle: TextStyle(color: Colors.white),
+              buttonText: Text(
+                hintText,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                ),
+              ),
               onConfirm: (values) {
                 onChanged(values);
               },
@@ -70,6 +80,8 @@ class AppDropdownMultiSelectFieldTitle extends StatelessWidget {
                 onTap: (value) {
                   onChanged([...selectedValues]..remove(value));
                 },
+                chipColor: AppColors.primaryColor,
+                textStyle: TextStyle(color: Colors.white),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {

@@ -292,7 +292,7 @@ class _AnotherProfileUserState extends State<AnotherProfileUser> {
           setState(() {
             postList = result;
             postsLoading = true;
-            postList.removeWhere((post) => post['postStatus'] == 'DISABLED');
+            postList.removeWhere((post) => post['postStatus'] == 'DELETED');
             setState(() {
               postList = result;
               Future.forEach(postList, (post) async {

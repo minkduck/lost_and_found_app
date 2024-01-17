@@ -14,6 +14,7 @@ import 'package:lost_and_find_app/widgets/small_text.dart';
 import 'package:lost_and_find_app/widgets/status_widget.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/api/item/claim_controller.dart';
 import '../../data/api/item/item_controller.dart';
@@ -56,6 +57,9 @@ class _ItemsDetailsState extends State<ItemsDetails> {
   int itemId = 0;
   bool loadingAll = false;
   late String verifyStatus = "";
+  bool isDeleteItem = false;
+  int? claimItemCount;
+  List<dynamic> claimItemList = [];
 
   Map<String, dynamic> itemlist = {};
   final ItemController itemController = Get.put(ItemController());
@@ -67,10 +71,19 @@ class _ItemsDetailsState extends State<ItemsDetails> {
   List<dynamic> recepitList = [];
   Future<void> claimItem() async {
     try {
-      await claimController.postClaimByItemId(itemId);
-      setState(() {
-        isItemClaimed = true;
-      });
+      claimItemCount = await AppConstrants.getClaimItemCount();
+      if (claimItemCount! < 5 ){
+        await claimController.postClaimByItemId(itemId);
+        setState(() {
+          isItemClaimed = true;
+        });
+        claimItemList = await claimController.getItemClaimByUidList();
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('claimItemCount', claimItemList.length);
+      } else {
+        SnackbarUtils().showError(title: "Claim", message: "You can only have 5 active Claims at a time! Unclaim some to proceed");
+      }
+
     } catch (e) {
       print('Error claiming item: $e');
     }
@@ -83,6 +96,9 @@ class _ItemsDetailsState extends State<ItemsDetails> {
       setState(() {
         isItemClaimed = false;
       });
+      claimItemList = await claimController.getItemClaimByUidList();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('claimItemCount', claimItemList.length);
     } catch (e) {
       print('Error unclaiming item: $e');
     }
@@ -191,7 +207,11 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                   String formattedDate = desiredDateFormat.format(originalDate);
 
                   // Update the foundDate in the itemlist
-                  itemlist['foundDate'] = '$formattedDate $slot';
+                  itemlist['foundDates'] = '$formattedDate $slot';
+                  itemlist['slot'] = slot;
+                  itemlist['date'] = originalDate;
+                  print(itemlist['slot']);
+                  print(itemlist['date']);
                 }
               }
             }
@@ -211,7 +231,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
             'receipt': receipt,
             'user': userMap != null ? userMap : null, // Check if user is null
           };
-          print("claimInfo:" + claimInfo.toString());
+          print("claimInfo:$claimInfo");
           setState(() {
             userReceiptList.add(claimInfo);
           });
@@ -285,7 +305,13 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                     String formattedDate = desiredDateFormat.format(originalDate);
 
                     // Update the foundDate in the itemlist
-                    itemlist['foundDate'] = '$formattedDate $slot';
+                    itemlist['foundDates'] = '$formattedDate $slot';
+                    itemlist['slot'] = slot;
+                    itemlist['date'] = originalDate;
+                    print(itemlist['slot']);
+                    print(itemlist['date']);
+
+
                   }
                 }
               }
@@ -305,7 +331,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                 'receipt': receipt,
                 'user': userMap != null ? userMap : null, // Check if user is null
               };
-              print("claimInfo:" + claimInfo.toString());
+              print("claimInfo:$claimInfo");
               setState(() {
                 userReceiptList.add(claimInfo);
               });
@@ -367,6 +393,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                       children: [
                         GestureDetector(
                           onTap: () {
+                            print("itemlist_foundDates: "+ itemlist['foundDate']);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -377,7 +404,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                                   initialDescription: itemlist['description'], // Pass the initial data
                                   initialLocation: itemlist['locationName'],
                                   status: itemlist['itemStatus'],
-                                  foundDate: itemlist['foundDate'],
+                                  slot: itemlist['slot'],
+                                  date: itemlist['date']
                                 ),
                               ),
                             );
@@ -386,10 +414,44 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                         ),
                         Gap(AppLayout.getWidth(15)),
                         GestureDetector(
-                          onTap: () async {
-                            await itemController.deleteItemById(itemId);
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext dialogContext) {
+                                return AlertDialog(
+                                  title: Text("Confirmation"),
+                                  content: Text("Do you want to delete this item?"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(dialogContext).pop(); // Close the dialog
+                                      },
+                                      child: Text("Cancel",
+                                        style: TextStyle( fontSize: 20),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        if (isDeleteItem) {
+                                          // If creation is already in progress, do nothing or show a message.
+                                          return;
+                                        }
+
+                                        isDeleteItem = true;
+
+                                        await itemController.deleteItemById(itemId);
+                                      },
+                                      child: Text(
+                                        "Delete",
+                                        style: TextStyle(color: Colors.redAccent, fontSize: 20),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
                           },
-                          child: Text("Delete", style: TextStyle(color: Colors.redAccent, fontSize: 20),),
+                          child: Text("Delete", style: TextStyle(color: Colors.redAccent, fontSize: 20)),
                         ),
 
                       ],
@@ -507,7 +569,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                                   onPressed: () {
                                     if (selectedReason != null) {
                                       Navigator.pop(context); // Close the dialog
-                                      print('selectedReason: '+ selectedReason.toString());
+                                      print('selectedReason: $selectedReason');
                                       // Provide the selected reason to the flagItem function
                                       flagItem(itemlist['id'], selectedReason!);
                                     } else {
@@ -546,7 +608,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                         top: AppLayout.getHeight(8)),
                     child: IconAndTextWidget(
                         icon: Icons.timer_sharp,
-                        text: itemlist['foundDate'],
+                        text: itemlist['foundDates'],
                         iconColor: Colors.grey)),
                 Gap(AppLayout.getHeight(5)),
 

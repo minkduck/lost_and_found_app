@@ -48,6 +48,7 @@ class _PostScreenState extends State<PostScreen> {
   bool myPostsSelected = false;
 
   bool _isMounted = false;
+  late String verifyStatus = "";
 
   final CommentController commentController = Get.put(CommentController());
   List<dynamic> commentList = [];
@@ -170,21 +171,26 @@ class _PostScreenState extends State<PostScreen> {
 
 
   Future<void> _refreshData() async {
+    verifyStatus = await AppConstrants.getVerifyStatus();
     uid = await AppConstrants.getUid();
     await postController.getPostList().then((result) {
       if (_isMounted) {
         setState(() {
           postList = result;
-          Future.forEach(postList, (post) async {
-            final postIdForBookmark = post['id'];
-            print(postIdForBookmark);
-            await loadBookmarkedPosts(postIdForBookmark);
-          });
-          Future.forEach(postList, (post) async {
-            final postIdForFlag = post['id'];
-            await loadFlagPosts(postIdForFlag);
-          });
+          postList.removeWhere((post) => post['postStatus'] == 'DELETED');
+          setState(() {
+            postList = result;
+            Future.forEach(postList, (post) async {
+              final postIdForBookmark = post['id'];
+              print(postIdForBookmark);
+              await loadBookmarkedPosts(postIdForBookmark);
+            });
+            Future.forEach(postList, (post) async {
+              final postIdForFlag = post['id'];
+              await loadFlagPosts(postIdForFlag);
+            });
 
+          });
         });
       }
     });
@@ -192,6 +198,17 @@ class _PostScreenState extends State<PostScreen> {
       if (_isMounted) {
         setState(() {
           mypostList = result;
+          myPostLoading = false;
+          mypostList.removeWhere((post) => post['postStatus'] == 'DELETED');
+          setState(() {
+            mypostList = result;
+            Future.forEach(mypostList, (post) async {
+              final postIdForBookmark = post['id'];
+              print(postIdForBookmark);
+              await loadBookmarkedPosts(postIdForBookmark);
+            });
+          });
+
         });
       }
     });
@@ -207,7 +224,6 @@ class _PostScreenState extends State<PostScreen> {
       final commentResult = await commentController.getCommentByPostId(idPost);
       if (_isMounted) {
         setState(() {
-          // Filter comments for the specific post and update commentList
           commentList.removeWhere((comment) => comment['postId'] == idPost);
           commentList.addAll(commentResult);
         });
@@ -274,6 +290,18 @@ class _PostScreenState extends State<PostScreen> {
       });
     }
   }
+  Future<void> loadBookmarkedMyPosts(int postId) async {
+    final bookmarkedPosts = await postController.getBookmarkedPost(postId);
+    if (_isMounted) {
+      setState(() {
+        final myPostToUpdate = mypostList.firstWhere((post) => post['id'] == postId, orElse: () => null);
+        if (myPostToUpdate != null) {
+          myPostToUpdate['isBookMarkMyActive'] = bookmarkedPosts['postId'] == postId && bookmarkedPosts['isActive'];
+        }
+      });
+    }
+  }
+
 
   Future<void> togglePostFlagStatus(int postId, Future<void> Function(int, String) action, String reason) async {
     try {
@@ -392,12 +420,13 @@ class _PostScreenState extends State<PostScreen> {
 
   Future<void> fetchData() async {
     try {
-    uid = await AppConstrants.getUid();
+      verifyStatus = await AppConstrants.getVerifyStatus();
+      uid = await AppConstrants.getUid();
     await postController.getPostList().then((result) {
       if (_isMounted) {
         setState(() {
           postList = result;
-          postList.removeWhere((post) => post['postStatus'] == 'DISABLED');
+          postList.removeWhere((post) => post['postStatus'] == 'DELETED');
           setState(() {
             postList = result;
             Future.forEach(postList, (post) async {
@@ -419,9 +448,15 @@ class _PostScreenState extends State<PostScreen> {
         setState(() {
           mypostList = result;
           myPostLoading = false;
-          mypostList.removeWhere((post) => post['postStatus'] == 'DISABLED');
+          mypostList.removeWhere((post) => post['postStatus'] == 'DELETED');
           setState(() {
             mypostList = result;
+            Future.forEach(mypostList, (post) async {
+              final postIdForBookmark = post['id'];
+              print(postIdForBookmark);
+              await loadBookmarkedPosts(postIdForBookmark);
+            });
+
           });
         });
       }
@@ -634,7 +669,7 @@ class _PostScreenState extends State<PostScreen> {
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: filteredPost.length,
-                      itemBuilder: (BuildContext context, int index) {
+                      itemBuilder: (BuildContext builderContext, int index) {
                         print('hi 2');
 
                         final post = filteredPost[index];
@@ -643,9 +678,9 @@ class _PostScreenState extends State<PostScreen> {
                         print("locationList: " + locationList.toString());
                         return GestureDetector(
                             onTap: () {
-                              Navigator.of(context).push(
+                              Navigator.of(builderContext).push(
                                 MaterialPageRoute(
-                                  builder: (context) => PostDetail(
+                                  builder: (builderContext) => PostDetail(
                                       pageId: post['id'],
                                       page: "post"), // Navigate to PostDetail
                                 ),
@@ -654,7 +689,7 @@ class _PostScreenState extends State<PostScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
-                                color: Theme.of(context).cardColor,
+                                color: Theme.of(builderContext).cardColor,
                               ),
                               margin: EdgeInsets.only(
                                   bottom: AppLayout.getHeight(20)),
@@ -914,7 +949,14 @@ class _PostScreenState extends State<PostScreen> {
                       },
                     ),
                       )
-                      : SizedBox(
+                      : postList.isEmpty ? SizedBox(
+                      width: AppLayout.getScreenWidth(),
+                      height: AppLayout.getScreenHeight()-400,
+                      child: Center(
+                        child: Text(""),
+                      ),
+                    ):
+                    SizedBox(
                           width: AppLayout.getWidth(100),
                           height: AppLayout.getHeight(300),
                           child: const Center(
@@ -935,7 +977,7 @@ class _PostScreenState extends State<PostScreen> {
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: filteredMyPost.length,
-                      itemBuilder: (BuildContext context, int index) {
+                      itemBuilder: (BuildContext builderContext, int index) {
                         print('hi 3');
 
                         final post = filteredMyPost[index];
@@ -943,9 +985,9 @@ class _PostScreenState extends State<PostScreen> {
                         loadAndDisplayCategoryNames(post);
                         return GestureDetector(
                             onTap: () {
-                              Navigator.of(context).push(
+                              Navigator.of(builderContext).push(
                                 MaterialPageRoute(
-                                  builder: (context) => PostDetail(
+                                  builder: (builderContext) => PostDetail(
                                       pageId: post['id'],
                                       page: "post"), // Navigate to PostDetail
                                 ),
@@ -954,7 +996,7 @@ class _PostScreenState extends State<PostScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
-                                color: Theme.of(context).cardColor,
+                                color: Theme.of(builderContext).cardColor,
                               ),
                               margin: EdgeInsets.only(
                                   bottom: AppLayout.getHeight(20)),
@@ -1042,7 +1084,6 @@ class _PostScreenState extends State<PostScreen> {
                                     ),
                                   ),
                                   Gap(AppLayout.getHeight(20)),
-
                                   Row(
                                     children: [
                                       Icon(
@@ -1152,7 +1193,7 @@ class _PostScreenState extends State<PostScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: verifyStatus == 'VERIFIED'? FloatingActionButton(
         onPressed: () {
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => CreatePost()));
@@ -1160,7 +1201,7 @@ class _PostScreenState extends State<PostScreen> {
         tooltip: 'Create Post',
         backgroundColor: AppColors.primaryColor,
         child: const Icon(Icons.add),
-      ),
+      ) : Container(),
     );
   }
 }

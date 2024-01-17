@@ -90,6 +90,36 @@ class ReportController extends GetxController{
       throw Exception('Failed to load getReportById');
     }
   }
+  Future<List<dynamic>> getReportByItemIdAndUserId(int itemId) async {
+    accessToken = await AppConstrants.getToken();
+    uid = await AppConstrants.getUid();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.MultipartRequest('GET', Uri.parse('${AppConstrants.GETREPORTBYUSERIDANDITEMID_URL}$uid&itemId=$itemId'));
+    request.fields.addAll({
+      'userId': uid,
+      'itemId': itemId.toString(),
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      update();
+      print("getReportByItemIdAndUserId: $resultList");
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getReportByItemIdAndUserId');
+    }
+  }
 
 
 }

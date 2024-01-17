@@ -91,5 +91,32 @@ class GiveawayController extends GetxController{
 
   }
 
+  Future<Map<String, dynamic>> getGiveawayById(int giveawayId) async {
+    accessToken = await AppConstrants.getToken();
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken'
+    };
+    var request = http.Request('GET', Uri.parse(AppConstrants.GETGIVEAWAYBYID_URL +giveawayId.toString()));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+
+      final resultList = jsonResponse['result'];
+      // _itemList = resultList;
+      update();
+      print("getGiveawayListById " + resultList.toString());
+      return resultList;
+    } else {
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      throw Exception('Failed to load getItemListById');
+    }
+  }
 
 }

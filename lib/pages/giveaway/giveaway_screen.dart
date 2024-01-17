@@ -90,7 +90,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
 
             if (giveawayList.isNotEmpty) {
               giveawayList.removeWhere((giveaway) => giveaway['giveawayStatus'] == 'NOT_STARTED');
-              giveawayList.removeWhere((giveaway) => giveaway['giveawayStatus'] == 'DISABLED');
+              giveawayList.removeWhere((giveaway) => giveaway['giveawayStatus'] == 'DELETED');
               giveawayList.forEach((giveaway) {
                 final participants = giveaway['giveawayParticipants'] as List<dynamic>;
                 if (participants.isNotEmpty) {
@@ -362,13 +362,15 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                             onTap: () async {
                               if (isGiveawayParticipate) {
                                 await unParticipateGiveaway(giveaway['id']);
+                                final updatedGiveaway = await giveawayController.getGiveawayById(giveaway['id']);
                                 setState(() {
-                                  giveaway['participantsCount'];
+                                  giveaway['participantsCount'] = updatedGiveaway['participantsCount'];
                                 });
                               } else {
                                 await participateGiveaway(giveaway['id']);
+                                final updatedGiveaway = await giveawayController.getGiveawayById(giveaway['id']);
                                 setState(() {
-                                  giveaway['participantsCount'];
+                                  giveaway['participantsCount'] = updatedGiveaway['participantsCount'];
                                 });
                               }
                             },
