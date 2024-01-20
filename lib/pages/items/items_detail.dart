@@ -54,6 +54,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
   bool _isMounted = false;
   late String uid = "";
   bool isItemClaimed = false;
+  String? isStatusClaim;
   int itemId = 0;
   bool loadingAll = false;
   late String verifyStatus = "";
@@ -71,19 +72,30 @@ class _ItemsDetailsState extends State<ItemsDetails> {
   List<dynamic> recepitList = [];
   Future<void> claimItem() async {
     try {
-      claimItemCount = await AppConstrants.getClaimItemCount();
-      if (claimItemCount! < 5 ){
+      claimItemList = await claimController.getItemClaimByUidList();
+      print("claimItemList: " + claimItemList.toString());
+
+      // Filter the claimItemList to include only items with claimStatus 'PENDING'
+      List filteredClaimItemList = claimItemList
+          .where((claimItem) =>
+      claimItem['itemClaims'] != null &&
+          claimItem['itemClaims'][0]['claimStatus'] == 'PENDING')
+          .toList();
+
+      claimItemCount = filteredClaimItemList.length;
+
+      print("claimItemCount: " + claimItemCount.toString());
+      if (claimItemCount! < 5) {
         await claimController.postClaimByItemId(itemId);
         setState(() {
           isItemClaimed = true;
         });
-        claimItemList = await claimController.getItemClaimByUidList();
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt('claimItemCount', claimItemList.length);
       } else {
-        SnackbarUtils().showError(title: "Claim", message: "You can only have 5 active Claims at a time! Unclaim some to proceed");
+        SnackbarUtils().showError(
+          title: "Claim",
+          message: "You can only have 5 active Claims at a time! Unclaim some to proceed",
+        );
       }
-
     } catch (e) {
       print('Error claiming item: $e');
     }
@@ -96,9 +108,6 @@ class _ItemsDetailsState extends State<ItemsDetails> {
       setState(() {
         isItemClaimed = false;
       });
-      claimItemList = await claimController.getItemClaimByUidList();
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('claimItemCount', claimItemList.length);
     } catch (e) {
       print('Error unclaiming item: $e');
     }
@@ -166,6 +175,19 @@ class _ItemsDetailsState extends State<ItemsDetails> {
     }
   }
 
+  Color _getStatusColor(String? status) {
+    switch (status) {
+      case 'ACTIVE':
+        return AppColors.primaryColor;
+      case 'RETURNED':
+        return AppColors.secondPrimaryColor;
+      case 'CLOSED':
+        return Colors.red;
+      default:
+        return Colors.grey; // Default color, you can change it to your preference
+    }
+  }
+
 
   Future<void> _refreshData() async {
     await itemController.getItemListById(widget.pageId).then((result) {
@@ -182,6 +204,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
 
               if (matchingClaim != null) {
                 isItemClaimed = matchingClaim['isActive'] == true ? true : false;
+                isStatusClaim = matchingClaim['claimStatus']??'';
+                print("isStatusClaim: " + isStatusClaim.toString() );
               }
             }
             if (itemlist['foundDate'] != null) {
@@ -280,6 +304,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
 
                 if (matchingClaim != null) {
                   isItemClaimed = matchingClaim['isActive'] == true ? true : false;
+                  isStatusClaim = matchingClaim['claimStatus']??'';
+                  print("isStatusClaim: " + isStatusClaim.toString() );
                 }
               }
               if (itemlist['foundDate'] != null) {
@@ -588,6 +614,9 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                     ),
                   ],
                 ),
+                Gap(AppLayout.getHeight(20)),
+                itemlist['user']['id'] == uid ? Text("   "+ itemlist['itemStatus'] ??
+                    'No Status',style: TextStyle(color: _getStatusColor(itemlist['itemStatus']), fontSize: 20),): Container(),
                 Padding(
                   padding: EdgeInsets.only(
                       left: AppLayout.getWidth(16), top: AppLayout.getHeight(16)),
@@ -670,7 +699,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          if (itemlist['user']['fullName'] != uid) {
+                          if (itemlist['user']['id'] != uid) {
                             Navigator.push(
                                 context, MaterialPageRoute(builder: (context) => AnotherProfileUser( userId: itemlist['user']['id'],)));
                           }
@@ -736,7 +765,8 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                     })),
                 Gap(AppLayout.getHeight(20)),
 
-                itemlist['itemStatus'] != 'RETURNED' ? itemlist['user']['id'] == uid ? Center(
+                itemlist['itemStatus'] != 'RETURNED' ? itemlist['user']['id'] == uid
+                    ? Center(
                     child: AppButton(
                         boxColor: AppColors.secondPrimaryColor,
                         textButton: "List Claim",
@@ -744,7 +774,7 @@ class _ItemsDetailsState extends State<ItemsDetails> {
                           Navigator.push(
                               context, MaterialPageRoute(builder: (context) => ClaimItems(pageId: widget.pageId, page: "Claim user",itemUserId: itemlist['user']['id'],)));
                         }))
-                : verifyStatus == 'VERIFIED' ? Center(
+                : verifyStatus == 'VERIFIED' ? isStatusClaim == 'DENIED' ? const Center(child: Text('Claim Denied', style: TextStyle(color: Colors.red, fontSize: 20),),) :Center(
                     child: AppButton(
                       boxColor: isItemClaimed ? AppColors.primaryColor : AppColors.secondPrimaryColor,
                       textButton: isItemClaimed ? "Claimed" : "Claim",

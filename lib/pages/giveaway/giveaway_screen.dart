@@ -31,9 +31,9 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
   final GiveawayController giveawayController = Get.put(GiveawayController());
 
   List<Map<String, String>> giveawayStatusList = [
-    {'name': 'ONGOING'},
-    {'name': 'REWARD_DISTRIBUTION_IN_PROGRESS'},
-    {'name': 'CLOSED'},
+    {'name': 'ONGOING', 'displayName':'ONGOING'},
+    {'name': 'REWARD_DISTRIBUTION_IN_PROGRESS', 'displayName':'DISTRIBUTING REWARD'},
+    {'name': 'CLOSED', 'displayName':'CLOSED'},
   ];
 
   List<String> selectedGiveawayStatus = ['ONGOING'];
@@ -161,7 +161,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 8, horizontal: 16),
                         child: BigText(
-                          text: status['name'] != null ? status['name'].toString() : 'No Status',
+                          text: status['displayName'] != null ? status['displayName'].toString() : 'No Status',
                           color: selectedGiveawayStatus.contains(status['name'])
                               ? AppColors
                               .primaryColor // Selected text color
@@ -282,10 +282,10 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                           Container(
                             alignment: Alignment.bottomLeft,
                             child: Text(
-                              "Status: ${giveaway['giveawayStatus']}",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall,
+                              giveaway['giveawayStatus'] == 'REWARD_DISTRIBUTION_IN_PROGRESS'
+                                  ? 'Status: DISTRIBUTING REWARD'
+                                  : 'Status: ${giveaway['giveawayStatus']}',
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
                           ),
 
@@ -300,7 +300,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                             ),
                           ),
                           Gap(AppLayout.getHeight(30)),
-                          giveaway['giveawayStatus'] == "CLOSED" ? Column(
+                          giveaway['giveawayStatus'] == "REWARD_DISTRIBUTION_IN_PROGRESS" ? Column(
                             children: [
                               Container(
                                 alignment: Alignment.bottomLeft,

@@ -180,9 +180,16 @@ class GoogleSignInProvider extends ChangeNotifier {
             await prefs.setString('access_token', idTokenUser.toString());
             await prefs.setString('uid', uid);
             await postAuthen();
-            claimItemList = await claimController.getItemClaimByUidList();
-            await prefs.setInt('claimItemCount', claimItemList.length);
-            print('claimItemCount: ' + claimItemList.length.toString());
+            // claimItemList = await claimController.getItemClaimByUidList();
+            //
+            // List filteredClaimItemList = claimItemList
+            //     .where((claimItem) =>
+            // claimItem['itemClaims']['claimStatus'] == 'PENDING')
+            //     .toList();
+            //
+            // await prefs.setInt('claimItemCount', filteredClaimItemList.length);
+            // print('claimItemCount: ' + filteredClaimItemList.length.toString());
+
             SnackbarUtils().showSuccess(title: "Success", message: "Login google successfully");
           }
 

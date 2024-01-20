@@ -132,20 +132,23 @@ class _ProfilePageState extends State<ProfilePage> {
                     NetworkImage(userList['avatar']),
                   ),
                   Gap(AppLayout.getHeight(30)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          userList['fullName'] ?? '-',
-                          maxLines: 2,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                          overflow: TextOverflow.ellipsis, // Add this line to handle overflow
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            userList['fullName'] ?? '-',
+                            maxLines: 2,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                            overflow: TextOverflow.ellipsis, // Add this line to handle overflow
+                          ),
                         ),
-                      ),
-                      if (verifyStatus == 'VERIFIED')
-                        Icon(Icons.verified, color: AppColors.primaryColor),
-                    ],
+                        if (verifyStatus == 'VERIFIED')
+                          Icon(Icons.verified, color: AppColors.primaryColor),
+                      ],
+                    ),
                   ),
                   Gap(AppLayout.getHeight(30)),
                   Container(

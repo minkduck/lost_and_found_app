@@ -26,7 +26,7 @@ class ItemController extends GetxController{
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken'
     };
-    var request = http.Request('GET', Uri.parse('${AppConstrants.GETITEMWITHPAGINATION_URL}ACTIVE&CampusId=$campusId'));
+    var request = http.Request('GET', Uri.parse('${AppConstrants.GETITEMWITHPAGINATION_URL}ACTIVE&CampusId=$campusId&MaxPageSize=100'));
 
     request.headers.addAll(headers);
 

@@ -39,6 +39,12 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
   final CommentController commentController = Get.put(CommentController());
   List<dynamic> commentList = [];
 
+  final Map<String, String> flagReasonsMap = {
+    "FALSE_INFORMATION": "False Information",
+    "VIOLATED_USER_POLICIES": "Violated User Policies",
+    "SPAM": "Spam",
+  };
+
   int getCommentCountForPost(int postId) {
     return commentList.where((comment) => comment['postId'] == postId).length;
   }
@@ -312,15 +318,10 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
     super.initState();
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
-      uid = await AppConstrants.getUid();
       await postController.getPostBookmark().then((result) {
         if (_isMounted) {
           setState(() {
             postBookmarkList = result;
-            Future.forEach(postBookmarkList, (post) async {
-              final postIdForFlag = post['id'];
-              await loadFlagPosts(postIdForFlag);
-            });
 
             Future<void> loadBookmarkedItemsForAllItems() async {
               for (final item in postBookmarkList) {
@@ -353,7 +354,7 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
           });
         }
       }
-      itemController.getItemBookmark().then((result) {
+      await itemController.getItemBookmark().then((result) {
         if (_isMounted) {
           setState(() {
             itemBookmarkList = result;
@@ -367,15 +368,6 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
             }
 
             loadBookmarkedItemsForAllItems();
-
-            Future<void> loadFlagItemsForAllItems() async {
-              for (final item in itemBookmarkList) {
-                final itemIdForFlag = item['id'];
-                await loadFlagItems(itemIdForFlag);
-              }
-            }
-
-            loadFlagItemsForAllItems();
           });
         }
       }).whenComplete(() {
@@ -387,6 +379,8 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
           });
         }
       });
+
+
     });
 
 
@@ -577,10 +571,10 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                                                       children: [
                                                         DropdownButton<String>(
                                                           value: selectedReason,
-                                                          items: ["BLURRY", "WRONG", "INAPPROPRIATE"].map((String value) {
+                                                          items: flagReasonsMap.keys.map((String value) {
                                                             return DropdownMenuItem<String>(
                                                               value: value,
-                                                              child: Text(value),
+                                                              child: Text(flagReasonsMap[value]!),
                                                             );
                                                           }).toList(),
                                                           onChanged: (String? newValue) {
@@ -589,6 +583,7 @@ class _MyItemBookmarkState extends State<MyListBookmark> {
                                                             });
                                                           },
                                                           hint: Text("Select Reason"),
+                                                          isExpanded: true,
                                                         ),
                                                       ],
                                                     );

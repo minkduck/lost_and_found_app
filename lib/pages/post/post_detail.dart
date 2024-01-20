@@ -52,6 +52,20 @@ class _PostDetailState extends State<PostDetail> {
     "VIOLATED_USER_POLICIES": "Violated User Policies",
     "SPAM": "Spam",
   };
+  Color _getStatusColor(String? status) {
+    switch (status) {
+      case 'ACTIVE':
+        return AppColors.primaryColor;
+      case 'RETURNED':
+        return AppColors.secondPrimaryColor;
+      case 'CLOSED':
+        return Colors.red;
+      case 'REJECTED':
+        return Colors.pink;
+      default:
+        return Colors.grey; // Default color, you can change it to your preference
+    }
+  }
 
   Future<void> postCommentAndReloadComments(String comment) async {
     await CommentController().postCommentByPostId(widget.pageId, comment);
@@ -313,7 +327,7 @@ class _PostDetailState extends State<PostDetail> {
                               ),
                             ),
                             BigText(
-                              text: "Post",
+                              text: "Post Detail",
                               size: 20,
                               color: AppColors.secondPrimaryColor,
                               fontW: FontWeight.w500,
@@ -566,6 +580,24 @@ class _PostDetailState extends State<PostDetail> {
                               ) : Text("Don't remember"),
                             ],
                           ),
+                          Gap(AppLayout.getHeight(10)),
+                          postList['user']['id'] == uid ? Row(
+                            children: [
+                              Icon(
+                                Icons.check_box,
+                                color: Theme.of(context).iconTheme.color,
+                                size: AppLayout.getHeight(24),
+                              ),
+                              const Gap(5),
+                              Text(
+                                postList['postStatus'] ?? 'No Status',
+                                style: TextStyle(
+                                  color: _getStatusColor(postList['postStatus']),
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ) : Container(),
                           Gap(AppLayout.getHeight(30)),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -608,10 +640,10 @@ class _PostDetailState extends State<PostDetail> {
                                               children: [
                                                 DropdownButton<String>(
                                                   value: selectedReason,
-                                                  items: ["FALSE_INFORMATION", "VIOLATED_USER_POLICIES", "SPAM"].map((String value) {
+                                                  items: flagReasonsMap.keys.map((String value) {
                                                     return DropdownMenuItem<String>(
                                                       value: value,
-                                                      child: Text(value),
+                                                      child: Text(flagReasonsMap[value]!),
                                                     );
                                                   }).toList(),
                                                   onChanged: (String? newValue) {

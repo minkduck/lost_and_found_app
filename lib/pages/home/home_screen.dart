@@ -262,33 +262,42 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Color _getStatusColor(String? status) {
+    switch (status) {
+      case 'ACTIVE':
+        return AppColors.primaryColor;
+      case 'RETURNED':
+        return AppColors.secondPrimaryColor;
+      case 'CLOSED':
+        return Colors.red;
+      case 'REJECTED':
+        return Colors.pink;
+      default:
+        return Colors.grey; // Default color, you can change it to your preference
+    }
+  }
+
+
   Future<void> _refreshData() async {
     _isMounted = true;
     verifyStatus = await AppConstrants.getVerifyStatus();
     uid = await AppConstrants.getUid();
-    await itemController.getItemList().then((result) async {
+    await itemController.getItemList().then((result) {
       if (_isMounted) {
         setState(() {
           itemlist = result;
           itemsLoading = false;
+          itemlist.removeWhere((item) => item['itemStatus'] == 'DELETED');
 
-          Future<void> loadBookmarkedItemsForAllItems() async {
-            for (final item in itemlist) {
-              final itemIdForBookmark = item['id'];
-              print(itemIdForBookmark);
-              await loadBookmarkedItems(itemIdForBookmark);
-            }
-          }
+          Future.forEach(itemlist, (item) async {
+            final itemIdForBookmark = item['id'];
+            await loadBookmarkedItems(itemIdForBookmark);
+          });
+          Future.forEach(itemlist, (item) async {
+            final itemIdForFlag = item['id'];
+            await loadFlagItems(itemIdForFlag);
+          });
 
-          loadBookmarkedItemsForAllItems();
-          Future<void> loadFlagItemsForAllItems() async {
-            for (final item in itemlist) {
-              final itemIdForFlag = item['id'];
-              await loadFlagItems(itemIdForFlag);
-            }
-          }
-
-          loadFlagItemsForAllItems();
         });
       }
     });
@@ -303,6 +312,17 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_isMounted) {
         setState(() {
           myItemlist = result;
+          myItemsLoading = false;
+          myItemlist.removeWhere((item) => item['itemStatus'] == 'DELETED');
+
+          Future.forEach(myItemlist, (item) async {
+            final itemIdForBookmark = item['id'];
+            await loadBookmarkedItems(itemIdForBookmark);
+          });
+          Future.forEach(myItemlist, (item) async {
+            final itemIdForFlag = item['id'];
+            await loadFlagItems(itemIdForFlag);
+          });
         });
       }
     });
@@ -310,6 +330,15 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_isMounted) {
         setState(() {
           categoryGroupList = result;
+        });
+      }
+    });
+    await itemController.getReturnItem().then((result) {
+      if (_isMounted) {
+        setState(() {
+          returnItemlist = result;
+          returnItemsLoading = false;
+
         });
       }
     });
@@ -887,7 +916,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             CrossAxisAlignment.start,
                             children: [
                               Container(
-                                height: AppLayout.getHeight(132),
+                                height: AppLayout.getHeight(98),
                                 width: AppLayout.getWidth(180),
                                 child: Image.network(
                                   mediaUrl,
@@ -970,6 +999,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                     ),
+                                    Gap(AppLayout.getHeight(15)),
+                                    Text("   "+item['itemStatus'] ??
+                                        'No Status',style: TextStyle(color: _getStatusColor(item['itemStatus']), fontSize: 15),)
                                   ],
                                 ),
                               ),

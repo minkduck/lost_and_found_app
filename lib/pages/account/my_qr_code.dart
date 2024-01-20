@@ -60,7 +60,7 @@ class _MyQrCodeState extends State<MyQrCode> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Get.toNamed(RouteHelper.getInitial(3));
+                    Get.toNamed(RouteHelper.getInitial(4));
                   },
                   child: Icon(
                     Icons.arrow_back_ios,

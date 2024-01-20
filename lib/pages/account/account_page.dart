@@ -29,24 +29,25 @@ class AccountPage extends StatefulWidget {
 
 class _AccountPageState extends State<AccountPage> {
   bool _isMounted = false;
-  Map<String, dynamic> userList = {};
   final UserController userController= Get.put(UserController());
   late String verifyStatus = "";
   bool loadingFinished = false;
+
+  Future<void> _refreshData() async {
+    _isMounted = true;
+    Future.delayed(Duration(seconds: 1), () async {
+      verifyStatus = await AppConstrants.getVerifyStatus();
+      setState(() {
+        loadingFinished = true;
+      });
+    });
+  }
 
   void initState() {
     super.initState();
     _isMounted = true;
     Future.delayed(Duration(seconds: 1), () async {
       verifyStatus = await AppConstrants.getVerifyStatus();
-
-      await userController.getUserByUid().then((result) {
-        if (_isMounted) {
-          setState(() {
-            userList = result;
-          });
-        }
-      });
       setState(() {
         loadingFinished = true;
       });
@@ -64,118 +65,121 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            loadingFinished ? Column(
-              children: [
-                // userList.isNotEmpty ? Column(
-                //   children: [
-                //     Gap(AppLayout.getHeight(50)),
-                //     Gap(AppLayout.getHeight(30)),
-                //     Center(
-                //       child: CircleAvatar(
-                //         radius: 80,
-                //         backgroundImage:
-                //         NetworkImage(userList['avatar']),
-                //       ),
-                //     ),
-                //   ],
-                // ) :const Center(child: CircularProgressIndicator(),),
-                Gap(AppLayout.getHeight(50)),
-                Gap(AppLayout.getHeight(30)),
-                Gap(AppLayout.getHeight(50)),
-                Center(
-                  child: AppButton(boxColor: AppColors.primaryColor, textButton: "Profile", onTap: () {
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              loadingFinished ? Column(
+                children: [
+                  // userList.isNotEmpty ? Column(
+                  //   children: [
+                  //     Gap(AppLayout.getHeight(50)),
+                  //     Gap(AppLayout.getHeight(30)),
+                  //     Center(
+                  //       child: CircleAvatar(
+                  //         radius: 80,
+                  //         backgroundImage:
+                  //         NetworkImage(userList['avatar']),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ) :const Center(child: CircularProgressIndicator(),),
+                  Gap(AppLayout.getHeight(50)),
+                  Gap(AppLayout.getHeight(30)),
+                  Gap(AppLayout.getHeight(50)),
+                  Center(
+                    child: AppButton(boxColor: AppColors.primaryColor, textButton: "Profile", onTap: () {
+                      Navigator.push(
+                          context, MaterialPageRoute(builder: (context) => ProfilePage()));
+
+                    }),
+                  ),
+                  Gap(AppLayout.getHeight(50)),
+                  verifyStatus == 'VERIFIED'? AppButton(boxColor: AppColors.primaryColor, textButton: "My QR Code", onTap: () {
                     Navigator.push(
-                        context, MaterialPageRoute(builder: (context) => ProfilePage()));
+                        context, MaterialPageRoute(builder: (context) => MyQrCode()));
+
+                  }) : Container(),
+                  verifyStatus == 'VERIFIED'?Gap(AppLayout.getHeight(50)) : Container(),
+                  AppButton(boxColor: AppColors.primaryColor, textButton: "My List Claim Item", onTap: () {
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => ItemClaimByUser()));
 
                   }),
-                ),
-                Gap(AppLayout.getHeight(50)),
-                verifyStatus == 'VERIFIED'? AppButton(boxColor: AppColors.primaryColor, textButton: "My QR Code", onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => MyQrCode()));
+                  Gap(AppLayout.getHeight(50)),
+                  AppButton(boxColor: AppColors.primaryColor, textButton: "My List Bookmark", onTap: () {
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => MyListBookmark()));
 
-                }) : Container(),
-                verifyStatus == 'VERIFIED'?Gap(AppLayout.getHeight(50)) : Container(),
-                AppButton(boxColor: AppColors.primaryColor, textButton: "My List Claim Item", onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => ItemClaimByUser()));
+                  }),
+                  Gap(AppLayout.getHeight(50)),
+                  AppButton(boxColor: AppColors.primaryColor, textButton: "My TransferRecord", onTap: () {
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => MyReceipt()));
 
-                }),
-                Gap(AppLayout.getHeight(50)),
-                AppButton(boxColor: AppColors.primaryColor, textButton: "My List Bookmark", onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => MyListBookmark()));
+                  }),
+                  Gap(AppLayout.getHeight(50)),
+                  AppButton(boxColor: AppColors.primaryColor, textButton: "My List Notifications", onTap: () {
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => MyListNotifications()));
 
-                }),
-                Gap(AppLayout.getHeight(50)),
-                AppButton(boxColor: AppColors.primaryColor, textButton: "My TransferRecord", onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => MyReceipt()));
+                  }),
+                  Gap(AppLayout.getHeight(50)),
+                  AppButton(boxColor: AppColors.primaryColor, textButton: "My Report", onTap: () {
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => MyReport()));
 
-                }),
-                Gap(AppLayout.getHeight(50)),
-                AppButton(boxColor: AppColors.primaryColor, textButton: "My List Notifications", onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => MyListNotifications()));
+                  }),
+                  Gap(AppLayout.getHeight(50)),
+                  verifyStatus == 'VERIFIED'? Container() : AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Upload Credentials", onTap: () {
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => VerifyAccount()));
 
-                }),
-                Gap(AppLayout.getHeight(50)),
-                AppButton(boxColor: AppColors.primaryColor, textButton: "My Report", onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => MyReport()));
+                  }) ,
+                  verifyStatus == 'VERIFIED'? Container() : Gap(AppLayout.getHeight(80)),
+                ],
+              ) : Center(child: CircularProgressIndicator(),),
 
-                }),
-                Gap(AppLayout.getHeight(50)),
-                verifyStatus == 'VERIFIED'? Container() : AppButton(boxColor: AppColors.secondPrimaryColor, textButton: "Upload Credentials", onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => VerifyAccount()));
+              loadingFinished ? Container() : Gap(AppLayout.getHeight(300)),
+              Padding(
+                padding: EdgeInsets.only(bottom: 40.0),
+                child: InkWell(
+                  onTap: () async {
+                    final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
+                    await provider.logout();
+                  },
+                  child: Ink(
+                    width: AppLayout.getWidth(325),
+                    height: AppLayout.getHeight(50),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor, // Set the color here
+                      // borderRadius: BorderRadius.circular(AppLayout.getHeight(15)),
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
 
-                }) ,
-                verifyStatus == 'VERIFIED'? Container() : Gap(AppLayout.getHeight(80)),
-              ],
-            ) : Center(child: CircularProgressIndicator(),),
-
-            loadingFinished ? Container() : Gap(AppLayout.getHeight(300)),
-            Padding(
-              padding: EdgeInsets.only(bottom: 40.0),
-              child: InkWell(
-                onTap: () async {
-                  final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
-                  await provider.logout();
-                },
-                child: Ink(
-                  width: AppLayout.getWidth(325),
-                  height: AppLayout.getHeight(50),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor, // Set the color here
-                    // borderRadius: BorderRadius.circular(AppLayout.getHeight(15)),
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-
-                    boxShadow: [
-                      BoxShadow(
-                          blurRadius: 4,
-                          spreadRadius: 4,
-                          offset: Offset(0, 4),
-                          color: Colors.grey.withOpacity(0.2))
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Log out",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 25,
+                      boxShadow: [
+                        BoxShadow(
+                            blurRadius: 4,
+                            spreadRadius: 4,
+                            offset: Offset(0, 4),
+                            color: Colors.grey.withOpacity(0.2))
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Log out",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 25,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );
